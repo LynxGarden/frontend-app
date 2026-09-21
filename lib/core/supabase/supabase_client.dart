@@ -39,6 +39,15 @@ class SupabaseClientWrapper {
   /// Usage: `SupabaseClientWrapper.db('table_name').select(...)`.
   static SupabaseQueryBuilder db(String table) => _client.from(table);
 
+  /// Call a Postgres function (RPC).
+  ///
+  /// Usage: `await SupabaseClientWrapper.rpc('assign_template', params: {...})`.
+  static PostgrestFilterBuilder<T> rpc<T>(
+    String fn, {
+    Map<String, dynamic>? params,
+  }) =>
+      _client.rpc<T>(fn, params: params);
+
   /// Supabase Storage client (upload / download files).
   static SupabaseStorageClient get storage => _client.storage;
 

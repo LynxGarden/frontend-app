@@ -82,7 +82,10 @@ Checkpoints are ordered by dependency, not by calendar. The brief is explicit th
 
 ---
 
-## CP3 · Assignment & the Client Record 🎯
+## CP3 · Assignment & the Client Record 🎯 — ✅ delivered
+
+> **Status:** migration adds `assignments`/`assignment_sessions`/`assignment_exercises` (the snapshot copies exercise name + video so the client loop reads only instance rows), `health_flags` (special-category), and `invites`, plus `assign_template()` and `redeem_invite()` RPCs and full RLS. **Verified**: assigning snapshots a template and editing the template afterward leaves the client's copy unchanged (instance independence); a client sees only their own assignment; a fresh auth user redeeming an invite gets linked. App: `features/clients` — clients list (Clients tab), add account-less client, client detail (safety flags add/remove, assigned programs, **Assign program** via template picker, **Invite to app** → shareable code), and invite redemption on the finish-setup screen. `flutter analyze` clean.
+
 
 **Goal:** a coach assigns a template to a client as an **editable per-client copy**, and the minimal client record exists (incl. account-less clients).
 

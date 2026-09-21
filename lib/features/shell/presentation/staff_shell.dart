@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:lynx_app/features/clients/presentation/clients_list_screen.dart';
 import 'package:lynx_app/features/exercises/presentation/exercise_library_screen.dart';
 import 'package:lynx_app/features/profile/presentation/profile_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
@@ -19,7 +20,7 @@ class StaffShell extends StatelessWidget {
           label: l.navClients,
           sfSymbol: 'person.2',
           materialIcon: Icons.people_outline,
-          screen: FeaturePlaceholder(title: l.clientsTitle, icon: Icons.people_outline),
+          screen: const ClientsListScreen(),
         ),
         ShellTab(
           label: l.navLibrary,

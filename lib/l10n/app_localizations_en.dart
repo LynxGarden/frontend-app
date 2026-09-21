@@ -289,4 +289,101 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get done => 'Done';
+
+  @override
+  String get clientsEmpty => 'No clients yet. Add your first one.';
+
+  @override
+  String get newClient => 'New client';
+
+  @override
+  String get firstName => 'First name';
+
+  @override
+  String get lastName => 'Last name';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get accountLinked => 'Has app account';
+
+  @override
+  String get accountNone => 'Managed by staff (no login)';
+
+  @override
+  String get healthFlagsTitle => 'Safety flags';
+
+  @override
+  String get addHealthFlag => 'Add flag';
+
+  @override
+  String get noHealthFlags => 'No safety flags recorded.';
+
+  @override
+  String get assignmentsTitle => 'Assigned programs';
+
+  @override
+  String get assignProgram => 'Assign program';
+
+  @override
+  String get noAssignments => 'No programs assigned yet.';
+
+  @override
+  String get inviteToApp => 'Invite to app';
+
+  @override
+  String get inviteCodeTitle => 'Invite code';
+
+  @override
+  String get inviteCodeBody =>
+      'Share this code with the client. After they sign in, they enter it to link their account.';
+
+  @override
+  String get flagValue => 'Value';
+
+  @override
+  String get flagNotes => 'Notes';
+
+  @override
+  String get haveInviteCode => 'Have an invite code?';
+
+  @override
+  String get enterInviteCode => 'Enter invite code';
+
+  @override
+  String get continueLabel => 'Continue';
+
+  @override
+  String get hfSmoking => 'Smoking';
+
+  @override
+  String get hfBloodPressure => 'Blood pressure';
+
+  @override
+  String get hfVertigo => 'Vertigo';
+
+  @override
+  String get hfMigraines => 'Migraines';
+
+  @override
+  String get hfMedications => 'Medications';
+
+  @override
+  String get hfAllergies => 'Allergies';
+
+  @override
+  String get hfAsthma => 'Asthma';
+
+  @override
+  String get hfOsteoporosis => 'Osteoporosis';
+
+  @override
+  String get hfJointPain => 'Joint pain';
+
+  @override
+  String get hfSpineCondition => 'Spine condition';
+
+  @override
+  String get hfOther => 'Other';
 }

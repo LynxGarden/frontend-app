@@ -619,6 +619,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done'**
   String get done;
+
+  /// No description provided for @clientsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No clients yet. Add your first one.'**
+  String get clientsEmpty;
+
+  /// No description provided for @newClient.
+  ///
+  /// In en, this message translates to:
+  /// **'New client'**
+  String get newClient;
+
+  /// No description provided for @firstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get firstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get lastName;
+
+  /// No description provided for @phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phone;
+
+  /// No description provided for @accountLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Has app account'**
+  String get accountLinked;
+
+  /// No description provided for @accountNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed by staff (no login)'**
+  String get accountNone;
+
+  /// No description provided for @healthFlagsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety flags'**
+  String get healthFlagsTitle;
+
+  /// No description provided for @addHealthFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Add flag'**
+  String get addHealthFlag;
+
+  /// No description provided for @noHealthFlags.
+  ///
+  /// In en, this message translates to:
+  /// **'No safety flags recorded.'**
+  String get noHealthFlags;
+
+  /// No description provided for @assignmentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned programs'**
+  String get assignmentsTitle;
+
+  /// No description provided for @assignProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign program'**
+  String get assignProgram;
+
+  /// No description provided for @noAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'No programs assigned yet.'**
+  String get noAssignments;
+
+  /// No description provided for @inviteToApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to app'**
+  String get inviteToApp;
+
+  /// No description provided for @inviteCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get inviteCodeTitle;
+
+  /// No description provided for @inviteCodeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this code with the client. After they sign in, they enter it to link their account.'**
+  String get inviteCodeBody;
+
+  /// No description provided for @flagValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get flagValue;
+
+  /// No description provided for @flagNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get flagNotes;
+
+  /// No description provided for @haveInviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Have an invite code?'**
+  String get haveInviteCode;
+
+  /// No description provided for @enterInviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter invite code'**
+  String get enterInviteCode;
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
+
+  /// No description provided for @hfSmoking.
+  ///
+  /// In en, this message translates to:
+  /// **'Smoking'**
+  String get hfSmoking;
+
+  /// No description provided for @hfBloodPressure.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood pressure'**
+  String get hfBloodPressure;
+
+  /// No description provided for @hfVertigo.
+  ///
+  /// In en, this message translates to:
+  /// **'Vertigo'**
+  String get hfVertigo;
+
+  /// No description provided for @hfMigraines.
+  ///
+  /// In en, this message translates to:
+  /// **'Migraines'**
+  String get hfMigraines;
+
+  /// No description provided for @hfMedications.
+  ///
+  /// In en, this message translates to:
+  /// **'Medications'**
+  String get hfMedications;
+
+  /// No description provided for @hfAllergies.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergies'**
+  String get hfAllergies;
+
+  /// No description provided for @hfAsthma.
+  ///
+  /// In en, this message translates to:
+  /// **'Asthma'**
+  String get hfAsthma;
+
+  /// No description provided for @hfOsteoporosis.
+  ///
+  /// In en, this message translates to:
+  /// **'Osteoporosis'**
+  String get hfOsteoporosis;
+
+  /// No description provided for @hfJointPain.
+  ///
+  /// In en, this message translates to:
+  /// **'Joint pain'**
+  String get hfJointPain;
+
+  /// No description provided for @hfSpineCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Spine condition'**
+  String get hfSpineCondition;
+
+  /// No description provided for @hfOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get hfOther;
 }
 
 class _AppLocalizationsDelegate

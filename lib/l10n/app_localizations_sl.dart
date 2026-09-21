@@ -294,4 +294,101 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get done => 'Končaj';
+
+  @override
+  String get clientsEmpty => 'Še ni strank. Dodaj prvo.';
+
+  @override
+  String get newClient => 'Nova stranka';
+
+  @override
+  String get firstName => 'Ime';
+
+  @override
+  String get lastName => 'Priimek';
+
+  @override
+  String get phone => 'Telefon';
+
+  @override
+  String get accountLinked => 'Ima račun v aplikaciji';
+
+  @override
+  String get accountNone => 'Vodi osebje (brez prijave)';
+
+  @override
+  String get healthFlagsTitle => 'Varnostne oznake';
+
+  @override
+  String get addHealthFlag => 'Dodaj oznako';
+
+  @override
+  String get noHealthFlags => 'Ni zabeleženih varnostnih oznak.';
+
+  @override
+  String get assignmentsTitle => 'Dodeljeni programi';
+
+  @override
+  String get assignProgram => 'Dodeli program';
+
+  @override
+  String get noAssignments => 'Še ni dodeljenih programov.';
+
+  @override
+  String get inviteToApp => 'Povabi v aplikacijo';
+
+  @override
+  String get inviteCodeTitle => 'Koda povabila';
+
+  @override
+  String get inviteCodeBody =>
+      'Deli to kodo s stranko. Ko se prijavi, jo vnese za povezavo računa.';
+
+  @override
+  String get flagValue => 'Vrednost';
+
+  @override
+  String get flagNotes => 'Opombe';
+
+  @override
+  String get haveInviteCode => 'Imaš kodo povabila?';
+
+  @override
+  String get enterInviteCode => 'Vnesi kodo povabila';
+
+  @override
+  String get continueLabel => 'Nadaljuj';
+
+  @override
+  String get hfSmoking => 'Kajenje';
+
+  @override
+  String get hfBloodPressure => 'Krvni tlak';
+
+  @override
+  String get hfVertigo => 'Vrtoglavica';
+
+  @override
+  String get hfMigraines => 'Migrene';
+
+  @override
+  String get hfMedications => 'Zdravila';
+
+  @override
+  String get hfAllergies => 'Alergije';
+
+  @override
+  String get hfAsthma => 'Astma';
+
+  @override
+  String get hfOsteoporosis => 'Osteoporoza';
+
+  @override
+  String get hfJointPain => 'Bolečine v sklepih';
+
+  @override
+  String get hfSpineCondition => 'Stanje hrbtenice';
+
+  @override
+  String get hfOther => 'Drugo';
 }
