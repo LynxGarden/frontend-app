@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:lynx_app/features/exercises/presentation/exercise_library_screen.dart';
 import 'package:lynx_app/features/profile/presentation/profile_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/feature_placeholder.dart';
@@ -24,7 +25,7 @@ class StaffShell extends StatelessWidget {
           label: l.navLibrary,
           sfSymbol: 'square.stack',
           materialIcon: Icons.layers_outlined,
-          screen: FeaturePlaceholder(title: l.libraryTitle, icon: Icons.layers_outlined),
+          screen: const ExerciseLibraryScreen(),
         ),
         ShellTab(
           label: l.navReview,

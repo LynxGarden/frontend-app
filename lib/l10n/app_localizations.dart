@@ -295,6 +295,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Slovenščina'**
   String get languageSlovenian;
+
+  /// No description provided for @exercisesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No exercises yet. Add your first one.'**
+  String get exercisesEmpty;
+
+  /// No description provided for @newExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'New exercise'**
+  String get newExercise;
+
+  /// No description provided for @editExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit exercise'**
+  String get editExercise;
+
+  /// No description provided for @exerciseName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get exerciseName;
+
+  /// No description provided for @exerciseNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Back squat'**
+  String get exerciseNameHint;
+
+  /// No description provided for @exerciseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get exerciseDescription;
+
+  /// No description provided for @exerciseVideoUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Video link'**
+  String get exerciseVideoUrl;
+
+  /// No description provided for @exerciseVideoUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://…'**
+  String get exerciseVideoUrlHint;
+
+  /// No description provided for @watchVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch video'**
+  String get watchVideo;
+
+  /// No description provided for @searchExercises.
+  ///
+  /// In en, this message translates to:
+  /// **'Search exercises'**
+  String get searchExercises;
+
+  /// No description provided for @tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get tags;
+
+  /// No description provided for @addTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tag'**
+  String get addTag;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @deleteExerciseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete exercise?'**
+  String get deleteExerciseTitle;
+
+  /// No description provided for @deleteExerciseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes it from your library. This cannot be undone.'**
+  String get deleteExerciseBody;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @couldNotOpenVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the video link.'**
+  String get couldNotOpenVideo;
+
+  /// No description provided for @nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get nameRequired;
+
+  /// No description provided for @catMovement.
+  ///
+  /// In en, this message translates to:
+  /// **'Movement'**
+  String get catMovement;
+
+  /// No description provided for @catMuscle.
+  ///
+  /// In en, this message translates to:
+  /// **'Muscle'**
+  String get catMuscle;
+
+  /// No description provided for @catEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment'**
+  String get catEquipment;
+
+  /// No description provided for @catTempo.
+  ///
+  /// In en, this message translates to:
+  /// **'Tempo'**
+  String get catTempo;
+
+  /// No description provided for @catOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get catOther;
 }
 
 class _AppLocalizationsDelegate

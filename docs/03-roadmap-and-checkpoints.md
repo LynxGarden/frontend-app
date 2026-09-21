@@ -40,9 +40,11 @@ Checkpoints are ordered by dependency, not by calendar. The brief is explicit th
 
 ---
 
-## CP1 · Exercise Library 🎯
+## CP1 · Exercise Library 🎯 — ✅ delivered
 
 **Goal:** a coach can build and manage their own exercise library with video, description, and tags.
+
+> **Status:** `exercises`/`tags`/`exercise_tags` migration applied with coach-ownership + tenant-isolation RLS (**verified**: a two-tenant, two-coach RLS test confirmed a coach sees only their own tenant's exercises). App: `features/exercises` (model/repo/providers) + library screen (search + tag-filter chips, add/edit/delete) wired into the staff **Library** tab; editor with tags (find-or-create) and a delete confirm; video is **link-based** — "Watch video" opens the link via `url_launcher` (inline hosted playback deferred, per the open-questions decision). `flutter analyze` clean.
 
 **App**
 - `features/exercises`: list, search/filter by tag, create/edit/delete.

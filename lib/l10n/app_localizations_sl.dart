@@ -108,4 +108,80 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get languageSlovenian => 'Slovenščina';
+
+  @override
+  String get exercisesEmpty => 'Še ni vaj. Dodaj prvo.';
+
+  @override
+  String get newExercise => 'Nova vaja';
+
+  @override
+  String get editExercise => 'Uredi vajo';
+
+  @override
+  String get exerciseName => 'Ime';
+
+  @override
+  String get exerciseNameHint => 'npr. Počep z ročko';
+
+  @override
+  String get exerciseDescription => 'Opis';
+
+  @override
+  String get exerciseVideoUrl => 'Povezava do videa';
+
+  @override
+  String get exerciseVideoUrlHint => 'https://…';
+
+  @override
+  String get watchVideo => 'Poglej video';
+
+  @override
+  String get searchExercises => 'Išči vaje';
+
+  @override
+  String get tags => 'Oznake';
+
+  @override
+  String get addTag => 'Dodaj oznako';
+
+  @override
+  String get save => 'Shrani';
+
+  @override
+  String get delete => 'Izbriši';
+
+  @override
+  String get cancel => 'Prekliči';
+
+  @override
+  String get deleteExerciseTitle => 'Izbrišem vajo?';
+
+  @override
+  String get deleteExerciseBody =>
+      'To jo odstrani iz tvoje knjižnice. Tega ni mogoče razveljaviti.';
+
+  @override
+  String get filterAll => 'Vse';
+
+  @override
+  String get couldNotOpenVideo => 'Povezave do videa ni bilo mogoče odpreti.';
+
+  @override
+  String get nameRequired => 'Ime je obvezno';
+
+  @override
+  String get catMovement => 'Gib';
+
+  @override
+  String get catMuscle => 'Mišica';
+
+  @override
+  String get catEquipment => 'Oprema';
+
+  @override
+  String get catTempo => 'Tempo';
+
+  @override
+  String get catOther => 'Drugo';
 }

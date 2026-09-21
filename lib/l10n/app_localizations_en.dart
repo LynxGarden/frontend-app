@@ -107,4 +107,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSlovenian => 'Slovenščina';
+
+  @override
+  String get exercisesEmpty => 'No exercises yet. Add your first one.';
+
+  @override
+  String get newExercise => 'New exercise';
+
+  @override
+  String get editExercise => 'Edit exercise';
+
+  @override
+  String get exerciseName => 'Name';
+
+  @override
+  String get exerciseNameHint => 'e.g. Back squat';
+
+  @override
+  String get exerciseDescription => 'Description';
+
+  @override
+  String get exerciseVideoUrl => 'Video link';
+
+  @override
+  String get exerciseVideoUrlHint => 'https://…';
+
+  @override
+  String get watchVideo => 'Watch video';
+
+  @override
+  String get searchExercises => 'Search exercises';
+
+  @override
+  String get tags => 'Tags';
+
+  @override
+  String get addTag => 'Add tag';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get deleteExerciseTitle => 'Delete exercise?';
+
+  @override
+  String get deleteExerciseBody =>
+      'This removes it from your library. This cannot be undone.';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get couldNotOpenVideo => 'Could not open the video link.';
+
+  @override
+  String get nameRequired => 'Name is required';
+
+  @override
+  String get catMovement => 'Movement';
+
+  @override
+  String get catMuscle => 'Muscle';
+
+  @override
+  String get catEquipment => 'Equipment';
+
+  @override
+  String get catTempo => 'Tempo';
+
+  @override
+  String get catOther => 'Other';
 }
