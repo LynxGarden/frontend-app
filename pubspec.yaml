@@ -1,0 +1,111 @@
+name: lynx_app
+description: "Lynx — training & physiotherapy platform (multi-tenant SaaS). Flutter client for iOS + Android."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.8
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Navigation
+  go_router: ^13.2.0
+
+  # Backend
+  supabase_flutter: ^2.5.0
+
+  # Fonts & UI
+  google_fonts: ^6.2.1
+  cached_network_image: ^3.3.1
+  # Native iOS tab bar (SF Symbols via a UIKit platform view). Android falls
+  # back to a custom Material pill bar — see lib/shared/widgets/main_shell.dart.
+  cupertino_native: ^0.1.1
+
+  # Local Storage — non-sensitive flags/preferences only.
+  shared_preferences: ^2.0.0
+  # Secure storage — tokens/sensitive values. Always included (see
+  # lib/core/storage/secure_storage_service.dart).
+  flutter_secure_storage: ^9.2.2
+
+  # Utilities
+  url_launcher: ^6.3.0
+  image_picker: ^1.0.7
+  intl: ^0.20.2 # pinned by flutter_localizations from the Flutter SDK when l10n is enabled
+
+  # Environment
+  flutter_dotenv: ^5.2.1
+
+  # In-App Purchases (uncomment if using RevenueCat)
+  # purchases_flutter: ^10.10.1
+  # purchases_ui_flutter: ^10.10.1
+
+  # Push Notifications (uncomment if using OneSignal)
+  # onesignal_flutter: ^5.1.0
+
+  # Payments (uncomment if using Stripe)
+  # flutter_stripe: ^11.1.0
+
+  # Crash reporting (uncomment if using Sentry)
+  # sentry_flutter: ^9.26.0
+
+  # Offline-first sync (uncomment if using PowerSync)
+  # powersync: ^1.10.0
+
+  # Connectivity / no-connection detection (uncomment if enabled)
+  # connectivity_plus: ^6.0.5
+
+  # Maintenance / force-update gate (uncomment if enabled)
+  # package_info_plus: ^8.1.1
+
+  # Location services (uncomment if enabled)
+  # geolocator: ^13.0.1
+  # geocoding: ^3.0.0
+
+  # Timezone sync (uncomment if enabled)
+  # flutter_timezone: ^5.1.0
+
+  # Custom backend beyond Supabase (uncomment if enabled)
+  # http: ^1.2.2
+
+  # Localization — the app ships in English + Slovenian.
+  flutter_localizations:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  riverpod_generator: ^2.3.9
+  build_runner: ^2.4.8
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.4
+
+  # Test suite (uncomment if the test suite toggle is enabled)
+  # mocktail: ^1.0.4
+  # golden_toolkit: ^0.15.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  remove_alpha_ios: true
+
+flutter:
+  uses-material-design: true
+  generate: true   # l10n: generates AppLocalizations from lib/l10n/*.arb
+
+  assets:
+    - .env          # dev flavor (lib/main_dev.dart)
+    - .env.prod     # prod flavor (lib/main_prod.dart)
+    - assets/images/
+    - assets/icons/
+    - assets/animations/

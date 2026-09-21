@@ -1,0 +1,41 @@
+{
+  "@@locale": "sl",
+  "appName": "Lynx",
+
+  "login": "Prijava",
+  "logout": "Odjava",
+  "loginTitle": "Prijava v Lynx",
+  "loginSubtitle": "Člani in trenerji — prijavite se za nadaljevanje.",
+  "continueWithGoogle": "Nadaljuj z Google",
+  "continueWithApple": "Nadaljuj z Apple",
+  "orDivider": "ali",
+  "emailLabel": "E-pošta",
+  "emailHint": "ti@epošta.si",
+  "sendMagicLink": "Pošlji povezavo",
+  "magicLinkSent": "Preveri e-pošto za povezavo za prijavo.",
+  "password": "Geslo",
+  "somethingWentWrong": "Nekaj je šlo narobe. Poskusi znova.",
+
+  "finishSetupTitle": "Še malo",
+  "finishSetupBody": "Tvoj račun še ni povezan s studiem. Prosi svojega trenerja za povabilo ali se vrni, ko bo nastavljeno.",
+
+  "navTrain": "Trening",
+  "navProgress": "Napredek",
+  "navProfile": "Profil",
+  "navClients": "Stranke",
+  "navLibrary": "Knjižnica",
+  "navReview": "Pregled",
+
+  "trainTitle": "Tvoj trening",
+  "progressTitle": "Napredek",
+  "profileTitle": "Profil",
+  "clientsTitle": "Stranke",
+  "libraryTitle": "Knjižnica",
+  "reviewTitle": "Pregled",
+  "comingSoon": "Kmalu na voljo",
+
+  "settings": "Nastavitve",
+  "language": "Jezik",
+  "languageEnglish": "English",
+  "languageSlovenian": "Slovenščina"
+}

@@ -1,0 +1,42 @@
+{
+  "@@locale": "en",
+  "appName": "Lynx",
+  "@appName": { "description": "Product name" },
+
+  "login": "Log in",
+  "logout": "Log out",
+  "loginTitle": "Log in to Lynx",
+  "loginSubtitle": "Members and coaches — sign in to continue.",
+  "continueWithGoogle": "Continue with Google",
+  "continueWithApple": "Continue with Apple",
+  "orDivider": "or",
+  "emailLabel": "Email",
+  "emailHint": "you@email.com",
+  "sendMagicLink": "Send magic link",
+  "magicLinkSent": "Check your inbox for a sign-in link.",
+  "password": "Password",
+  "somethingWentWrong": "Something went wrong. Please try again.",
+
+  "finishSetupTitle": "Almost there",
+  "finishSetupBody": "Your account isn't linked to a studio yet. Ask your coach for an invite, or check back once it's set up.",
+
+  "navTrain": "Train",
+  "navProgress": "Progress",
+  "navProfile": "Profile",
+  "navClients": "Clients",
+  "navLibrary": "Library",
+  "navReview": "Review",
+
+  "trainTitle": "Your training",
+  "progressTitle": "Progress",
+  "profileTitle": "Profile",
+  "clientsTitle": "Clients",
+  "libraryTitle": "Library",
+  "reviewTitle": "Review",
+  "comingSoon": "Coming soon",
+
+  "settings": "Settings",
+  "language": "Language",
+  "languageEnglish": "English",
+  "languageSlovenian": "Slovenščina"
+}
