@@ -9,6 +9,7 @@ import 'package:lynx_app/features/exercises/data/models/exercise.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise_tag.dart';
 import 'package:lynx_app/features/exercises/presentation/exercise_editor_screen.dart';
 import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
+import 'package:lynx_app/features/programs/presentation/program_list_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
@@ -80,7 +81,20 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(l.libraryTitle, style: AppTextStyles.heading3)),
+      appBar: AppBar(
+        title: Text(l.libraryTitle, style: AppTextStyles.heading3),
+        actions: [
+          TextButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ProgramListScreen()),
+            ),
+            icon: const Icon(Icons.dashboard_customize_outlined,
+                size: 18, color: AppColors.forest),
+            label: Text(l.programsTitle,
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.forest)),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.forest,
         foregroundColor: AppColors.onPrimary,

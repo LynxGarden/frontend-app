@@ -29,7 +29,7 @@ Everything in v1 serves that loop. The CRM is designed for but mostly deferred t
 
 | Thing | Location |
 |-------|----------|
-| This app | `/Users/matevzmiskec/PersonalProjects/Lynx-app` → `LynxGarden/website-app` |
+| This app | `/Users/matevzmiskec/PersonalProjects/Lynx-app` → `LynxGarden/frontend-app` |
 | Backend (Supabase) | `/Users/matevzmiskec/PersonalProjects/Lynx-backend` → `LynxGarden/backend-supabase` |
 | Reference website (branding) | `/Users/matevzmiskec/PersonalProjects/Lynx-website` → https://lynxgarden.github.io/frontend-website/ |
 | Flutter starter template (base) | `/Users/matevzmiskec/CaldaProjects/flutter-starter/calda-flutter-starter` |

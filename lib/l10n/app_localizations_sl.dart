@@ -184,4 +184,114 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get catOther => 'Drugo';
+
+  @override
+  String get programsTitle => 'Programi';
+
+  @override
+  String get programsEmpty => 'Še ni programov. Ustvari prvo predlogo.';
+
+  @override
+  String get newProgram => 'Nov program';
+
+  @override
+  String get editProgram => 'Uredi program';
+
+  @override
+  String get programName => 'Ime programa';
+
+  @override
+  String get programNameHint => 'npr. Moč za začetnike';
+
+  @override
+  String get sessionsLabel => 'Treningi';
+
+  @override
+  String get addSession => 'Dodaj trening';
+
+  @override
+  String get sessionLabelHint => 'npr. A1';
+
+  @override
+  String get renameSession => 'Preimenuj trening';
+
+  @override
+  String get deleteProgramTitle => 'Izbrišem program?';
+
+  @override
+  String get deleteProgramBody =>
+      'To odstrani program in njegove treninge. Tega ni mogoče razveljaviti.';
+
+  @override
+  String sessionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count treningov',
+      few: '$count treningi',
+      two: '$count treninga',
+      one: '1 trening',
+      zero: 'Ni treningov',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String exerciseCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vaj',
+      few: '$count vaje',
+      two: '$count vaji',
+      one: '1 vaja',
+      zero: 'Ni vaj',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addExercise => 'Dodaj vajo';
+
+  @override
+  String get pickExercise => 'Izberi vajo';
+
+  @override
+  String get prescription => 'Predpis';
+
+  @override
+  String get presSets => 'Serije';
+
+  @override
+  String get presReps => 'Ponovitve';
+
+  @override
+  String get presWeight => 'Teža';
+
+  @override
+  String get presLoad => 'Obremenitev / intenzivnost';
+
+  @override
+  String get presRpe => 'RPE';
+
+  @override
+  String get presTime => 'Čas (s)';
+
+  @override
+  String get presTempo => 'Tempo';
+
+  @override
+  String get presRest => 'Počitek (s)';
+
+  @override
+  String get presSetType => 'Opomba o tipu serije';
+
+  @override
+  String get presCoachNote => 'Opomba trenerja';
+
+  @override
+  String get remove => 'Odstrani';
+
+  @override
+  String get done => 'Končaj';
 }

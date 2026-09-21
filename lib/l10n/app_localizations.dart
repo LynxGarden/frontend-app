@@ -445,6 +445,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get catOther;
+
+  /// No description provided for @programsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Programs'**
+  String get programsTitle;
+
+  /// No description provided for @programsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No programs yet. Create your first template.'**
+  String get programsEmpty;
+
+  /// No description provided for @newProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'New program'**
+  String get newProgram;
+
+  /// No description provided for @editProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit program'**
+  String get editProgram;
+
+  /// No description provided for @programName.
+  ///
+  /// In en, this message translates to:
+  /// **'Program name'**
+  String get programName;
+
+  /// No description provided for @programNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Beginner Strength'**
+  String get programNameHint;
+
+  /// No description provided for @sessionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get sessionsLabel;
+
+  /// No description provided for @addSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Add session'**
+  String get addSession;
+
+  /// No description provided for @sessionLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. A1'**
+  String get sessionLabelHint;
+
+  /// No description provided for @renameSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename session'**
+  String get renameSession;
+
+  /// No description provided for @deleteProgramTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete program?'**
+  String get deleteProgramTitle;
+
+  /// No description provided for @deleteProgramBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the program and its sessions. This cannot be undone.'**
+  String get deleteProgramBody;
+
+  /// No description provided for @sessionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No sessions} =1{1 session} other{{count} sessions}}'**
+  String sessionCount(int count);
+
+  /// No description provided for @exerciseCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No exercises} =1{1 exercise} other{{count} exercises}}'**
+  String exerciseCount(int count);
+
+  /// No description provided for @addExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Add exercise'**
+  String get addExercise;
+
+  /// No description provided for @pickExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an exercise'**
+  String get pickExercise;
+
+  /// No description provided for @prescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Prescription'**
+  String get prescription;
+
+  /// No description provided for @presSets.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets'**
+  String get presSets;
+
+  /// No description provided for @presReps.
+  ///
+  /// In en, this message translates to:
+  /// **'Reps'**
+  String get presReps;
+
+  /// No description provided for @presWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get presWeight;
+
+  /// No description provided for @presLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Load / intensity'**
+  String get presLoad;
+
+  /// No description provided for @presRpe.
+  ///
+  /// In en, this message translates to:
+  /// **'RPE'**
+  String get presRpe;
+
+  /// No description provided for @presTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time (s)'**
+  String get presTime;
+
+  /// No description provided for @presTempo.
+  ///
+  /// In en, this message translates to:
+  /// **'Tempo'**
+  String get presTempo;
+
+  /// No description provided for @presRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest (s)'**
+  String get presRest;
+
+  /// No description provided for @presSetType.
+  ///
+  /// In en, this message translates to:
+  /// **'Set type note'**
+  String get presSetType;
+
+  /// No description provided for @presCoachNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach note'**
+  String get presCoachNote;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
 }
 
 class _AppLocalizationsDelegate

@@ -61,7 +61,10 @@ Checkpoints are ordered by dependency, not by calendar. The brief is explicit th
 
 ---
 
-## CP2 · Program Builder & Templates 🎯
+## CP2 · Program Builder & Templates 🎯 — ✅ delivered
+
+> **Status:** `programs`/`sessions`/`session_exercises` migration applied with coach-ownership + tenant-isolation RLS via an `owns_program()` helper (**verified**: a coach built a full program→session→exercise chain under RLS and read it back). App: `features/programs` (models + `ProgramRepository` + provider) with a program list (create/delete), program editor (name/description, add/rename/reorder sessions), and session editor (add exercise from library picker → prescription sheet, edit/remove/reorder). Reached via a **Programs** action in the Library tab. Set types are free-text. `flutter analyze` clean.
+
 
 **Goal:** a coach composes programs from their exercises and saves them as reusable templates.
 

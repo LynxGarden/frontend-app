@@ -183,4 +183,110 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get catOther => 'Other';
+
+  @override
+  String get programsTitle => 'Programs';
+
+  @override
+  String get programsEmpty => 'No programs yet. Create your first template.';
+
+  @override
+  String get newProgram => 'New program';
+
+  @override
+  String get editProgram => 'Edit program';
+
+  @override
+  String get programName => 'Program name';
+
+  @override
+  String get programNameHint => 'e.g. Beginner Strength';
+
+  @override
+  String get sessionsLabel => 'Sessions';
+
+  @override
+  String get addSession => 'Add session';
+
+  @override
+  String get sessionLabelHint => 'e.g. A1';
+
+  @override
+  String get renameSession => 'Rename session';
+
+  @override
+  String get deleteProgramTitle => 'Delete program?';
+
+  @override
+  String get deleteProgramBody =>
+      'This removes the program and its sessions. This cannot be undone.';
+
+  @override
+  String sessionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions',
+      one: '1 session',
+      zero: 'No sessions',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String exerciseCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count exercises',
+      one: '1 exercise',
+      zero: 'No exercises',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addExercise => 'Add exercise';
+
+  @override
+  String get pickExercise => 'Pick an exercise';
+
+  @override
+  String get prescription => 'Prescription';
+
+  @override
+  String get presSets => 'Sets';
+
+  @override
+  String get presReps => 'Reps';
+
+  @override
+  String get presWeight => 'Weight';
+
+  @override
+  String get presLoad => 'Load / intensity';
+
+  @override
+  String get presRpe => 'RPE';
+
+  @override
+  String get presTime => 'Time (s)';
+
+  @override
+  String get presTempo => 'Tempo';
+
+  @override
+  String get presRest => 'Rest (s)';
+
+  @override
+  String get presSetType => 'Set type note';
+
+  @override
+  String get presCoachNote => 'Coach note';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get done => 'Done';
 }
