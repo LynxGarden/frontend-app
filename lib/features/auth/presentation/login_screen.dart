@@ -25,6 +25,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isBusy = false;
   bool _magicLinkSent = false;
 
+  /// SSO is off until Google/Apple providers are configured in Supabase.
+  /// Enable at build time: --dart-define=ENABLE_SSO=true
+  static const bool _ssoEnabled = bool.fromEnvironment('ENABLE_SSO');
+
   @override
   void initState() {
     super.initState();
@@ -109,25 +113,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: AppSpacing.xxl),
 
-                    // SSO
-                    AppButton(
-                      label: l.continueWithGoogle,
-                      variant: AppButtonVariant.secondary,
-                      isExpanded: true,
-                      onPressed:
-                          _isBusy ? null : () => _oauth(OAuthProvider.google),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppButton(
-                      label: l.continueWithApple,
-                      isExpanded: true,
-                      onPressed:
-                          _isBusy ? null : () => _oauth(OAuthProvider.apple),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    _OrDivider(label: l.orDivider),
-                    const SizedBox(height: AppSpacing.lg),
+                    // SSO — hidden until Google/Apple providers are configured in
+                    // Supabase. Re-enable with --dart-define=ENABLE_SSO=true.
+                    if (_ssoEnabled) ...[
+                      AppButton(
+                        label: l.continueWithGoogle,
+                        variant: AppButtonVariant.secondary,
+                        isExpanded: true,
+                        onPressed:
+                            _isBusy ? null : () => _oauth(OAuthProvider.google),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      AppButton(
+                        label: l.continueWithApple,
+                        isExpanded: true,
+                        onPressed:
+                            _isBusy ? null : () => _oauth(OAuthProvider.apple),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      _OrDivider(label: l.orDivider),
+                      const SizedBox(height: AppSpacing.lg),
+                    ],
 
                     // Magic link
                     AppTextField(

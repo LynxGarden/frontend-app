@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for Supabase / network access (release manifests don't inherit
+         the debug/profile INTERNET permission). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="calda_starter"
+        android:label="Lynx"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -24,13 +27,16 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Deep link intent filter for Supabase auth redirects -->
+            <!-- Deep link intent filter for Supabase auth redirects. Scheme-only
+                 (no host) so it catches every lynx:// callback:
+                 lynx://login-callback (OAuth/magic-link) and
+                 lynx://app.lynxgarden.si/... (verify, reset-password).
+                 Matches DeepLinkConfig (lib/core/config/deeplink_config.dart). -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- TODO: Update scheme and host to match your DeepLinkConfig -->
-                <data android:scheme="myapp-staging" android:host="staging.myapp.com" />
+                <data android:scheme="lynx" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Calda Starter</string>
+	<string>Lynx</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>calda_starter</string>
+	<string>lynx</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -41,16 +41,19 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Deep link scheme for Supabase auth redirects (magic-link / reset /
+	     verify). Matches DeepLinkConfig (lib/core/config/deeplink_config.dart)
+	     and the Supabase redirect URLs (lynx://…). -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>staging.myapp.com</string>
+			<string>si.lynxgarden.lynx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>myapp-staging</string>
+				<string>lynx</string>
 			</array>
 		</dict>
 	</array>
