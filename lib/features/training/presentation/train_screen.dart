@@ -10,72 +10,101 @@ import 'package:lynx_app/features/training/presentation/session_runner_screen.da
 import 'package:lynx_app/features/training/providers/training_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
+import 'package:lynx_app/shared/widgets/collapsing_header.dart';
 
 /// The client's Train tab: their active program as a menu of sessions. Tapping a
 /// session opens the runner. The most-recently-completed session is badged.
-class TrainScreen extends ConsumerWidget {
+class TrainScreen extends ConsumerStatefulWidget {
   const TrainScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TrainScreen> createState() => _TrainScreenState();
+}
+
+class _TrainScreenState extends ConsumerState<TrainScreen> {
+  final _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final async = ref.watch(activeAssignmentProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(l.trainTitle, style: AppTextStyles.heading3),
-        backgroundColor: AppColors.background,
-      ),
       body: RefreshIndicator(
         color: AppColors.forest,
         onRefresh: () => ref.refresh(activeAssignmentProvider.future),
-        child: async.when(
-          loading: () =>
-              const Center(child: CircularProgressIndicator(color: AppColors.forest)),
-          error: (_, _) => _Message(
-            icon: Icons.wifi_off_rounded,
-            title: l.somethingWentWrong,
-            body: l.offlineTraining,
-          ),
-          data: (assignment) {
-            if (assignment == null || assignment.sessions.isEmpty) {
-              return _Message(
-                icon: Icons.fitness_center,
-                title: l.noProgramAssigned,
-                body: l.noProgramAssignedBody,
-              );
-            }
-            return ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xxl),
-              itemCount: assignment.sessions.length + 1,
-              itemBuilder: (context, i) {
-                if (i == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: Text(assignment.name, style: AppTextStyles.heading2),
+        child: CustomScrollView(
+          controller: _scroll,
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverCollapsingHeader(title: l.trainTitle, controller: _scroll),
+            async.when(
+              loading: () => const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                    child: CircularProgressIndicator(color: AppColors.forest)),
+              ),
+              error: (_, _) => SliverFillRemaining(
+                hasScrollBody: false,
+                child: _Message(
+                  icon: Icons.wifi_off_rounded,
+                  title: l.somethingWentWrong,
+                  body: l.offlineTraining,
+                ),
+              ),
+              data: (assignment) {
+                if (assignment == null || assignment.sessions.isEmpty) {
+                  return SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: _Message(
+                      icon: Icons.fitness_center,
+                      title: l.noProgramAssigned,
+                      body: l.noProgramAssignedBody,
+                    ),
                   );
                 }
-                final session = assignment.sessions[i - 1];
-                return _SessionCard(
-                  session: session,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => SessionRunnerScreen(
-                          assignmentId: assignment.id,
-                          sessionId: session.id,
-                        ),
-                      ),
-                    );
-                  },
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.xxl),
+                  sliver: SliverList.builder(
+                    itemCount: assignment.sessions.length + 1,
+                    itemBuilder: (context, i) {
+                      if (i == 0) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: Text(assignment.name,
+                              style: AppTextStyles.heading3
+                                  .copyWith(color: AppColors.textSecondary)),
+                        );
+                      }
+                      final session = assignment.sessions[i - 1];
+                      return _SessionCard(
+                        session: session,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => SessionRunnerScreen(
+                                assignmentId: assignment.id,
+                                sessionId: session.id,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 );
               },
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

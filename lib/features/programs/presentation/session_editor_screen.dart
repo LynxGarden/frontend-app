@@ -8,6 +8,7 @@ import 'package:lynx_app/core/utils/app_exception.dart';
 import 'package:lynx_app/features/programs/data/models/session_exercise.dart';
 import 'package:lynx_app/features/programs/data/models/training_session.dart';
 import 'package:lynx_app/features/programs/data/program_repository.dart';
+import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/features/programs/presentation/exercise_picker_sheet.dart';
 import 'package:lynx_app/features/programs/presentation/prescription_editor_sheet.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
@@ -31,40 +32,25 @@ class SessionEditorScreen extends ConsumerStatefulWidget {
 }
 
 class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
+  /// Local copy for optimistic reorder; synced from [sessionEditorProvider] via
+  /// `ref.listen` in build.
   TrainingSession? _session;
-  bool _loading = true;
+
+  SessionEditorKey get _key =>
+      (programId: widget.programId, sessionId: widget.sessionId);
 
   String get _tenantId =>
       ref.read(currentUserProvider).valueOrNull?.tenantId ?? '';
 
-  @override
-  void initState() {
-    super.initState();
-    _reload();
-  }
-
-  Future<void> _reload() async {
-    try {
-      final program = await ProgramRepository.loadProgram(
-        tenantId: _tenantId,
-        programId: widget.programId,
-      );
-      final matches =
-          program.sessions.where((s) => s.id == widget.sessionId).toList();
-      final session = matches.isEmpty ? null : matches.first;
-      if (mounted) setState(() { _session = session; _loading = false; });
-    } on AppException catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        AppToast.show(context, title: e.message, blur: false);
-      }
-    }
+  void _refresh() {
+    ref.invalidate(sessionEditorProvider(_key));
+    ref.invalidate(programProvider(widget.programId));
   }
 
   Future<void> _guard(Future<void> Function() action) async {
     try {
       await action();
-      await _reload();
+      _refresh();
     } on AppException catch (e) {
       if (mounted) AppToast.show(context, title: e.message, blur: false);
     }
@@ -126,7 +112,15 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    // Keep the local (optimistically-reorderable) copy in sync with the provider.
+    ref.listen(sessionEditorProvider(_key), (prev, next) {
+      next.whenData((s) {
+        if (mounted) setState(() => _session = s);
+      });
+    });
+    final async = ref.watch(sessionEditorProvider(_key));
     final session = _session;
+    final loading = session == null && async.isLoading;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -141,7 +135,7 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
         children: [
           AppNavBar(title: session?.label ?? '…'),
           Expanded(
-            child: _loading
+            child: loading
                 ? const Center(
                     child: CircularProgressIndicator(color: AppColors.forest))
                 : session == null

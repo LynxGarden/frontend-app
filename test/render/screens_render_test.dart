@@ -3,6 +3,8 @@ import 'package:lynx_app/features/clients/presentation/clients_list_screen.dart'
 import 'package:lynx_app/features/clients/providers/clients_provider.dart';
 import 'package:lynx_app/features/groups/presentation/groups_list_screen.dart';
 import 'package:lynx_app/features/groups/providers/groups_provider.dart';
+import 'package:lynx_app/features/programs/presentation/session_editor_screen.dart';
+import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/features/review/presentation/client_review_screen.dart';
 import 'package:lynx_app/features/review/presentation/review_screen.dart';
 import 'package:lynx_app/features/review/providers/review_provider.dart';
@@ -40,6 +42,18 @@ void main() {
         currentUserProvider.overrideWith((ref) async => appUserFixture()),
         sessionRunnerProvider.overrideWith((ref, key) async => runnerSessionFixture()),
         lastEntriesProvider.overrideWith((ref, id) async => const <LoggedEntry>[]),
+      ],
+    );
+  });
+
+  forEachDevice('SessionEditorScreen renders without overflow', (tester, device) async {
+    await pumpScreen(
+      tester,
+      const SessionEditorScreen(programId: 'pr1', sessionId: 's1'),
+      device: device,
+      overrides: [
+        currentUserProvider.overrideWith((ref) async => appUserFixture()),
+        sessionEditorProvider.overrideWith((ref, key) async => sessionEditorFixture()),
       ],
     );
   });

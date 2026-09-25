@@ -1,5 +1,7 @@
 import 'package:lynx_app/features/clients/data/models/client.dart';
 import 'package:lynx_app/features/groups/data/models/group.dart';
+import 'package:lynx_app/features/programs/data/models/session_exercise.dart';
+import 'package:lynx_app/features/programs/data/models/training_session.dart';
 import 'package:lynx_app/features/review/data/models/review_models.dart';
 import 'package:lynx_app/features/training/data/models/active_assignment.dart';
 import 'package:lynx_app/shared/models/app_user.dart';
@@ -90,6 +92,32 @@ List<Group> groupsFixture() => const [
       Group(id: 'g1', name: 'Monday Morning Squad', memberCount: 8),
       Group(id: 'g2', name: 'Physio — return to sport', memberCount: 0),
     ];
+
+/// A session (with exercises) for the SessionEditorScreen render test.
+TrainingSession sessionEditorFixture() => const TrainingSession(
+      id: 's1',
+      label: 'A1 · Squat focus',
+      orderIndex: 0,
+      exercises: [
+        SessionExercise(
+          id: 'se1',
+          exerciseId: 'ex1',
+          orderIndex: 0,
+          exerciseName: 'Back Squat',
+          sets: 4,
+          reps: '8-10',
+          rpe: '8',
+        ),
+        SessionExercise(
+          id: 'se2',
+          exerciseId: 'ex2',
+          orderIndex: 1,
+          exerciseName: 'Romanian Deadlift with a very long descriptive name',
+          sets: 3,
+          reps: '10',
+        ),
+      ],
+    );
 
 List<Client> clientsFixture() => const [
       Client(
