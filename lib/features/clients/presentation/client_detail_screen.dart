@@ -13,6 +13,7 @@ import 'package:lynx_app/features/clients/presentation/health_flag_labels.dart';
 import 'package:lynx_app/features/clients/providers/clients_provider.dart';
 import 'package:lynx_app/features/programs/data/models/program.dart';
 import 'package:lynx_app/features/programs/providers/programs_provider.dart';
+import 'package:lynx_app/features/review/presentation/client_review_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
@@ -229,6 +230,19 @@ class ClientDetailScreen extends ConsumerWidget {
                           ),
                       ],
                     ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+
+            // Completed sessions (coach review)
+            _SectionHeader(
+              title: l.completedSessions,
+              actionLabel: l.view,
+              onAction: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ClientReviewScreen(
+                  personId: personId,
+                  clientName: clientAsync.valueOrNull?.fullName ?? '',
+                ),
+              )),
             ),
           ],
         ),

@@ -455,4 +455,80 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get coachNoteLabel => 'Opomba trenerja';
+
+  @override
+  String get navGroups => 'Skupine';
+
+  @override
+  String get groupsTitle => 'Skupine';
+
+  @override
+  String get newGroup => 'Nova skupina';
+
+  @override
+  String get groupNameHint => 'npr. Ponedeljkova ekipa';
+
+  @override
+  String get create => 'Ustvari';
+
+  @override
+  String get view => 'Poglej';
+
+  @override
+  String get noGroups => 'Ni skupin';
+
+  @override
+  String get members => 'Člani';
+
+  @override
+  String get addMember => 'Dodaj člana';
+
+  @override
+  String get noMembers => 'Ni članov';
+
+  @override
+  String get noClientsToAdd => 'Ni več strank za dodajanje';
+
+  @override
+  String memberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count članov',
+      few: '$count člani',
+      two: '$count člana',
+      one: '1 član',
+      zero: 'Ni članov',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupAssigned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count športnikom',
+      few: '$count športnikom',
+      two: '$count športnikoma',
+      one: '1 športniku',
+    );
+    return 'Dodeljeno $_temp0';
+  }
+
+  @override
+  String get deleteGroupTitle => 'Izbriši skupino?';
+
+  @override
+  String get deleteGroupBody =>
+      'To odstrani skupino in njen seznam. Programi, že dodeljeni članom, ostanejo. Tega ni mogoče razveljaviti.';
+
+  @override
+  String get completedSessions => 'Zaključeni treningi';
+
+  @override
+  String get reviewEmpty => 'Ni zaključenih treningov';
+
+  @override
+  String get noneLogged => 'Nič zabeleženega';
 }

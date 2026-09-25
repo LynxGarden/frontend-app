@@ -931,6 +931,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Coach note'**
   String get coachNoteLabel;
+
+  /// No description provided for @navGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get navGroups;
+
+  /// No description provided for @groupsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get groupsTitle;
+
+  /// No description provided for @newGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'New group'**
+  String get newGroup;
+
+  /// No description provided for @groupNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Monday Squad'**
+  String get groupNameHint;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @view.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get view;
+
+  /// No description provided for @noGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups yet'**
+  String get noGroups;
+
+  /// No description provided for @members.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get members;
+
+  /// No description provided for @addMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Add member'**
+  String get addMember;
+
+  /// No description provided for @noMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'No members yet'**
+  String get noMembers;
+
+  /// No description provided for @noClientsToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'No more clients to add'**
+  String get noClientsToAdd;
+
+  /// No description provided for @memberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No members} =1{1 member} other{{count} members}}'**
+  String memberCount(int count);
+
+  /// No description provided for @groupAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned to {count, plural, =1{1 athlete} other{{count} athletes}}'**
+  String groupAssigned(int count);
+
+  /// No description provided for @deleteGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete group?'**
+  String get deleteGroupTitle;
+
+  /// No description provided for @deleteGroupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the group and its roster. Assigned programs already sent to members are kept. This cannot be undone.'**
+  String get deleteGroupBody;
+
+  /// No description provided for @completedSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed sessions'**
+  String get completedSessions;
+
+  /// No description provided for @reviewEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No completed sessions yet'**
+  String get reviewEmpty;
+
+  /// No description provided for @noneLogged.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged'**
+  String get noneLogged;
 }
 
 class _AppLocalizationsDelegate

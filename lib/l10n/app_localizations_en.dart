@@ -449,4 +449,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coachNoteLabel => 'Coach note';
+
+  @override
+  String get navGroups => 'Groups';
+
+  @override
+  String get groupsTitle => 'Groups';
+
+  @override
+  String get newGroup => 'New group';
+
+  @override
+  String get groupNameHint => 'e.g. Monday Squad';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get view => 'View';
+
+  @override
+  String get noGroups => 'No groups yet';
+
+  @override
+  String get members => 'Members';
+
+  @override
+  String get addMember => 'Add member';
+
+  @override
+  String get noMembers => 'No members yet';
+
+  @override
+  String get noClientsToAdd => 'No more clients to add';
+
+  @override
+  String memberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count members',
+      one: '1 member',
+      zero: 'No members',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupAssigned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count athletes',
+      one: '1 athlete',
+    );
+    return 'Assigned to $_temp0';
+  }
+
+  @override
+  String get deleteGroupTitle => 'Delete group?';
+
+  @override
+  String get deleteGroupBody =>
+      'This removes the group and its roster. Assigned programs already sent to members are kept. This cannot be undone.';
+
+  @override
+  String get completedSessions => 'Completed sessions';
+
+  @override
+  String get reviewEmpty => 'No completed sessions yet';
+
+  @override
+  String get noneLogged => 'Nothing logged';
 }
