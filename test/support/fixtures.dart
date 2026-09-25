@@ -1,0 +1,74 @@
+import 'package:lynx_app/features/clients/data/models/client.dart';
+import 'package:lynx_app/features/groups/data/models/group.dart';
+import 'package:lynx_app/features/review/data/models/review_models.dart';
+import 'package:lynx_app/features/training/data/models/active_assignment.dart';
+
+/// Mock data for render tests. Values are deliberately long-ish to stress layout.
+
+TrainingExercise exerciseFixture([int i = 0]) => TrainingExercise(
+      id: 'ae$i',
+      exerciseId: 'ex$i',
+      orderIndex: i,
+      exerciseName: 'Bulgarian Split Squat (rear-foot elevated)',
+      videoUrl: 'https://example.com/v',
+      sets: 4,
+      reps: '8-10 each side',
+      weight: '2×24kg',
+      rpe: '8',
+      restSeconds: 120,
+      setTypeNote: 'Superset with the next movement',
+      coachNote: 'Keep the front shin vertical; control the descent.',
+    );
+
+ActiveAssignment activeAssignmentFixture() => ActiveAssignment(
+      id: 'a1',
+      name: 'Lower Body Strength — Block A',
+      sessions: [
+        TrainingAssignmentSession(
+          id: 's1',
+          label: 'A1 · Squat focus',
+          orderIndex: 0,
+          lastCompletedAt: DateTime(2026, 9, 24, 18, 30),
+          exercises: [exerciseFixture(0), exerciseFixture(1)],
+        ),
+        TrainingAssignmentSession(
+          id: 's2',
+          label: 'A2 · Hinge focus',
+          orderIndex: 1,
+          exercises: [exerciseFixture(2)],
+        ),
+      ],
+    );
+
+List<CompletedSession> completedSessionsFixture() => [
+      CompletedSession(
+        assignmentSessionId: 's1',
+        label: 'A1 · Squat focus',
+        assignmentName: 'Lower Body Strength — Block A',
+        personId: 'p1',
+        completedAt: DateTime(2026, 9, 24, 18, 30),
+        personName: 'Alexandra Kovačević',
+      ),
+      CompletedSession(
+        assignmentSessionId: 's2',
+        label: 'A2 · Hinge focus',
+        assignmentName: 'Lower Body Strength — Block A',
+        personId: 'p2',
+        completedAt: DateTime(2026, 9, 23, 7, 15),
+        personName: 'Bob',
+      ),
+    ];
+
+List<Group> groupsFixture() => const [
+      Group(id: 'g1', name: 'Monday Morning Squad', memberCount: 8),
+      Group(id: 'g2', name: 'Physio — return to sport', memberCount: 0),
+    ];
+
+List<Client> clientsFixture() => const [
+      Client(
+          id: 'p1',
+          firstName: 'Alexandra',
+          lastName: 'Kovačević',
+          hasAccount: true),
+      Client(id: 'p2', firstName: 'Bob', lastName: 'Novak', hasAccount: false),
+    ];

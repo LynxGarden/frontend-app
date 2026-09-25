@@ -15,6 +15,7 @@ import 'package:lynx_app/features/programs/data/models/program.dart';
 import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/features/review/presentation/client_review_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
@@ -214,13 +215,8 @@ class ClientDetailScreen extends ConsumerWidget {
                   : Column(
                       children: [
                         for (final a in assignments)
-                          Container(
-                            margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(AppRadius.lg),
-                              border: Border.all(color: AppColors.surfaceBorder),
-                            ),
+                          AppCard(
+                            padding: EdgeInsets.zero,
                             child: ListTile(
                               title: Text(a.name,
                                   style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),

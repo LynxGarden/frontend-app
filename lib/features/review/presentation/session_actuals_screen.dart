@@ -50,6 +50,7 @@ class SessionActualsScreen extends ConsumerWidget {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppRadius.lg),
                 border: Border.all(color: AppColors.surfaceBorder),
+                boxShadow: AppShadows.card,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

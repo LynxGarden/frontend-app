@@ -10,6 +10,7 @@ import 'package:lynx_app/features/programs/data/models/training_session.dart';
 import 'package:lynx_app/features/programs/data/program_repository.dart';
 import 'package:lynx_app/features/programs/presentation/session_editor_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
@@ -283,15 +284,9 @@ class _SessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.surfaceBorder),
-        ),
-        child: ListTile(
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: ListTile(
           onTap: onTap,
           title: Text(session.label,
               style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
@@ -305,7 +300,6 @@ class _SessionCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }

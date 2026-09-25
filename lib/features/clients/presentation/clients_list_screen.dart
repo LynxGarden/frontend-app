@@ -9,6 +9,7 @@ import 'package:lynx_app/features/clients/presentation/add_client_screen.dart';
 import 'package:lynx_app/features/clients/presentation/client_detail_screen.dart';
 import 'package:lynx_app/features/clients/providers/clients_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/widgets/app_card.dart';
 
 /// Staff view of the tenant's clients.
 class ClientsListScreen extends ConsumerWidget {
@@ -81,12 +82,8 @@ class _ClientCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.surfaceBorder),
-      ),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: ListTile(
         onTap: onTap,
         leading: CircleAvatar(

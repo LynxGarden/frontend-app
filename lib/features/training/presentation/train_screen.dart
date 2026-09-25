@@ -9,6 +9,7 @@ import 'package:lynx_app/features/training/data/models/active_assignment.dart';
 import 'package:lynx_app/features/training/presentation/session_runner_screen.dart';
 import 'package:lynx_app/features/training/providers/training_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/widgets/app_card.dart';
 
 /// The client's Train tab: their active program as a menu of sessions. Tapping a
 /// session opens the runner. The most-recently-completed session is badged.
@@ -90,50 +91,41 @@ class _SessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Material(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.surfaceBorder),
-            ),
-            child: Row(
+    return AppCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(session.label,
-                              style: AppTextStyles.body
-                                  .copyWith(fontWeight: FontWeight.w700)),
-                          if (session.isCompleted) ...[
-                            const SizedBox(width: AppSpacing.sm),
-                            const _CompletedBadge(),
-                          ],
-                        ],
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        session.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.body
+                            .copyWith(fontWeight: FontWeight.w700),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l.sessionCount(session.exercises.length),
-                        style: AppTextStyles.bodySmall,
-                      ),
+                    ),
+                    if (session.isCompleted) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      const _CompletedBadge(),
                     ],
-                  ),
+                  ],
                 ),
-                const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+                const SizedBox(height: 4),
+                Text(
+                  l.sessionCount(session.exercises.length),
+                  style: AppTextStyles.bodySmall,
+                ),
               ],
             ),
           ),
-        ),
+          const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+        ],
       ),
     );
   }

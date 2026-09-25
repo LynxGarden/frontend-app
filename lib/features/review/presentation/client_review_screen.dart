@@ -8,6 +8,7 @@ import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/features/review/presentation/session_actuals_screen.dart';
 import 'package:lynx_app/features/review/providers/review_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/widgets/app_card.dart';
 
 /// A single client's completed sessions (from the client record). Tap one to see
 /// the logged actuals.
@@ -50,13 +51,8 @@ class ClientReviewScreen extends ConsumerWidget {
             itemCount: sessions.length,
             itemBuilder: (context, i) {
               final s = sessions[i];
-              return Container(
-                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.surfaceBorder),
-                ),
+              return AppCard(
+                padding: EdgeInsets.zero,
                 child: ListTile(
                   title: Text('${s.assignmentName} · ${s.label}',
                       style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),

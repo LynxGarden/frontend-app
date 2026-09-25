@@ -11,6 +11,7 @@ import 'package:lynx_app/features/groups/presentation/group_detail_screen.dart';
 import 'package:lynx_app/features/groups/providers/groups_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
+import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 
@@ -80,13 +81,8 @@ class GroupsListScreen extends ConsumerWidget {
             itemCount: groups.length,
             itemBuilder: (context, i) {
               final g = groups[i];
-              return Container(
-                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.surfaceBorder),
-                ),
+              return AppCard(
+                padding: EdgeInsets.zero,
                 child: ListTile(
                   title: Text(g.name,
                       style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),

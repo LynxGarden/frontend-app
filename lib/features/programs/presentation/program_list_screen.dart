@@ -10,6 +10,7 @@ import 'package:lynx_app/features/programs/data/program_repository.dart';
 import 'package:lynx_app/features/programs/presentation/program_editor_screen.dart';
 import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
@@ -112,12 +113,8 @@ class _ProgramCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.surfaceBorder),
-      ),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: ListTile(
         onTap: onTap,
         title: Text(program.name,
