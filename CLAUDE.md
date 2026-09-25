@@ -173,6 +173,7 @@ TODO: List key business rules that Claude should know about.
 11. **Secure vs. local storage** — tokens/sensitive values go through `SecureStorageService`, never `LocalStorageService`/`shared_preferences`
 12. **Code generation** — run `dart run build_runner build` after adding/editing Riverpod-annotated providers or Freezed models
 13. **No backend/SQL work in this repo** — schema/migration/edge-function changes go through the official Supabase agent skills (`npx skills add supabase/agent-skills`), not through Claude editing this codebase directly
+14. **Docs are part of every feature (fumadocs)** — no feature is "done" until its fumadocs page exists and is current. Whenever you build or change a feature, add/update the matching fumadocs MDX page (frontend feature, screen, flow, or backend table/RPC/RLS) in the same change set as the code — never as a follow-up. This applies retroactively too: backfill docs for anything already built but undocumented. Keep the fumadocs pages the single source of truth for how a feature works; the `fumadocs-doc-sync` skill flags drift and the `docs-deploy` skill publishes.
 
 ## UI Styling Patterns & Conventions
 
