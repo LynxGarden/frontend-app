@@ -2,6 +2,15 @@ import 'package:lynx_app/features/clients/data/models/client.dart';
 import 'package:lynx_app/features/groups/data/models/group.dart';
 import 'package:lynx_app/features/review/data/models/review_models.dart';
 import 'package:lynx_app/features/training/data/models/active_assignment.dart';
+import 'package:lynx_app/shared/models/app_user.dart';
+
+AppUser appUserFixture() => const AppUser(
+      personId: 'p1',
+      tenantId: 't1',
+      roles: {AppRole.client},
+      locale: 'en',
+      firstName: 'Alexandra',
+    );
 
 /// Mock data for render tests. Values are deliberately long-ish to stress layout.
 
@@ -18,6 +27,24 @@ TrainingExercise exerciseFixture([int i = 0]) => TrainingExercise(
       restSeconds: 120,
       setTypeNote: 'Superset with the next movement',
       coachNote: 'Keep the front shin vertical; control the descent.',
+    );
+
+/// A time-based exercise (sets the time field visible) to stress the 3-input row.
+TrainingExercise exerciseTimedFixture() => const TrainingExercise(
+      id: 'aeT',
+      exerciseId: 'exT',
+      orderIndex: 3,
+      exerciseName: 'Plank hold',
+      timeSeconds: 45,
+      setTypeNote: 'Hold — brace hard',
+    );
+
+/// A single runner session (for SessionRunnerScreen render tests).
+TrainingAssignmentSession runnerSessionFixture() => TrainingAssignmentSession(
+      id: 's1',
+      label: 'A1 · Squat focus',
+      orderIndex: 0,
+      exercises: [exerciseFixture(0), exerciseTimedFixture()],
     );
 
 ActiveAssignment activeAssignmentFixture() => ActiveAssignment(

@@ -12,6 +12,7 @@ import 'package:lynx_app/features/programs/data/models/program.dart';
 import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 
@@ -173,17 +174,6 @@ class GroupDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(groupName, style: AppTextStyles.heading3),
-        backgroundColor: AppColors.background,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.error),
-            tooltip: l.delete,
-            onPressed: () => _delete(context, ref),
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.forest,
         foregroundColor: AppColors.onPrimary,
@@ -191,10 +181,23 @@ class GroupDetailScreen extends ConsumerWidget {
         icon: const Icon(Icons.assignment_outlined),
         label: Text(l.assignProgram),
       ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: Column(
+        children: [
+          AppNavBar(
+            title: groupName,
+            trailing: AppNavBarAction(
+              icon: Icons.delete_outline,
+              onTap: () => _delete(context, ref),
+              tint: AppColors.error,
+              tooltip: l.delete,
+            ),
+          ),
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(
                   AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
@@ -248,8 +251,11 @@ class GroupDetailScreen extends ConsumerWidget {
                 },
               ),
             ),
-          ],
-        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

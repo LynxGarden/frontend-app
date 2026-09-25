@@ -13,6 +13,7 @@ import 'package:lynx_app/features/training/data/training_repository.dart';
 import 'package:lynx_app/features/training/providers/training_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 
 /// The gym-facing session runner: per exercise show the target, the video, the
@@ -33,43 +34,10 @@ class SessionRunnerScreen extends ConsumerStatefulWidget {
 }
 
 class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
-  TrainingAssignmentSession? _session;
-  bool _loading = true;
   bool _completing = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final user = ref.read(currentUserProvider).valueOrNull;
-    if (user == null) {
-      if (mounted) setState(() => _loading = false);
-      return;
-    }
-    try {
-      final assignment = await TrainingRepository.loadActiveAssignment(
-        tenantId: user.tenantId,
-        personId: user.personId,
-      );
-      final matches = assignment?.sessions
-          .where((s) => s.id == widget.sessionId)
-          .toList();
-      if (mounted) {
-        setState(() {
-          _session = (matches == null || matches.isEmpty) ? null : matches.first;
-          _loading = false;
-        });
-      }
-    } on AppException catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        AppToast.show(context, title: e.message, blur: false);
-      }
-    }
-  }
+  RunnerKey get _key =>
+      (assignmentId: widget.assignmentId, sessionId: widget.sessionId);
 
   Future<void> _swap(TrainingExercise ex) async {
     final l = AppLocalizations.of(context);
@@ -80,9 +48,8 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
         assignmentExerciseId: ex.id,
         newExerciseId: replacement.id,
       );
-      // The menu doesn't show exercises, but keep the shared cache honest.
       ref.invalidate(activeAssignmentProvider);
-      await _load();
+      ref.invalidate(sessionRunnerProvider(_key));
       if (mounted) AppToast.show(context, title: l.exerciseSwappedToast, blur: false);
     } on AppException catch (e) {
       if (mounted) AppToast.show(context, title: e.message, blur: false);
@@ -112,15 +79,12 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final user = ref.watch(currentUserProvider).valueOrNull;
-    final session = _session;
+    final async = ref.watch(sessionRunnerProvider(_key));
+    final session = async.valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(session?.label ?? '…', style: AppTextStyles.heading3),
-        backgroundColor: AppColors.background,
-      ),
-      floatingActionButton: (session != null && user != null && !_loading)
+      floatingActionButton: (session != null && user != null)
           ? FloatingActionButton.extended(
               backgroundColor: AppColors.forest,
               foregroundColor: AppColors.onPrimary,
@@ -136,26 +100,42 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
               label: Text(l.markComplete),
             )
           : null,
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.forest))
-          : (session == null || user == null)
-              ? Center(
-                  child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall))
-              : ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 96),
-                  itemCount: session.exercises.length,
-                  itemBuilder: (context, i) {
-                    final ex = session.exercises[i];
-                    return _ExerciseRunnerCard(
-                      key: ValueKey(ex.id),
-                      exercise: ex,
-                      tenantId: user.tenantId,
-                      personId: user.personId,
-                      onSwap: () => _swap(ex),
-                    );
-                  },
-                ),
+      body: Column(
+        children: [
+          AppNavBar(title: session?.label ?? '…'),
+          Expanded(
+            child: async.when(
+              loading: () => const Center(
+                  child: CircularProgressIndicator(color: AppColors.forest)),
+              error: (_, _) => Center(
+                  child: Text(l.somethingWentWrong,
+                      style: AppTextStyles.bodySmall)),
+              data: (session) => (session == null || user == null)
+                  ? Center(
+                      child: Text(l.somethingWentWrong,
+                          style: AppTextStyles.bodySmall))
+                  : SafeArea(
+                      top: false,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 96),
+                        itemCount: session.exercises.length,
+                        itemBuilder: (context, i) {
+                          final ex = session.exercises[i];
+                          return _ExerciseRunnerCard(
+                            key: ValueKey(ex.id),
+                            exercise: ex,
+                            tenantId: user.tenantId,
+                            personId: user.personId,
+                            onSwap: () => _swap(ex),
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

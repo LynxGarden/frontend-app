@@ -9,6 +9,7 @@ import 'package:lynx_app/features/review/presentation/session_actuals_screen.dar
 import 'package:lynx_app/features/review/providers/review_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 
 /// A single client's completed sessions (from the client record). Tap one to see
 /// the logged actuals.
@@ -29,24 +30,27 @@ class ClientReviewScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(l.completedSessions, style: AppTextStyles.heading3),
-        backgroundColor: AppColors.background,
-      ),
-      body: async.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: AppColors.forest)),
-        error: (_, _) =>
-            Center(child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall)),
-        data: (sessions) {
-          if (sessions.isEmpty) {
-            return Center(
-              child: Text(l.reviewEmpty,
-                  style: AppTextStyles.bodySmall
-                      .copyWith(color: AppColors.textTertiary)),
-            );
-          }
-          return ListView.builder(
+      body: Column(
+        children: [
+          AppNavBar(title: l.completedSessions),
+          Expanded(
+            child: async.when(
+              loading: () => const Center(
+                  child: CircularProgressIndicator(color: AppColors.forest)),
+              error: (_, _) => Center(
+                  child: Text(l.somethingWentWrong,
+                      style: AppTextStyles.bodySmall)),
+              data: (sessions) {
+                if (sessions.isEmpty) {
+                  return Center(
+                    child: Text(l.reviewEmpty,
+                        style: AppTextStyles.bodySmall
+                            .copyWith(color: AppColors.textTertiary)),
+                  );
+                }
+                return SafeArea(
+                  top: false,
+                  child: ListView.builder(
             padding: const EdgeInsets.all(AppSpacing.lg),
             itemCount: sessions.length,
             itemBuilder: (context, i) {
@@ -75,8 +79,12 @@ class ClientReviewScreen extends ConsumerWidget {
                 ),
               );
             },
-          );
-        },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

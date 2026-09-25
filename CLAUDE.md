@@ -1,10 +1,19 @@
-# PROJECT_NAME — Flutter Project Brief for Claude
+# Lynx — Flutter Project Brief for Claude
 
 ## Project Overview
 
-**PROJECT_NAME** is ... (describe what your app does in 2-3 sentences).
+**Lynx** is a **multi-tenant SaaS** training & physiotherapy platform. Coaches build
+an exercise library and programs, assign them to clients (as independent instance
+copies), and clients train in the gym — logging actuals with a first-class "last
+time" history. Lynx Center (a Ljubljana gym) is tenant #1; the product is built to
+be sold to other gyms. A **client record is not a user account** — staff can
+operate account-less clients.
 
-**Tagline:** *Your tagline here.*
+**Tagline:** *Train. Log. Progress.*
+
+> Full docs live in the sibling **`Lynx-docs`** repo (fumadocs) and in `docs/`.
+> Backend (schema/RLS/RPCs) lives in the **`Lynx-backend`** repo. **Rule #14
+> below: every feature ships with its `Lynx-docs` page.**
 
 ---
 
@@ -25,20 +34,22 @@
 
 ## Brand Guidelines
 
-### Colors
-TODO: Replace the placeholder colors in `lib/core/theme/app_colors.dart` with your brand colors.
+### Colors — forest green on cream (a LIGHT theme). See `lib/core/theme/app_colors.dart`.
 
 ```dart
-// Example:
-class AppColors {
-  static const primary    = Color(0xFF______);  // Your primary color
-  static const background = Color(0xFF______);  // Background color
-  // ...
-}
+forest  #004225  // primary brand
+cream   #F5F1E8  // background
+ink     #14281F  // primary text
+surface #FFFFFF  // cards        surfaceLight #EFEADD (warm input fill)
+surfaceBorder #E4DED0 (warm hairline)   success #2E7D32  error #B3261E
 ```
+Depth: `AppShadows.card` / `.floating` (soft warm double-shadow) + a hairline
+border, **elevation 0** — the iOS-27 look. Use `AppCard` for list rows/cards and
+`AppNavBar` (circular back button) for pushed detail pages.
 
-### Typography
-TODO: Update font families in `lib/core/theme/app_text_styles.dart`.
+### Typography — `lib/core/theme/app_text_styles.dart`
+Bricolage Grotesque (headings) + Inter (body), via google_fonts. Tight negative
+tracking on large titles.
 
 ### Border Radius & Spacing
 ```dart
@@ -125,36 +136,69 @@ lib/
 
 ---
 
-## Features
+## Features (checkpoints; all CP0–CP5 delivered, CP6 = launch hardening in progress)
 
-TODO: List your app's features here so Claude knows what to build.
+1. **Auth** — email **OTP** (6-digit code, no magic-link deep links) + optional
+   Google/Apple SSO (gated off via `--dart-define=ENABLE_SSO=true`). `features/auth`.
+2. **Exercise library** (CP1) — coach-owned, tag-faceted, link-based video. `features/exercises`.
+3. **Program builder** (CP2) — programs = ordered sessions of prescribed exercises;
+   templates. No calendar. `features/programs`.
+4. **Assignments** (CP3) — assigning a template SNAPSHOTS an instance bound to a
+   client (a copy, not a reference). `features/clients` (assign flow).
+5. **Clients & invites** (CP3) — account-less client record + safety `health_flags`
+   (special-category) + invite-code binding. `features/clients`.
+6. **Daily loop** (CP4, the hero) — Train tab: session menu → runner (target ·
+   video · **LAST TIME** · log actuals · swap · complete). `features/training`.
+7. **Coach review** (CP5) — completed sessions + logged actuals per client;
+   review-on-login. `features/review`.
+8. **Groups** (CP5) — rosters; group-assign fans out an independent instance per
+   member. `features/groups`.
 
-1. Feature 1 — description
-2. Feature 2 — description
-3. ...
+Shells: **client** (Train · Progress · Profile) and **staff** (Clients · Library ·
+Groups · Review · Profile), chosen by role in `features/shell/RootShell`.
 
 ---
 
 ## Data Models
 
-TODO: Define your Supabase tables and corresponding Dart models here.
+Schema + RLS live in `Lynx-backend` (migrations CP-B0…B5). Every domain table
+carries `tenant_id` (tenant-isolation RLS is the first predicate everywhere).
+Load-bearing tables:
 
-```dart
-// Example:
-// class UserProfile {
-//   final String id, firstName, lastName, email;
-//   final bool onboardingCompleted;
-// }
-```
+- `tenants`; `persons` (the spine — `auth_user_id` nullable = account-less), `person_roles`.
+- `exercises` / `tags` / `exercise_tags` (coach-owned library).
+- `programs` / `sessions` / `session_exercises` (template side).
+- `assignments` / `assignment_sessions` / `assignment_exercises` (per-client
+  SNAPSHOT instance; `assignment_exercises` copies `exercise_name`/`video_url`,
+  keeps `exercise_id` for "last time", `swapped_from_exercise_id` for swap history).
+- `logged_entries` (generic actuals; index `(person_id, exercise_id, logged_at desc)`
+  powers "last time"), `health_flags` (special-category), `invites`.
+- `groups` / `group_members`; `assignments.group_id` (group-assign provenance).
+
+SECURITY DEFINER RPCs (clients can't write staff-only rows): `assign_template`,
+`assign_template_to_group`, `redeem_invite`, `complete_session`,
+`swap_assignment_exercise`. Dart models mirror these under each
+`features/<x>/data/models/`.
 
 ---
 
 ## Business Rules
 
-TODO: List key business rules that Claude should know about.
-
-1. Rule 1
-2. Rule 2
+1. **Tenant isolation first.** Every domain row has `tenant_id`; RLS filters on it
+   before any role/ownership check. No end-user role crosses tenants.
+2. **Client record ≠ user account.** The domain identity is a `person`; it may be
+   account-less (staff operate it). Accounts bind to a person via an invite code.
+3. **Instances, not references.** Assigning a program snapshots a per-client copy;
+   editing it never touches the template or another client's copy.
+4. **"Last time" is first-class**, keyed on `(person_id, exercise_id)` and preserved
+   across program changes and swaps.
+5. **Staff-write-only assignment rows.** Clients trigger `complete_session` /
+   `swap_assignment_exercise` via SECURITY DEFINER RPCs, never direct writes.
+6. **Group-assign = fan-out.** Shared prescription at assign time, independent
+   per-athlete logging & history.
+7. **Online-only in v1** (clear messaging when offline). **Bilingual EN + SL.**
+8. **Health data is special-category (GDPR)** — no real health data in prod until
+   consent + the data-sharing agreement (with Urban's physio practice) are in place.
 
 ---
 

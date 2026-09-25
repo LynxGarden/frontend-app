@@ -11,6 +11,7 @@ import 'package:lynx_app/features/programs/data/program_repository.dart';
 import 'package:lynx_app/features/programs/presentation/session_editor_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
@@ -193,19 +194,6 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(l.editProgram, style: AppTextStyles.heading3),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check, color: AppColors.forest),
-            onPressed: _saveDetails,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.error),
-            onPressed: _confirmDeleteProgram,
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.forest,
         foregroundColor: AppColors.onPrimary,
@@ -213,11 +201,37 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
         icon: const Icon(Icons.add),
         label: Text(l.addSession),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.forest))
-          : program == null
-              ? Center(child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall))
-              : Column(
+      body: Column(
+        children: [
+          AppNavBar(
+            title: l.editProgram,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppNavBarAction(
+                  icon: Icons.check,
+                  onTap: _saveDetails,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                AppNavBarAction(
+                  icon: Icons.delete_outline,
+                  onTap: _confirmDeleteProgram,
+                  tint: AppColors.error,
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _loading
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.forest))
+                : program == null
+                    ? Center(
+                        child: Text(l.somethingWentWrong,
+                            style: AppTextStyles.bodySmall))
+                    : SafeArea(
+                        top: false,
+                        child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Padding(
@@ -261,8 +275,12 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
                               },
                             ),
                     ),
-                  ],
-                ),
+                        ],
+                      ),
+                    ),
+          ),
+        ],
+      ),
     );
   }
 }

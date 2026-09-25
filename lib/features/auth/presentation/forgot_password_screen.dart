@@ -6,6 +6,7 @@ import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/supabase/supabase_client.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_button.dart';
 
@@ -63,34 +64,37 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.go('/login'),
-        ),
-      ),
-      body: SafeArea(
-        child: CustomScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Spacer(),
-                    _emailSent ? _buildSuccessContent() : _buildFormContent(),
-                    const Spacer(),
-                  ],
-                ),
+      body: Column(
+        children: [
+          AppNavBar(title: '', onBack: () => context.go('/login')),
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: CustomScrollView(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Spacer(),
+                          _emailSent
+                              ? _buildSuccessContent()
+                              : _buildFormContent(),
+                          const Spacer(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

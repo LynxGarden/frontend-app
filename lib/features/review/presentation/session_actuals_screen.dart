@@ -6,6 +6,7 @@ import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/features/review/providers/review_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 
 /// Drill-in for one completed session: each exercise + the actuals the client
 /// logged (their most recent occasion for that movement).
@@ -29,21 +30,24 @@ class SessionActualsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(title, style: AppTextStyles.heading3),
-        backgroundColor: AppColors.background,
-      ),
-      body: async.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: AppColors.forest)),
-        error: (_, _) =>
-            Center(child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall)),
-        data: (items) => ListView.builder(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          itemCount: items.length,
-          itemBuilder: (context, i) {
-            final ex = items[i];
-            return Container(
+      body: Column(
+        children: [
+          AppNavBar(title: title),
+          Expanded(
+            child: async.when(
+              loading: () => const Center(
+                  child: CircularProgressIndicator(color: AppColors.forest)),
+              error: (_, _) => Center(
+                  child: Text(l.somethingWentWrong,
+                      style: AppTextStyles.bodySmall)),
+              data: (items) => SafeArea(
+                top: false,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  itemCount: items.length,
+                  itemBuilder: (context, i) {
+                    final ex = items[i];
+                    return Container(
               margin: const EdgeInsets.only(bottom: AppSpacing.sm),
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
@@ -75,9 +79,13 @@ class SessionActualsScreen extends ConsumerWidget {
                     ),
                 ],
               ),
-            );
-          },
-        ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

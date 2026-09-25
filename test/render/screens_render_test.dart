@@ -6,8 +6,11 @@ import 'package:lynx_app/features/groups/providers/groups_provider.dart';
 import 'package:lynx_app/features/review/presentation/client_review_screen.dart';
 import 'package:lynx_app/features/review/presentation/review_screen.dart';
 import 'package:lynx_app/features/review/providers/review_provider.dart';
+import 'package:lynx_app/features/training/data/models/active_assignment.dart';
+import 'package:lynx_app/features/training/presentation/session_runner_screen.dart';
 import 'package:lynx_app/features/training/presentation/train_screen.dart';
 import 'package:lynx_app/features/training/providers/training_provider.dart';
+import 'package:lynx_app/shared/providers/current_user_provider.dart';
 
 import '../support/fixtures.dart';
 import '../support/render_harness.dart';
@@ -24,6 +27,19 @@ void main() {
       device: device,
       overrides: [
         activeAssignmentProvider.overrideWith((ref) async => activeAssignmentFixture()),
+      ],
+    );
+  });
+
+  forEachDevice('SessionRunnerScreen renders without overflow', (tester, device) async {
+    await pumpScreen(
+      tester,
+      const SessionRunnerScreen(assignmentId: 'a1', sessionId: 's1'),
+      device: device,
+      overrides: [
+        currentUserProvider.overrideWith((ref) async => appUserFixture()),
+        sessionRunnerProvider.overrideWith((ref, key) async => runnerSessionFixture()),
+        lastEntriesProvider.overrideWith((ref, id) async => const <LoggedEntry>[]),
       ],
     );
   });

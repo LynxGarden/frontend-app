@@ -16,6 +16,7 @@ import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/features/review/presentation/client_review_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
@@ -159,22 +160,25 @@ class ClientDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(clientAsync.valueOrNull?.fullName ?? '…',
-            style: AppTextStyles.heading3),
-        actions: [
-          if (clientAsync.valueOrNull?.hasAccount == false)
-            TextButton(
-              onPressed: () => _invite(context, ref),
-              child: Text(l.inviteToApp,
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.forest)),
-            ),
-        ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
+      body: Column(
+        children: [
+          AppNavBar(
+            title: clientAsync.valueOrNull?.fullName ?? '…',
+            trailing: clientAsync.valueOrNull?.hasAccount == false
+                ? TextButton(
+                    onPressed: () => _invite(context, ref),
+                    child: Text(l.inviteToApp,
+                        style: AppTextStyles.bodySmall
+                            .copyWith(color: AppColors.forest)),
+                  )
+                : null,
+          ),
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                children: [
             // Account status
             Text(
               clientAsync.valueOrNull?.hasAccount == true ? l.accountLinked : l.accountNone,
@@ -240,8 +244,11 @@ class ClientDetailScreen extends ConsumerWidget {
                 ),
               )),
             ),
-          ],
-        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

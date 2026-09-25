@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
-import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/core/utils/app_exception.dart';
 import 'package:lynx_app/features/clients/data/client_repository.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_button.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 
@@ -70,13 +70,17 @@ class _AddClientScreenState extends ConsumerState<AddClientScreen> {
     final l = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(l.newClient, style: AppTextStyles.heading3)),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            children: [
+      body: Column(
+        children: [
+          AppNavBar(title: l.newClient),
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  children: [
               AppTextField(
                 label: l.firstName,
                 controller: _first,
@@ -114,9 +118,12 @@ class _AddClientScreenState extends ConsumerState<AddClientScreen> {
                 isLoading: _saving,
                 onPressed: _saving ? null : _save,
               ),
-            ],
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lynx_app/core/theme/app_colors.dart';
-import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/supabase/supabase_client.dart';
 import 'package:lynx_app/core/utils/validation_helpers.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_button.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
@@ -108,12 +108,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text('Change Password',
-            style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary)),
-      ),
       body: Column(
         children: [
+          const AppNavBar(title: 'Change Password'),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSpacing.md),

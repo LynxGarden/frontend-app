@@ -12,6 +12,7 @@ import 'package:lynx_app/features/programs/presentation/exercise_picker_sheet.da
 import 'package:lynx_app/features/programs/presentation/prescription_editor_sheet.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 
 /// Edits one session: its ordered exercises + prescriptions.
@@ -129,7 +130,6 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(session?.label ?? '…', style: AppTextStyles.heading3)),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.forest,
         foregroundColor: AppColors.onPrimary,
@@ -137,27 +137,42 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
         icon: const Icon(Icons.add),
         label: Text(l.addExercise),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.forest))
-          : session == null
-              ? Center(child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall))
-              : session.exercises.isEmpty
-                  ? Center(child: Text(l.comingSoon, style: AppTextStyles.bodySmall))
-                  : ReorderableListView.builder(
-                      padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 96),
-                      itemCount: session.exercises.length,
-                      onReorderItem: _reorder,
-                      itemBuilder: (context, i) {
-                        final se = session.exercises[i];
-                        return _ExerciseCard(
-                          key: ValueKey(se.id),
-                          se: se,
-                          onEdit: () => _editExercise(se),
-                          onRemove: () => _removeExercise(se),
-                        );
-                      },
-                    ),
+      body: Column(
+        children: [
+          AppNavBar(title: session?.label ?? '…'),
+          Expanded(
+            child: _loading
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.forest))
+                : session == null
+                    ? Center(
+                        child: Text(l.somethingWentWrong,
+                            style: AppTextStyles.bodySmall))
+                    : session.exercises.isEmpty
+                        ? Center(
+                            child: Text(l.comingSoon,
+                                style: AppTextStyles.bodySmall))
+                        : SafeArea(
+                            top: false,
+                            child: ReorderableListView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                  AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 96),
+                              itemCount: session.exercises.length,
+                              onReorderItem: _reorder,
+                              itemBuilder: (context, i) {
+                                final se = session.exercises[i];
+                                return _ExerciseCard(
+                                  key: ValueKey(se.id),
+                                  se: se,
+                                  onEdit: () => _editExercise(se),
+                                  onRemove: () => _removeExercise(se),
+                                );
+                              },
+                            ),
+                          ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -13,6 +13,7 @@ import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_button.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 
@@ -166,23 +167,28 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(_isEdit ? l.editExercise : l.newExercise,
-            style: AppTextStyles.heading3),
-        actions: [
-          if (_isEdit)
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
-              onPressed: _saving ? null : _confirmDelete,
-            ),
-        ],
-      ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            children: [
+      body: Column(
+        children: [
+          AppNavBar(
+            title: _isEdit ? l.editExercise : l.newExercise,
+            trailing: _isEdit
+                ? AppNavBarAction(
+                    icon: Icons.delete_outline,
+                    onTap: () {
+                      if (!_saving) _confirmDelete();
+                    },
+                    tint: AppColors.error,
+                  )
+                : null,
+          ),
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  children: [
               AppTextField(
                 label: l.exerciseName,
                 controller: _name,
@@ -253,9 +259,12 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
                 isLoading: _saving,
                 onPressed: _saving ? null : _save,
               ),
-            ],
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
