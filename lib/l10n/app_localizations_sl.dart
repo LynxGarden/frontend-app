@@ -531,4 +531,21 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get noneLogged => 'Nič zabeleženega';
+
+  @override
+  String get sendCode => 'Pošlji kodo';
+
+  @override
+  String get codeLabel => '6-mestna koda';
+
+  @override
+  String get verifyCode => 'Potrdi in nadaljuj';
+
+  @override
+  String get changeEmail => 'Uporabi drug e-naslov';
+
+  @override
+  String codeSentTo(String email) {
+    return 'Poslali smo 6-mestno kodo na $email';
+  }
 }

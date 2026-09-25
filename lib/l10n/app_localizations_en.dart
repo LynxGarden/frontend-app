@@ -521,4 +521,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noneLogged => 'Nothing logged';
+
+  @override
+  String get sendCode => 'Send code';
+
+  @override
+  String get codeLabel => '6-digit code';
+
+  @override
+  String get verifyCode => 'Verify & continue';
+
+  @override
+  String get changeEmail => 'Use a different email';
+
+  @override
+  String codeSentTo(String email) {
+    return 'We sent a 6-digit code to $email';
+  }
 }

@@ -62,6 +62,13 @@ class MyApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
+      // Clamp accessibility text scaling so large-font settings can't overflow
+      // fixed-height controls (steppers, pills, nav) across device sizes.
+      builder: (context, child) => MediaQuery.withClampedTextScaling(
+        minScaleFactor: 1.0,
+        maxScaleFactor: 1.3,
+        child: child!,
+      ),
     );
   }
 }

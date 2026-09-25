@@ -169,5 +169,11 @@
   "deleteGroupBody": "To odstrani skupino in njen seznam. Programi, že dodeljeni članom, ostanejo. Tega ni mogoče razveljaviti.",
   "completedSessions": "Zaključeni treningi",
   "reviewEmpty": "Ni zaključenih treningov",
-  "noneLogged": "Nič zabeleženega"
+  "noneLogged": "Nič zabeleženega",
+  "sendCode": "Pošlji kodo",
+  "codeLabel": "6-mestna koda",
+  "verifyCode": "Potrdi in nadaljuj",
+  "changeEmail": "Uporabi drug e-naslov",
+  "codeSentTo": "Poslali smo 6-mestno kodo na {email}",
+  "@codeSentTo": { "placeholders": { "email": { "type": "String" } } }
 }

@@ -1039,6 +1039,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing logged'**
   String get noneLogged;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get sendCode;
+
+  /// No description provided for @codeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get codeLabel;
+
+  /// No description provided for @verifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify & continue'**
+  String get verifyCode;
+
+  /// No description provided for @changeEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different email'**
+  String get changeEmail;
+
+  /// No description provided for @codeSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6-digit code to {email}'**
+  String codeSentTo(String email);
 }
 
 class _AppLocalizationsDelegate

@@ -22,8 +22,9 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
+  final _codeController = TextEditingController();
   bool _isBusy = false;
-  bool _magicLinkSent = false;
+  bool _codeSent = false;
 
   /// SSO is off until Google/Apple providers are configured in Supabase.
   /// Enable at build time: --dart-define=ENABLE_SSO=true
@@ -33,11 +34,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
     _emailController.addListener(() => setState(() {}));
+    _codeController.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
     _emailController.dispose();
+    _codeController.dispose();
     super.dispose();
   }
 
@@ -65,12 +68,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _oauth(OAuthProvider provider) =>
       _run(() => AuthRepository.signInWithOAuth(provider));
 
-  Future<void> _magicLink() async {
+  Future<void> _sendCode() async {
     final email = _emailController.text.trim();
     if (!isValidEmailFormat(email)) return;
     await _run(() async {
-      await AuthRepository.sendMagicLink(email);
-      if (mounted) setState(() => _magicLinkSent = true);
+      await AuthRepository.sendEmailOtp(email);
+      if (mounted) setState(() => _codeSent = true);
+    });
+  }
+
+  Future<void> _verifyCode() async {
+    final email = _emailController.text.trim();
+    final code = _codeController.text.trim();
+    if (code.length < 6) return;
+    // On success the auth-state listener redirects; no explicit nav needed.
+    await _run(() => AuthRepository.verifyEmailOtp(email: email, token: code));
+  }
+
+  void _resetToEmail() {
+    setState(() {
+      _codeSent = false;
+      _codeController.clear();
     });
   }
 
@@ -92,13 +110,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Spacer(),
+                    const Spacer(flex: 3),
+                    // Brand mark
+                    Center(
+                      child: Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: AppColors.forest,
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                          boxShadow: AppShadows.floating,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'L',
+                          style: AppTextStyles.heading1.copyWith(
+                            color: AppColors.onPrimary,
+                            fontSize: 40,
+                            height: 1,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                     Center(
                       child: Text(
                         l.appName,
                         style: AppTextStyles.heading1.copyWith(
                           color: AppColors.primary,
-                          fontSize: 40,
+                          fontSize: 36,
                           letterSpacing: -1,
                         ),
                       ),
@@ -111,57 +152,99 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: AppTextStyles.bodySmall,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xxl),
+                    const SizedBox(height: AppSpacing.xl),
 
-                    // SSO — hidden until Google/Apple providers are configured in
-                    // Supabase. Re-enable with --dart-define=ENABLE_SSO=true.
-                    if (_ssoEnabled) ...[
-                      AppButton(
-                        label: l.continueWithGoogle,
-                        variant: AppButtonVariant.secondary,
-                        isExpanded: true,
-                        onPressed:
-                            _isBusy ? null : () => _oauth(OAuthProvider.google),
+                    // Sign-in card
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                        border: Border.all(color: AppColors.surfaceBorder),
+                        boxShadow: AppShadows.card,
                       ),
-                      const SizedBox(height: AppSpacing.sm),
-                      AppButton(
-                        label: l.continueWithApple,
-                        isExpanded: true,
-                        onPressed:
-                            _isBusy ? null : () => _oauth(OAuthProvider.apple),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _OrDivider(label: l.orDivider),
-                      const SizedBox(height: AppSpacing.lg),
-                    ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // SSO — hidden until Google/Apple providers are
+                          // configured. Re-enable with --dart-define=ENABLE_SSO=true.
+                          if (_ssoEnabled) ...[
+                            AppButton(
+                              label: l.continueWithGoogle,
+                              variant: AppButtonVariant.secondary,
+                              isExpanded: true,
+                              onPressed: _isBusy
+                                  ? null
+                                  : () => _oauth(OAuthProvider.google),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            AppButton(
+                              label: l.continueWithApple,
+                              isExpanded: true,
+                              onPressed: _isBusy
+                                  ? null
+                                  : () => _oauth(OAuthProvider.apple),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            _OrDivider(label: l.orDivider),
+                            const SizedBox(height: AppSpacing.lg),
+                          ],
 
-                    // Magic link
-                    AppTextField(
-                      label: l.emailLabel,
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.done,
-                      hintText: l.emailHint,
+                          // Email → OTP code (no magic-link deep links)
+                          if (!_codeSent) ...[
+                            AppTextField(
+                              label: l.emailLabel,
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.done,
+                              hintText: l.emailHint,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            AppButton(
+                              label: l.sendCode,
+                              isExpanded: true,
+                              isLoading: _isBusy,
+                              onPressed:
+                                  (!_isBusy && emailValid) ? _sendCode : null,
+                            ),
+                          ] else ...[
+                            Text(
+                              l.codeSentTo(_emailController.text.trim()),
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.bodySmall,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            AppTextField(
+                              label: l.codeLabel,
+                              controller: _codeController,
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.done,
+                              hintText: '••••••',
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            AppButton(
+                              label: l.verifyCode,
+                              isExpanded: true,
+                              isLoading: _isBusy,
+                              onPressed: (!_isBusy && _codeController.text.trim().length >= 6)
+                                  ? _verifyCode
+                                  : null,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Center(
+                              child: TextButton(
+                                onPressed: _isBusy ? null : _resetToEmail,
+                                child: Text(l.changeEmail,
+                                    style: AppTextStyles.bodySmall
+                                        .copyWith(color: AppColors.primary)),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    AppButton(
-                      label: l.sendMagicLink,
-                      variant: AppButtonVariant.secondary,
-                      isExpanded: true,
-                      isLoading: _isBusy,
-                      onPressed: (!_isBusy && emailValid) ? _magicLink : null,
-                    ),
-                    if (_magicLinkSent) ...[
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        l.magicLinkSent,
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.bodySmall
-                            .copyWith(color: AppColors.primary),
-                      ),
-                    ],
 
-                    const Spacer(),
+                    const Spacer(flex: 4),
                   ],
                 ),
               ),

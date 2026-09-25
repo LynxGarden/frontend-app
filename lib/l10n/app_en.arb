@@ -170,5 +170,11 @@
   "deleteGroupBody": "This removes the group and its roster. Assigned programs already sent to members are kept. This cannot be undone.",
   "completedSessions": "Completed sessions",
   "reviewEmpty": "No completed sessions yet",
-  "noneLogged": "Nothing logged"
+  "noneLogged": "Nothing logged",
+  "sendCode": "Send code",
+  "codeLabel": "6-digit code",
+  "verifyCode": "Verify & continue",
+  "changeEmail": "Use a different email",
+  "codeSentTo": "We sent a 6-digit code to {email}",
+  "@codeSentTo": { "placeholders": { "email": { "type": "String" } } }
 }

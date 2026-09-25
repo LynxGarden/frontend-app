@@ -25,8 +25,13 @@ class AppColors {
 
   static const background    = cream;
   static const surface       = Color(0xFFFFFFFF); // cards
-  static const surfaceLight  = Color(0xFFEFEADD); // elevated / input fill (warm tint)
-  static const surfaceBorder = Color(0x1F004225); // forest ~12%
+  static const surfaceLifted = Color(0xFFFBF9F3); // card lifted just off cream
+  static const surfaceLight  = Color(0xFFEFEADD); // input fill / muted chip (warm tint)
+  static const surfaceBorder = Color(0xFFE4DED0); // warm hairline (not gray/green)
+
+  // Frosted-glass surfaces (bright translucent white on the light brand).
+  static const glassFill     = Color(0x99FFFFFF); // white ~60% for BackdropFilter
+  static const glassBorder   = Color(0x1F004225); // forest ~12% edge on glass
 
   static const textPrimary   = ink;
   static const textSecondary = muted;
