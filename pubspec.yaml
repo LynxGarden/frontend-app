@@ -38,7 +38,6 @@ dependencies:
 
   # Utilities
   url_launcher: ^6.3.0
-  image_picker: ^1.0.7
   intl: ^0.20.2 # pinned by flutter_localizations from the Flutter SDK when l10n is enabled
 
   # Environment

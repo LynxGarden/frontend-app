@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.calda.calda_starter"
+    namespace = "si.lynxgarden.lynx"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,14 +20,26 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.calda.calda_starter"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        applicationId = "si.lynxgarden.lynx"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    // Dev / prod flavors. Prod uses the base id; dev appends .dev so both can be
+    // installed side by side. Deep-link scheme is 'lynx' for both flavors.
+    flavorDimensions += "env"
+    productFlavors {
+        create("dev") {
+            dimension = "env"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "Lynx Dev")
+        }
+        create("prod") {
+            dimension = "env"
+            resValue("string", "app_name", "Lynx")
+        }
     }
 
     buildTypes {

@@ -1,4 +1,4 @@
-package com.calda.calda_starter
+package si.lynxgarden.lynx
 
 import io.flutter.embedding.android.FlutterActivity
 
