@@ -811,6 +811,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get hfOther;
+
+  /// No description provided for @noProgramAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No program assigned yet'**
+  String get noProgramAssigned;
+
+  /// No description provided for @noProgramAssignedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your coach hasn\'t assigned a program yet. Check back soon.'**
+  String get noProgramAssignedBody;
+
+  /// No description provided for @offlineTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Training needs a connection.'**
+  String get offlineTraining;
+
+  /// No description provided for @targetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get targetLabel;
+
+  /// No description provided for @lastTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Last time'**
+  String get lastTime;
+
+  /// No description provided for @noHistoryYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
+  String get noHistoryYet;
+
+  /// No description provided for @logSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Log set'**
+  String get logSet;
+
+  /// No description provided for @addSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Add set'**
+  String get addSet;
+
+  /// No description provided for @setN.
+  ///
+  /// In en, this message translates to:
+  /// **'Set {n}'**
+  String setN(int n);
+
+  /// No description provided for @setsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets'**
+  String get setsLabel;
+
+  /// No description provided for @repsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reps'**
+  String get repsLabel;
+
+  /// No description provided for @weightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get weightLabel;
+
+  /// No description provided for @timeSecLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time (s)'**
+  String get timeSecLabel;
+
+  /// No description provided for @markComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark complete'**
+  String get markComplete;
+
+  /// No description provided for @completedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completedBadge;
+
+  /// No description provided for @swapExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap exercise'**
+  String get swapExercise;
+
+  /// No description provided for @setLoggedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Set logged'**
+  String get setLoggedToast;
+
+  /// No description provided for @sessionDoneToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Session complete — great work!'**
+  String get sessionDoneToast;
+
+  /// No description provided for @exerciseSwappedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise swapped'**
+  String get exerciseSwappedToast;
+
+  /// No description provided for @coachNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach note'**
+  String get coachNoteLabel;
 }
 
 class _AppLocalizationsDelegate

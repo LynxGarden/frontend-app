@@ -391,4 +391,68 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get hfOther => 'Drugo';
+
+  @override
+  String get noProgramAssigned => 'Program še ni dodeljen';
+
+  @override
+  String get noProgramAssignedBody =>
+      'Tvoj trener ti še ni dodelil programa. Preveri pozneje.';
+
+  @override
+  String get offlineTraining =>
+      'Nisi povezan. Za trening je potrebna povezava.';
+
+  @override
+  String get targetLabel => 'Cilj';
+
+  @override
+  String get lastTime => 'Zadnjič';
+
+  @override
+  String get noHistoryYet => 'Še ni zgodovine';
+
+  @override
+  String get logSet => 'Zabeleži serijo';
+
+  @override
+  String get addSet => 'Dodaj serijo';
+
+  @override
+  String setN(int n) {
+    return 'Serija $n';
+  }
+
+  @override
+  String get setsLabel => 'Serije';
+
+  @override
+  String get repsLabel => 'Ponovitve';
+
+  @override
+  String get weightLabel => 'Teža';
+
+  @override
+  String get timeSecLabel => 'Čas (s)';
+
+  @override
+  String get markComplete => 'Označi kot dokončano';
+
+  @override
+  String get completedBadge => 'Dokončano';
+
+  @override
+  String get swapExercise => 'Zamenjaj vajo';
+
+  @override
+  String get setLoggedToast => 'Serija zabeležena';
+
+  @override
+  String get sessionDoneToast => 'Serija zaključena — odlično!';
+
+  @override
+  String get exerciseSwappedToast => 'Vaja zamenjana';
+
+  @override
+  String get coachNoteLabel => 'Opomba trenerja';
 }

@@ -1,0 +1,199 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:lynx_app/core/theme/app_colors.dart';
+import 'package:lynx_app/core/theme/app_spacing.dart';
+import 'package:lynx_app/core/theme/app_text_styles.dart';
+import 'package:lynx_app/features/training/data/models/active_assignment.dart';
+import 'package:lynx_app/features/training/presentation/session_runner_screen.dart';
+import 'package:lynx_app/features/training/providers/training_provider.dart';
+import 'package:lynx_app/l10n/app_localizations.dart';
+
+/// The client's Train tab: their active program as a menu of sessions. Tapping a
+/// session opens the runner. The most-recently-completed session is badged.
+class TrainScreen extends ConsumerWidget {
+  const TrainScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final async = ref.watch(activeAssignmentProvider);
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: Text(l.trainTitle, style: AppTextStyles.heading3),
+        backgroundColor: AppColors.background,
+      ),
+      body: RefreshIndicator(
+        color: AppColors.forest,
+        onRefresh: () => ref.refresh(activeAssignmentProvider.future),
+        child: async.when(
+          loading: () =>
+              const Center(child: CircularProgressIndicator(color: AppColors.forest)),
+          error: (_, _) => _Message(
+            icon: Icons.wifi_off_rounded,
+            title: l.somethingWentWrong,
+            body: l.offlineTraining,
+          ),
+          data: (assignment) {
+            if (assignment == null || assignment.sessions.isEmpty) {
+              return _Message(
+                icon: Icons.fitness_center,
+                title: l.noProgramAssigned,
+                body: l.noProgramAssignedBody,
+              );
+            }
+            return ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xxl),
+              itemCount: assignment.sessions.length + 1,
+              itemBuilder: (context, i) {
+                if (i == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: Text(assignment.name, style: AppTextStyles.heading2),
+                  );
+                }
+                final session = assignment.sessions[i - 1];
+                return _SessionCard(
+                  session: session,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => SessionRunnerScreen(
+                          assignmentId: assignment.id,
+                          sessionId: session.id,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _SessionCard extends StatelessWidget {
+  const _SessionCard({required this.session, required this.onTap});
+
+  final TrainingAssignmentSession session;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: AppColors.surfaceBorder),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(session.label,
+                              style: AppTextStyles.body
+                                  .copyWith(fontWeight: FontWeight.w700)),
+                          if (session.isCompleted) ...[
+                            const SizedBox(width: AppSpacing.sm),
+                            const _CompletedBadge(),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l.sessionCount(session.exercises.length),
+                        style: AppTextStyles.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CompletedBadge extends StatelessWidget {
+  const _CompletedBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.success.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.check_circle, size: 13, color: AppColors.success),
+          const SizedBox(width: 4),
+          Text(
+            l.completedBadge,
+            style: AppTextStyles.label.copyWith(color: AppColors.success),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Message extends StatelessWidget {
+  const _Message({required this.icon, required this.title, required this.body});
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl, AppSpacing.xxl * 2, AppSpacing.xl, AppSpacing.xl),
+          child: Column(
+            children: [
+              Icon(icon, size: 44, color: AppColors.textTertiary),
+              const SizedBox(height: AppSpacing.md),
+              Text(title,
+                  textAlign: TextAlign.center, style: AppTextStyles.heading3),
+              const SizedBox(height: AppSpacing.sm),
+              Text(body,
+                  textAlign: TextAlign.center, style: AppTextStyles.bodySmall),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

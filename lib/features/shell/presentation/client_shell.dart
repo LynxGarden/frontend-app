@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lynx_app/features/profile/presentation/profile_screen.dart';
+import 'package:lynx_app/features/training/presentation/train_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/feature_placeholder.dart';
 import 'package:lynx_app/shared/widgets/main_shell.dart';
@@ -18,10 +19,7 @@ class ClientShell extends StatelessWidget {
           label: l.navTrain,
           sfSymbol: 'figure.run',
           materialIcon: Icons.fitness_center,
-          screen: FeaturePlaceholder(
-            title: l.trainTitle,
-            icon: Icons.fitness_center,
-          ),
+          screen: const TrainScreen(),
         ),
         ShellTab(
           label: l.navProgress,

@@ -386,4 +386,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hfOther => 'Other';
+
+  @override
+  String get noProgramAssigned => 'No program assigned yet';
+
+  @override
+  String get noProgramAssignedBody =>
+      'Your coach hasn\'t assigned a program yet. Check back soon.';
+
+  @override
+  String get offlineTraining => 'You\'re offline. Training needs a connection.';
+
+  @override
+  String get targetLabel => 'Target';
+
+  @override
+  String get lastTime => 'Last time';
+
+  @override
+  String get noHistoryYet => 'No history yet';
+
+  @override
+  String get logSet => 'Log set';
+
+  @override
+  String get addSet => 'Add set';
+
+  @override
+  String setN(int n) {
+    return 'Set $n';
+  }
+
+  @override
+  String get setsLabel => 'Sets';
+
+  @override
+  String get repsLabel => 'Reps';
+
+  @override
+  String get weightLabel => 'Weight';
+
+  @override
+  String get timeSecLabel => 'Time (s)';
+
+  @override
+  String get markComplete => 'Mark complete';
+
+  @override
+  String get completedBadge => 'Completed';
+
+  @override
+  String get swapExercise => 'Swap exercise';
+
+  @override
+  String get setLoggedToast => 'Set logged';
+
+  @override
+  String get sessionDoneToast => 'Session complete — great work!';
+
+  @override
+  String get exerciseSwappedToast => 'Exercise swapped';
+
+  @override
+  String get coachNoteLabel => 'Coach note';
 }
