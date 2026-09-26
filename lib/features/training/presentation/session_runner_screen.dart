@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/core/utils/app_exception.dart';
+import 'package:lynx_app/features/exercises/presentation/exercise_video.dart';
 import 'package:lynx_app/features/programs/presentation/exercise_picker_sheet.dart';
 import 'package:lynx_app/features/training/data/models/active_assignment.dart';
 import 'package:lynx_app/features/training/data/training_repository.dart';
@@ -209,17 +209,11 @@ class _ExerciseRunnerCardState extends ConsumerState<_ExerciseRunnerCard> {
     if (first.timeSeconds != null) _time.text = '${first.timeSeconds}';
   }
 
-  Future<void> _watchVideo() async {
-    final l = AppLocalizations.of(context);
-    final url = widget.exercise.videoUrl;
-    if (url == null || url.isEmpty) return;
-    final uri = Uri.tryParse(url);
-    final ok = uri != null &&
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!ok && mounted) {
-      AppToast.show(context, title: l.couldNotOpenVideo, blur: false);
-    }
-  }
+  Future<void> _watchVideo() => playExerciseVideo(
+        context,
+        storagePath: widget.exercise.videoStoragePath,
+        url: widget.exercise.videoUrl,
+      );
 
   Future<void> _logSet() async {
     final l = AppLocalizations.of(context);
@@ -310,7 +304,8 @@ class _ExerciseRunnerCardState extends ConsumerState<_ExerciseRunnerCard> {
                     style: AppTextStyles.bodySmall
                         .copyWith(color: AppColors.textSecondary)),
               ),
-            if (ex.videoUrl != null && ex.videoUrl!.isNotEmpty) ...[
+            if ((ex.videoStoragePath != null && ex.videoStoragePath!.isNotEmpty) ||
+                (ex.videoUrl != null && ex.videoUrl!.isNotEmpty)) ...[
               const SizedBox(height: AppSpacing.sm),
               GestureDetector(
                 onTap: _watchVideo,

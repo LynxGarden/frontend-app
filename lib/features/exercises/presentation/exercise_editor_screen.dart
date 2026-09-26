@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
@@ -36,6 +39,8 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
   late final TextEditingController _videoUrl;
   final Set<String> _selectedTagIds = {};
   bool _saving = false;
+  bool _uploading = false;
+  String? _videoStoragePath;
 
   bool get _isEdit => widget.exercise != null;
 
@@ -46,7 +51,28 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
     _name = TextEditingController(text: e?.name ?? '');
     _description = TextEditingController(text: e?.description ?? '');
     _videoUrl = TextEditingController(text: e?.videoUrl ?? '');
+    _videoStoragePath = e?.videoStoragePath;
     _selectedTagIds.addAll(e?.tags.map((t) => t.id) ?? const []);
+  }
+
+  Future<void> _pickAndUploadVideo() async {
+    final user = ref.read(currentUserProvider).valueOrNull;
+    if (user == null) return;
+    final picked =
+        await ImagePicker().pickVideo(source: ImageSource.gallery);
+    if (picked == null || !mounted) return;
+    setState(() => _uploading = true);
+    try {
+      final path = await ExerciseRepository.uploadVideo(
+        tenantId: user.tenantId,
+        file: File(picked.path),
+      );
+      if (mounted) setState(() => _videoStoragePath = path);
+    } on AppException catch (e) {
+      if (mounted) AppToast.show(context, title: e.message, blur: false);
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
   }
 
   @override
@@ -71,6 +97,7 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
           name: _name.text,
           description: _description.text,
           videoUrl: _videoUrl.text,
+          videoStoragePath: _videoStoragePath,
           tagIds: _selectedTagIds.toList(),
         );
       } else {
@@ -80,6 +107,7 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
           name: _name.text,
           description: _description.text,
           videoUrl: _videoUrl.text,
+          videoStoragePath: _videoStoragePath,
           tagIds: _selectedTagIds.toList(),
         );
       }
@@ -205,6 +233,46 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
                 keyboardType: TextInputType.url,
                 textInputAction: TextInputAction.next,
               ),
+              const SizedBox(height: AppSpacing.md),
+              // Hosted video upload
+              Text(l.demoVideo, style: AppTextStyles.label),
+              const SizedBox(height: AppSpacing.sm),
+              if (_videoStoragePath == null)
+                AppButton(
+                  label: l.uploadVideo,
+                  variant: AppButtonVariant.secondary,
+                  isExpanded: true,
+                  isLoading: _uploading,
+                  onPressed: _uploading ? null : _pickAndUploadVideo,
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.surfaceBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle,
+                          size: 18, color: AppColors.success),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(l.videoUploaded,
+                            style: AppTextStyles.bodySmall),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            setState(() => _videoStoragePath = null),
+                        child: Text(l.remove,
+                            style: AppTextStyles.bodySmall
+                                .copyWith(color: AppColors.error)),
+                      ),
+                    ],
+                  ),
+                ),
               const SizedBox(height: AppSpacing.md),
               AppTextField(
                 label: l.exerciseDescription,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
@@ -8,11 +7,11 @@ import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise_tag.dart';
 import 'package:lynx_app/features/exercises/presentation/exercise_editor_screen.dart';
+import 'package:lynx_app/features/exercises/presentation/exercise_video.dart';
 import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
 import 'package:lynx_app/features/programs/presentation/program_list_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
-import 'package:lynx_app/shared/widgets/app_toast.dart';
 
 /// Coach exercise library: searchable list, tag filter, add/edit/delete.
 class ExerciseLibraryScreen extends ConsumerStatefulWidget {
@@ -49,17 +48,11 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
     }
   }
 
-  Future<void> _watch(Exercise e) async {
-    final l = AppLocalizations.of(context);
-    final url = e.videoUrl;
-    if (url == null) return;
-    final uri = Uri.tryParse(url);
-    final ok = uri != null &&
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!ok && mounted) {
-      AppToast.show(context, title: l.couldNotOpenVideo, blur: false);
-    }
-  }
+  Future<void> _watch(Exercise e) => playExerciseVideo(
+        context,
+        storagePath: e.videoStoragePath,
+        url: e.videoUrl,
+      );
 
   List<Exercise> _filter(List<Exercise> all) {
     final q = _search.text.trim().toLowerCase();

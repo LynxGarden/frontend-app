@@ -176,5 +176,8 @@
   "verifyCode": "Verify & continue",
   "changeEmail": "Use a different email",
   "codeSentTo": "We sent a 6-digit code to {email}",
-  "@codeSentTo": { "placeholders": { "email": { "type": "String" } } }
+  "@codeSentTo": { "placeholders": { "email": { "type": "String" } } },
+  "demoVideo": "Demo video",
+  "uploadVideo": "Upload video",
+  "videoUploaded": "Video uploaded"
 }

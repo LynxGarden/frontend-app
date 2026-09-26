@@ -1069,6 +1069,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We sent a 6-digit code to {email}'**
   String codeSentTo(String email);
+
+  /// No description provided for @demoVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo video'**
+  String get demoVideo;
+
+  /// No description provided for @uploadVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload video'**
+  String get uploadVideo;
+
+  /// No description provided for @videoUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Video uploaded'**
+  String get videoUploaded;
 }
 
 class _AppLocalizationsDelegate

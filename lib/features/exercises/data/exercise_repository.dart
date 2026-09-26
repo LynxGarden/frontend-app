@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
+
 import 'package:lynx_app/core/supabase/supabase_client.dart';
 import 'package:lynx_app/core/utils/app_exception.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise.dart';
@@ -8,8 +12,11 @@ import 'package:lynx_app/features/exercises/data/models/exercise_tag.dart';
 class ExerciseRepository {
   const ExerciseRepository._();
 
+  static const _videoBucket = 'exercise-videos';
+
   static const _select =
-      'id, owner_id, name, description, video_url, exercise_tags(tags(id, category, label))';
+      'id, owner_id, name, description, video_url, video_storage_path, '
+      'exercise_tags(tags(id, category, label))';
 
   /// A coach's own exercises, alphabetical.
   static Future<List<Exercise>> listForOwner({
@@ -85,6 +92,7 @@ class ExerciseRepository {
     required String name,
     String? description,
     String? videoUrl,
+    String? videoStoragePath,
     List<String> tagIds = const [],
   }) async {
     try {
@@ -96,6 +104,7 @@ class ExerciseRepository {
             'name': name.trim(),
             'description': _nullIfBlank(description),
             'video_url': _nullIfBlank(videoUrl),
+            'video_storage_path': _nullIfBlank(videoStoragePath),
           })
           .select('id')
           .single();
@@ -114,6 +123,7 @@ class ExerciseRepository {
     required String name,
     String? description,
     String? videoUrl,
+    String? videoStoragePath,
     List<String> tagIds = const [],
   }) async {
     try {
@@ -122,6 +132,7 @@ class ExerciseRepository {
             'name': name.trim(),
             'description': _nullIfBlank(description),
             'video_url': _nullIfBlank(videoUrl),
+            'video_storage_path': _nullIfBlank(videoStoragePath),
           })
           .eq('id', exerciseId)
           .eq('tenant_id', tenantId);
@@ -143,6 +154,49 @@ class ExerciseRepository {
     } catch (e) {
       throw AppException('Could not delete the exercise.', cause: e);
     }
+  }
+
+  // ── Video storage (private bucket `exercise-videos`) ──────────────────────
+
+  /// Uploads a video [file] to `{tenantId}/{uuid}.<ext>` and returns the storage
+  /// path (store it as the exercise's `video_storage_path`). Staff-only per RLS.
+  static Future<String> uploadVideo({
+    required String tenantId,
+    required File file,
+    void Function(double fraction)? onProgress,
+  }) async {
+    try {
+      final ext = file.path.split('.').last.toLowerCase();
+      final name = DateTime.now().microsecondsSinceEpoch.toString();
+      final path = '$tenantId/$name.$ext';
+      await SupabaseClientWrapper.storage.from(_videoBucket).upload(
+            path,
+            file,
+            fileOptions: const FileOptions(upsert: true),
+          );
+      return path;
+    } catch (e) {
+      throw AppException('Could not upload the video.', cause: e);
+    }
+  }
+
+  /// A short-lived signed URL to stream a hosted video (RLS-gated to the tenant).
+  static Future<String> signedVideoUrl(String storagePath,
+      {int expiresInSeconds = 3600}) async {
+    try {
+      return await SupabaseClientWrapper.storage
+          .from(_videoBucket)
+          .createSignedUrl(storagePath, expiresInSeconds);
+    } catch (e) {
+      throw AppException('Could not open the video.', cause: e);
+    }
+  }
+
+  /// Removes a hosted video from storage (best-effort; ignores failures).
+  static Future<void> deleteVideo(String storagePath) async {
+    try {
+      await SupabaseClientWrapper.storage.from(_videoBucket).remove([storagePath]);
+    } catch (_) {/* best-effort */}
   }
 
   static Future<void> _replaceTags({

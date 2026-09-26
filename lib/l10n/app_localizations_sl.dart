@@ -548,4 +548,13 @@ class AppLocalizationsSl extends AppLocalizations {
   String codeSentTo(String email) {
     return 'Poslali smo 6-mestno kodo na $email';
   }
+
+  @override
+  String get demoVideo => 'Video z vajo';
+
+  @override
+  String get uploadVideo => 'Naloži video';
+
+  @override
+  String get videoUploaded => 'Video naložen';
 }

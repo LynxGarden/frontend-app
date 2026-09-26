@@ -175,5 +175,8 @@
   "verifyCode": "Potrdi in nadaljuj",
   "changeEmail": "Uporabi drug e-naslov",
   "codeSentTo": "Poslali smo 6-mestno kodo na {email}",
-  "@codeSentTo": { "placeholders": { "email": { "type": "String" } } }
+  "@codeSentTo": { "placeholders": { "email": { "type": "String" } } },
+  "demoVideo": "Video z vajo",
+  "uploadVideo": "Naloži video",
+  "videoUploaded": "Video naložen"
 }

@@ -40,6 +40,11 @@ dependencies:
   url_launcher: ^6.3.0
   intl: ^0.20.2 # pinned by flutter_localizations from the Flutter SDK when l10n is enabled
 
+  # Exercise video: pick/record (image_picker) + inline playback (video_player).
+  # Hosted in a private Supabase Storage bucket; streamed via signed URLs.
+  image_picker: ^1.1.2
+  video_player: ^2.9.2
+
   # Environment
   flutter_dotenv: ^5.2.1
 

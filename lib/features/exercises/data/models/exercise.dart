@@ -9,6 +9,7 @@ class Exercise {
     required this.name,
     this.description,
     this.videoUrl,
+    this.videoStoragePath,
     this.tags = const [],
   });
 
@@ -17,12 +18,17 @@ class Exercise {
   final String name;
   final String? description;
   final String? videoUrl;
+  /// Path in the private `exercise-videos` bucket (hosted video), or null.
+  final String? videoStoragePath;
   final List<ExerciseTag> tags;
 
-  bool get hasVideo => (videoUrl != null && videoUrl!.trim().isNotEmpty);
+  bool get hasHostedVideo =>
+      videoStoragePath != null && videoStoragePath!.trim().isNotEmpty;
+  bool get hasLinkVideo => videoUrl != null && videoUrl!.trim().isNotEmpty;
+  bool get hasVideo => hasHostedVideo || hasLinkVideo;
 
   /// Parses a row selected with the embedded tags shape:
-  /// `id, owner_id, name, description, video_url,
+  /// `id, owner_id, name, description, video_url, video_storage_path,
   ///  exercise_tags(tags(id, category, label))`
   factory Exercise.fromJson(Map<String, dynamic> json) {
     final tagJoins = (json['exercise_tags'] as List?) ?? const [];
@@ -39,6 +45,7 @@ class Exercise {
       name: json['name'] as String,
       description: json['description'] as String?,
       videoUrl: json['video_url'] as String?,
+      videoStoragePath: json['video_storage_path'] as String?,
       tags: tags,
     );
   }

@@ -538,4 +538,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String codeSentTo(String email) {
     return 'We sent a 6-digit code to $email';
   }
+
+  @override
+  String get demoVideo => 'Demo video';
+
+  @override
+  String get uploadVideo => 'Upload video';
+
+  @override
+  String get videoUploaded => 'Video uploaded';
 }

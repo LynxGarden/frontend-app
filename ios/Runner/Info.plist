@@ -79,5 +79,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Lynx needs access to your photo library so coaches can attach exercise demo videos.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Lynx needs camera access so coaches can record exercise demo videos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Lynx needs microphone access to record audio in exercise demo videos.</string>
 </dict>
 </plist>

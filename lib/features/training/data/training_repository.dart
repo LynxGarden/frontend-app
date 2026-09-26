@@ -20,7 +20,7 @@ class TrainingRepository {
             'id, name, '
             'assignment_sessions(id, label, order_index, last_completed_at, '
             'assignment_exercises(id, exercise_id, swapped_from_exercise_id, '
-            'exercise_name, video_url, order_index, sets, reps, weight, '
+            'exercise_name, video_url, video_storage_path, order_index, sets, reps, weight, '
             'load_intensity, rpe, time_seconds, tempo, rest_seconds, '
             'set_type_note, coach_note))',
           )

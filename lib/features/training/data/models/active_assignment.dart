@@ -11,6 +11,7 @@ class TrainingExercise {
     required this.orderIndex,
     required this.exerciseName,
     this.videoUrl,
+    this.videoStoragePath,
     this.swappedFromExerciseId,
     this.sets,
     this.reps,
@@ -30,6 +31,7 @@ class TrainingExercise {
   final int orderIndex;
   final String exerciseName;
   final String? videoUrl;
+  final String? videoStoragePath;
   final String? swappedFromExerciseId;
 
   final int? sets;
@@ -67,6 +69,7 @@ class TrainingExercise {
       orderIndex: (json['order_index'] as int?) ?? 0,
       exerciseName: (json['exercise_name'] as String?) ?? '',
       videoUrl: json['video_url'] as String?,
+      videoStoragePath: json['video_storage_path'] as String?,
       swappedFromExerciseId: json['swapped_from_exercise_id'] as String?,
       sets: json['sets'] as int?,
       reps: json['reps'] as String?,
