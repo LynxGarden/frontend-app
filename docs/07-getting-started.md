@@ -60,7 +60,7 @@ To actually land in a shell you need a linked person. For local testing: create 
 - Lynx **light theme** (forest/cream), Bricolage Grotesque headings + Inter body (Geist wasn't available in google_fonts; Inter is the stand-in — revisit if we bundle Geist).
 - **i18n EN + SL** (`lib/l10n/app_en.arb`, `app_sl.arb`).
 - **Adaptive shell**: native iOS `CNTabBar` (cupertino_native) / custom Material pill on Android, role-based tabs.
-- **Auth**: Google + Apple SSO + email magic link (`features/auth`), shared with the website.
+- **Auth**: email + password with OTP email verification & password reset (`features/auth`); Google/Apple SSO gated off (`--dart-define=ENABLE_SSO=true`).
 - **Tenant-aware session**: `currentUserProvider` (role + `tenant_id`), `BaseRepository` scoping helper.
 - Two flavors (dev/prod).
 

@@ -17,23 +17,23 @@ Checkpoints are ordered by dependency, not by calendar. The brief is explicit th
 
 **Goal:** an installable app that authenticates against Supabase, shows the branded adaptive shell, and routes by role. Nothing domain-specific yet.
 
-> **Status:** app scaffolded (`lynx_app`), Lynx light theme, EN/SL i18n, adaptive shell + role routing, SSO + magic-link auth, tenant-aware session, and **dev/prod flavors** all in place; `flutter analyze` clean. Backend migrations applied & verified on the local stack. **Remaining before "done":** configure Supabase auth providers + redirect URLs, push migrations to the cloud project, create a linked test user to walk the shells on a device, and (later) native per-flavor bundle IDs. See [07 · Getting Started](07-getting-started.md).
+> **Status:** app scaffolded (`lynx_app`), Lynx **light + dark** theme, EN/SL i18n, adaptive shell + role routing, **email+password auth with OTP** verification (SSO gated off), tenant-aware session, **dev/prod flavors** and native per-flavor bundle IDs all in place; `flutter analyze` clean. Backend migrations applied & verified on the local stack. **Remaining before "done":** configure the Supabase email provider + OTP templates, push migrations to the cloud project, and create a linked test user to walk the shells on a device. See [07 · Getting Started](07-getting-started.md).
 
 **App**
 - Init Flutter project from the starter (`bin/setup.dart`): rename to `lynx_app`, set bundle IDs, deeplink scheme/host, brand colours & fonts.
 - Port branding tokens into `core/theme` ([02](02-navigation-and-ui.md)); replace dark-only theme with Lynx light theme.
 - Enable **i18n** shipping **`en` + `sl`** (`flutter_localizations`, `.arb`, `flutter gen-l10n`); wire `MaterialApp.router` locales. Extract all starter strings.
 - Build the **platform-adaptive `MainShell`** (iOS `CNTabBar` / Android pill) + the two role-based shells (client / staff) with placeholder tab screens.
-- **Auth: magic link + Google SSO + Apple SSO** (plus starter email/password fallback); `currentUserProvider` reads **role + `tenant_id`**; router redirects by role and to a "finish setup / accept invite" screen when no `person` is linked yet.
+- **Auth: email + password with OTP** email verification & OTP password reset (6-digit codes, no magic-link deep links); Google/Apple SSO wired but **gated off** (`--dart-define=ENABLE_SSO=true`); `currentUserProvider` reads **role + `tenant_id`**; router redirects by role and to a "finish setup / accept invite" screen when no `person` is linked yet.
 - **Tenant-aware repositories**: base repository pattern scopes every query to `current tenant_id`.
 
-**Backend** → CP-B0: `supabase init`, seed **tenant #1 (Lynx Center)**, enable **magic-link + Google + Apple** providers with all redirect URLs, and the identity core (`tenants`, `persons` + `tenant_id`, `person_roles`) with **tenant-isolation RLS**.
+**Backend** → CP-B0: `supabase init`, seed **tenant #1 (Lynx Center)**, enable the **email provider** with OTP email templates surfacing `{{ .Token }}` (Google/Apple added when SSO is switched on), and the identity core (`tenants`, `persons` + `tenant_id`, `person_roles`) with **tenant-isolation RLS**.
 
 **Website** (`Lynx-website`) — ✅ done this round: top-right **Log in** button + profile menu, login modal with Google/Apple/magic-link (EN + SL), sharing this backend. Fill `assets/js/config.js` with the Supabase URL + publishable key and it goes live ([website auth-setup](../../Lynx-website/docs/auth-setup.md)).
 
 **Acceptance**
 - Fresh install on an iOS device shows the native Cupertino tab bar; on Android the pill bar.
-- Can sign in with Google, Apple, and a magic link **on both the app and the website**; land in the correct shell for the account's role; sign out.
+- Can sign in on the app with **email + password** (OTP-verified sign-up) and on the website; land in the correct shell for the account's role; sign out.
 - App language switches **EN ↔ SL** and strings update.
 - A user in a second (test) tenant sees none of Lynx's data.
 - No hardcoded colours/strings in new code (lint + review).
@@ -105,9 +105,11 @@ Checkpoints are ordered by dependency, not by calendar. The brief is explicit th
 
 ---
 
-## CP4 · Client Daily Loop 🎯 (the hero)
+## CP4 · Client Daily Loop 🎯 (the hero) — ✅ delivered
 
 **Goal:** the client trains in the gym — this is the single most important slice.
+
+> **Status:** CP-B4 backend (**`logged_entries`** with the `(person_id, exercise_id, logged_at desc)` "last time" index, `complete_session` / `swap_assignment_exercise` RPCs) **done & verified**. App: `features/training` — Train tab (program → session menu, completed badges, pull-to-refresh, Train-tailored skeleton, offline messaging) and the session runner (target · set-type · coach notes · **Watch video** · **LAST TIME** block · numeric log inputs · swap · complete). `activeAssignmentProvider` is a realtime stream (best-effort) that auto-refreshes on re-assign. `flutter analyze` clean.
 
 **App** (`features/training`)
 - Open app → program shown as a **list of sessions** → see which was completed last → pick the next.
@@ -125,9 +127,11 @@ Checkpoints are ordered by dependency, not by calendar. The brief is explicit th
 
 ---
 
-## CP5 · Coach Review & Groups 🧩
+## CP5 · Coach Review & Groups 🧩 — ✅ delivered
 
 **Goal:** the coach closes the loop by seeing completed work; groups let one program serve many athletes.
+
+> **Status:** CP-B5 backend (`groups` + `group_members`, `assign_template_to_group` fan-out, review reads under existing RLS) **done & verified** (a 3-person group assign produced three independent logging streams). App: `features/review` — completed sessions + logged actuals per client (review-on-login); `features/groups` — rosters (create/manage members) and group-assign that snapshots an independent instance per member. `flutter analyze` clean.
 
 **App**
 - `features/review`: coach sees completed sessions and the actuals each client logged (review-on-login; realtime is later).
@@ -141,9 +145,28 @@ Checkpoints are ordered by dependency, not by calendar. The brief is explicit th
 
 ---
 
-## CP6 · Launch Hardening 🎯
+## CP6 · Launch Hardening 🎯 — 🚧 in progress
 
 **Goal:** ship-quality. Turn the working slices into something real people use daily.
+
+> **Status (living checklist — keep this current):**
+>
+> **Done**
+> - ✅ Native per-flavor bundle IDs + Android flavors; iOS **privacy manifest** (`PrivacyInfo.xcprivacy`).
+> - ✅ App **icon / splash / launcher icons** (`flutter_launcher_icons` + `flutter_native_splash`).
+> - ✅ **Account + data-deletion path** — Settings → Delete account → `delete-account` edge function + full `SessionService` teardown.
+> - ✅ **Empty / loading / error states** across screens (`skeleton_loader`, Train skeleton, `AppToast`); `mounted` checks.
+> - ✅ **EN + SL i18n** throughout; user-selectable language (persisted).
+> - ✅ **Dark mode** (light + dark, semantic `AppColors`) — beyond original scope.
+> - ✅ **Auth → OTP** (email verification + password reset), removing magic-link deep-link fragility.
+> - ✅ **GDPR consent-copy draft** (`08-gdpr-consent-draft.md`); backend **seed/demo data** (`supabase/seed.sql`, `scripts/seed_test_data.sql`).
+>
+> **Left**
+> - ⬜ **Tests:** repository unit tests for the training-engine data layer; **golden tests** for the daily-loop screens (only render tests exist today — `test/render/`).
+> - ⬜ **Distribution:** iOS **TestFlight** + Android internal testing; store listings / metadata.
+> - ⬜ **Production backend (CP-B6):** push migrations to the cloud project, **RLS audit** across all tables, backups.
+> - ⬜ **Legal:** privacy-policy link in-app; **final GDPR stance** — consent + the data-sharing agreement with Urban's physio practice before any real health data in prod.
+> - ⬜ **Polish:** responsive/tablet verification pass on all screens.
 
 **App**
 - Full i18n pass (all strings extracted; EN complete, structure ready for SL).

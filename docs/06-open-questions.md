@@ -8,7 +8,7 @@ Decisions still owed. Each has an **owner** and a note on **what it gates**. Res
 |----------|----------|
 | PWA vs. native | **Native iOS + Android in Flutter.** |
 | Product model | **Multi-tenant SaaS** from day one; Lynx Center is tenant #1; sellable to other gyms later. |
-| Auth & SSO | **Shared** across app + website: email **magic link** + **Google SSO** + **Apple SSO** (email/password kept as fallback). |
+| Auth & SSO | App uses **email + password** with **OTP** email verification & password reset; **Google/Apple SSO** implemented but gated off (`--dart-define=ENABLE_SSO=true`). Website may still offer SSO/magic-link. |
 | Login surface (website) | Top-right **Log in** button → in-page modal; profile menu when signed in. **Done this round.** |
 | Coach/admin dashboard | Lives in the **website** (`Lynx-website`) on the shared backend — not a separate project. Rich web builder still grows post-v1. |
 | Languages | **English + Slovenian** (`en`/`sl`) on app + website, i18n-ready for more. |
@@ -45,7 +45,7 @@ Decisions still owed. Each has an **owner** and a note on **what it gates**. Res
 | A1 | **Supabase project credentials** — URL + publishable key needed to activate website login (`config.js`) and app `.env`. | CP0 go-live | Provide the project ref; the anon/publishable key is public-safe. |
 | A2 | **Google OAuth clients** — web + iOS + Android client IDs/secrets in Google Cloud. | Google SSO | Console work (dev + Robin's Google org). |
 | A3 | **Apple Sign in** — Services ID + key in the Apple Developer portal; required for App Store if Google SSO ships on iOS. | Apple SSO, App Store | Needs the Apple Developer account. |
-| A4 | **Magic-link email sender** — Supabase default vs. custom SMTP/domain for deliverability. | email UX | Default fine for dev; custom SMTP before launch. |
+| A4 | **OTP email sender** — Supabase default vs. custom SMTP/domain for deliverability. | email UX | Default fine for dev; custom SMTP (Brevo) before launch. |
 
 ## Technical (owner: dev)
 

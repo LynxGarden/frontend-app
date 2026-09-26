@@ -21,7 +21,7 @@ The app, the **website** (`Lynx-website`), and the Supabase backend all share **
 - **Website** — marketing site **plus** the login entry point and the coach/admin **dashboard** (the dashboard grows over time). Login lives top-right on every page.
 - **Supabase** — Postgres + Auth + Storage shared by both.
 
-**Sign-in is unified across app + web:** email **magic link** (passwordless) + **Google SSO** + **Apple SSO**. See [01 · Architecture → Auth](01-architecture.md).
+**Sign-in:** the app uses **email + password** with **OTP** email verification and OTP password reset (6-digit codes, no magic-link deep links); Google/Apple SSO is wired but **gated off** (`--dart-define=ENABLE_SSO=true`). See [01 · Architecture → Auth](01-architecture.md).
 
 ### Languages
 
@@ -44,7 +44,7 @@ Confirmed decisions for this planning round:
 - **Coach role runs on mobile too.** Coaches build libraries and programs *in this app* on their phone (responsive, works on tablet). The richer coach/admin **web dashboard** now lives in the **website** (`Lynx-website`) on the shared backend — it is no longer a separate future project, though the full web builder still grows post-v1.
 - **CRM** (§5) is designed-for but deferred: the schema is built extensible now, the UI lands in v1.x.
 - **Multi-tenant SaaS** from the first migration (see above).
-- **Auth:** shared across app + web — email magic link, Google SSO, Apple SSO.
+- **Auth:** email + password with OTP verification & reset (Google/Apple SSO gated off).
 - **Languages:** **English + Slovenian**, i18n-ready from commit one.
 - **Connectivity:** online-only for v1 (no offline mode).
 

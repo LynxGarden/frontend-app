@@ -2,7 +2,7 @@
 
 Scope, architecture, and delivery plan for the **Lynx** training & physiotherapy platform (Flutter client for iOS + Android). This folder is the app-side source of truth. Backend/database docs live in the [`Lynx-backend`](https://github.com/LynxGarden/backend-supabase) repo under `docs/`.
 
-**At a glance:** a **multi-tenant SaaS** (Lynx Center is tenant #1, sellable to other gyms later) with **one shared backend** behind three surfaces — the Flutter app, the website (`Lynx-website`, which hosts login + the coach/admin dashboard), and Supabase. **Unified auth**: email magic link + Google SSO + Apple SSO. Shipped in **English + Slovenian**.
+**At a glance:** a **multi-tenant SaaS** (Lynx Center is tenant #1, sellable to other gyms later) with **one shared backend** behind three surfaces — the Flutter app, the website (`Lynx-website`, which hosts login + the coach/admin dashboard), and Supabase. **Auth**: email + password with OTP verification & reset (Google/Apple SSO gated off). Shipped in **English + Slovenian**.
 
 > Derived from `Lynx-App-Scope-Brief-v0.2.md`. Where this document and the brief disagree, the brief's intent wins — flag the conflict in [`06-open-questions.md`](06-open-questions.md).
 

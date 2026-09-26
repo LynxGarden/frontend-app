@@ -84,10 +84,10 @@ Run `dart run build_runner build --delete-conflicting-outputs` after adding `@ri
 
 Auth is **shared with the website** — one Supabase project, one set of users, the same sign-in methods on every surface.
 
-- **Sign-in methods:** email **magic link** (passwordless, `signInWithOtp`), **Google SSO**, **Apple SSO** (`signInWithOAuth`), plus the starter's email/password screens kept as a fallback. On iOS, use native Sign in with Apple; Apple SSO is **required by App Store review** whenever Google SSO is offered. Provider setup is in the [backend security doc](../../Lynx-backend/docs/01-security-and-rls.md#auth-configuration--external-identity-sso).
+- **Sign-in methods:** **email + password** as the primary method, with **OTP** (6-digit code) for email verification and password reset (`verifyOTP` — no magic-link deep links). **Google SSO / Apple SSO** (`signInWithOAuth`) are implemented but **gated off** behind `--dart-define=ENABLE_SSO=true`; when enabled on iOS, Apple SSO is **required by App Store review** whenever Google SSO is offered. Provider setup is in the [backend security doc](../../Lynx-backend/docs/01-security-and-rls.md#auth-configuration--external-identity-sso).
 - A user's **role** (owner/admin, coach, physio, client) and **tenant** live on their linked `person`/profile row, read once at startup into `currentUserProvider` (which also exposes `tenantId`).
 - go_router's `redirect` (extended from the starter's `_AuthNotifier` pattern) gates:
-  - unauthenticated → auth stack (login with SSO + magic link; deep-link callback handling).
+  - unauthenticated → auth stack (welcome → email+password login/signup, OTP email verification, OTP password reset).
   - authenticated **but no linked `person` yet** → a "finish setup / accept invite" holding screen (a brand-new SSO user has no tenant until linked; RLS returns nothing).
   - authenticated **client** → client shell (training tabs).
   - authenticated **coach/physio/admin** → staff shell (library / programs / clients / review tabs).
