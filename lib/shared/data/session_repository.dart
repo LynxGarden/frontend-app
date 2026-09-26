@@ -15,7 +15,8 @@ class SessionRepository {
 
     try {
       final personRow = await SupabaseClientWrapper.db('users_data')
-          .select('id, tenant_id, first_name, last_name, email, locale')
+          .select(
+              'id, tenant_id, first_name, last_name, email, locale, avatar_kind, avatar_value, date_of_birth, onboarding_complete')
           .eq('auth_user_id', authUser.id)
           .maybeSingle();
 

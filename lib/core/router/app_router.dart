@@ -16,6 +16,7 @@ import 'package:lynx_app/features/auth/presentation/change_password_screen.dart'
 
 // App screens
 import 'package:lynx_app/features/shell/presentation/root_shell.dart';
+import 'package:lynx_app/features/settings/presentation/profile_settings_screen.dart';
 import 'package:lynx_app/features/settings/presentation/settings_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -131,6 +132,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
         routes: [
+          GoRoute(
+            parentNavigatorKey: rootNavigatorKey,
+            path: 'profile',
+            builder: (context, state) => const ProfileSettingsScreen(),
+          ),
           GoRoute(
             parentNavigatorKey: rootNavigatorKey,
             path: 'change-password',

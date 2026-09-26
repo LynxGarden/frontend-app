@@ -10,7 +10,7 @@
 ## What we must ship for CP6
 
 1. **Consent capture** before storing health data (a `consents` table or a
-   consent record on `persons`): who consented, to what version of the notice,
+   consent record on `users_data`): who consented, to what version of the notice,
    when. Staff recording a `health_flag` on a client's behalf must attest consent
    was obtained.
 2. **Privacy policy link** — reachable from Settings/Profile and the sign-in

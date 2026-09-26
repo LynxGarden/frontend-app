@@ -29,6 +29,10 @@ class AppUser {
     this.firstName,
     this.lastName,
     this.email,
+    this.avatarKind,
+    this.avatarValue,
+    this.dateOfBirth,
+    this.onboardingComplete = false,
   });
 
   final String personId;
@@ -38,6 +42,33 @@ class AppUser {
   final String? firstName;
   final String? lastName;
   final String? email;
+
+  /// Avatar: `null` (→ initials) · `'dicebear'` (config JSON in [avatarValue]) ·
+  /// `'photo'` (storage path in [avatarValue]).
+  final String? avatarKind;
+  final String? avatarValue;
+  final DateTime? dateOfBirth;
+  final bool onboardingComplete;
+
+  /// Display name, falling back to email then a dash.
+  String get fullName {
+    final name = [firstName, lastName]
+        .where((s) => s != null && s.trim().isNotEmpty)
+        .join(' ')
+        .trim();
+    if (name.isNotEmpty) return name;
+    return email ?? '—';
+  }
+
+  /// Up to two initials for the avatar fallback.
+  String get initials {
+    final f = (firstName ?? '').trim();
+    final l = (lastName ?? '').trim();
+    final a = f.isNotEmpty ? f[0] : '';
+    final b = l.isNotEmpty ? l[0] : '';
+    final combined = (a + b).toUpperCase();
+    return combined.isNotEmpty ? combined : '?';
+  }
 
   /// Staff = owner / coach / physio. Drives which shell the user sees.
   bool get isStaff =>
@@ -54,6 +85,7 @@ class AppUser {
   }
 
   factory AppUser.fromJson(Map<String, dynamic> json, Set<AppRole> roles) {
+    final dob = json['date_of_birth'] as String?;
     return AppUser(
       personId: json['id'] as String,
       tenantId: json['tenant_id'] as String,
@@ -62,6 +94,10 @@ class AppUser {
       firstName: json['first_name'] as String?,
       lastName: json['last_name'] as String?,
       email: json['email'] as String?,
+      avatarKind: json['avatar_kind'] as String?,
+      avatarValue: json['avatar_value'] as String?,
+      dateOfBirth: dob == null ? null : DateTime.tryParse(dob),
+      onboardingComplete: (json['onboarding_complete'] as bool?) ?? false,
     );
   }
 }

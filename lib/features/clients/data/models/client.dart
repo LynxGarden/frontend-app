@@ -10,6 +10,8 @@ class Client {
     this.lifecycleStage = 'regular',
     this.locale = 'en',
     this.hasAccount = false,
+    this.avatarKind,
+    this.avatarValue,
   });
 
   final String id;
@@ -20,6 +22,10 @@ class Client {
   final String lifecycleStage;
   final String locale;
   final bool hasAccount;
+
+  /// Avatar: `null` (→ initials) · `'dicebear'` (config JSON) · `'photo'` (path).
+  final String? avatarKind;
+  final String? avatarValue;
 
   String get fullName {
     final n = '$firstName $lastName'.trim();
@@ -43,6 +49,8 @@ class Client {
       lifecycleStage: (json['lifecycle_stage'] as String?) ?? 'regular',
       locale: (json['locale'] as String?) ?? 'en',
       hasAccount: json['auth_user_id'] != null,
+      avatarKind: json['avatar_kind'] as String?,
+      avatarValue: json['avatar_value'] as String?,
     );
   }
 }

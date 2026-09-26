@@ -15,7 +15,7 @@ class ClientRepository {
     try {
       final rows = await SupabaseClientWrapper.db('users_data')
           .select(
-              'id, first_name, last_name, email, phone, lifecycle_stage, locale, auth_user_id, person_roles!inner(role)')
+              'id, first_name, last_name, email, phone, lifecycle_stage, locale, auth_user_id, avatar_kind, avatar_value, person_roles!inner(role)')
           .eq('tenant_id', tenantId)
           .eq('person_roles.role', 'client')
           .order('sort_order')
@@ -52,7 +52,7 @@ class ClientRepository {
     try {
       final row = await SupabaseClientWrapper.db('users_data')
           .select(
-              'id, first_name, last_name, email, phone, lifecycle_stage, locale, auth_user_id')
+              'id, first_name, last_name, email, phone, lifecycle_stage, locale, auth_user_id, avatar_kind, avatar_value')
           .eq('id', personId)
           .eq('tenant_id', tenantId)
           .single();

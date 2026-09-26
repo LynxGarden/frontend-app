@@ -152,6 +152,105 @@ class AppLocalizationsSl extends AppLocalizations {
   String get category => 'Kategorija';
 
   @override
+  String get profileSettings => 'Nastavitve profila';
+
+  @override
+  String get editProfile => 'Uredi profil';
+
+  @override
+  String get firstName => 'Ime';
+
+  @override
+  String get lastName => 'Priimek';
+
+  @override
+  String get dateOfBirth => 'Datum rojstva';
+
+  @override
+  String get notSet => 'Ni nastavljeno';
+
+  @override
+  String get avatar => 'Avatar';
+
+  @override
+  String get chooseAvatar => 'Izberi avatar';
+
+  @override
+  String get buildAvatar => 'Ustvari avatar';
+
+  @override
+  String get editAvatar => 'Uredi avatar';
+
+  @override
+  String get uploadPhoto => 'Naloži fotografijo';
+
+  @override
+  String get removePhoto => 'Odstrani';
+
+  @override
+  String get shuffle => 'Premešaj';
+
+  @override
+  String get saveAvatar => 'Shrani avatar';
+
+  @override
+  String get avNone => 'Brez';
+
+  @override
+  String get avHair => 'Lasje';
+
+  @override
+  String get avEyes => 'Oči';
+
+  @override
+  String get avEyebrows => 'Obrvi';
+
+  @override
+  String get avMouth => 'Usta';
+
+  @override
+  String get avNose => 'Nos';
+
+  @override
+  String get avGlasses => 'Očala';
+
+  @override
+  String get avBeard => 'Brada';
+
+  @override
+  String get avClothing => 'Oblačila';
+
+  @override
+  String get onboardingNameTitle => 'Kako ti je ime?';
+
+  @override
+  String get onboardingNameSubtitle =>
+      'Tako te bodo videli tvoj trener in stranke.';
+
+  @override
+  String get onboardingAvatarTitle => 'Izberi avatar';
+
+  @override
+  String get onboardingAvatarSubtitle =>
+      'Ustvari ga ali naloži fotografijo. Kadar koli ga lahko spremeniš.';
+
+  @override
+  String get onboardingDobTitle => 'Tvoj datum rojstva';
+
+  @override
+  String get onboardingDobSubtitle =>
+      'Neobvezno — trenerju pomaga prilagoditi trening.';
+
+  @override
+  String get skip => 'Preskoči';
+
+  @override
+  String get finish => 'Končaj';
+
+  @override
+  String get next => 'Naprej';
+
+  @override
   String get save => 'Shrani';
 
   @override
@@ -306,12 +405,6 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get newClient => 'Nova stranka';
-
-  @override
-  String get firstName => 'Ime';
-
-  @override
-  String get lastName => 'Priimek';
 
   @override
   String get phone => 'Telefon';

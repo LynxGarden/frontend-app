@@ -14,6 +14,8 @@ import 'package:lynx_app/shared/models/app_user.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/providers/locale_provider.dart';
 import 'package:lynx_app/shared/providers/theme_mode_provider.dart';
+import 'package:lynx_app/shared/widgets/app_avatar.dart';
+import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/collapsing_header.dart';
 
@@ -243,7 +245,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ── Profile ──────────────────────────────────────
+                  // ── Profile header ───────────────────────────────
+                  if (user != null) ...[
+                    _ProfileHeader(
+                      user: user,
+                      roleLabel: _roleLabel(l, user.primaryRole),
+                      onTap: () => context.push('/settings/profile'),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
+
+                  // ── Account ──────────────────────────────────────
                   _Section(
                     header: l.secProfile,
                     rows: [
@@ -251,13 +263,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: Icons.mail_outline,
                         title: l.emailLabel,
                         value: user?.email ?? '—',
-                      ),
-                      _Row.value(
-                        icon: Icons.badge_outlined,
-                        title: l.roleLabel,
-                        value: user != null
-                            ? _roleLabel(l, user.primaryRole)
-                            : '—',
                       ),
                     ],
                   ),
@@ -460,6 +465,52 @@ class _Row extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Tappable profile header: avatar + name + role, opens Profile settings.
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader({
+    required this.user,
+    required this.roleLabel,
+    required this.onTap,
+  });
+
+  final AppUser user;
+  final String roleLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          AppAvatar(
+            avatarKind: user.avatarKind,
+            avatarValue: user.avatarValue,
+            initials: user.initials,
+            role: user.primaryRole,
+            radius: 30,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(user.fullName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.heading3.copyWith(fontSize: 18)),
+                const SizedBox(height: 2),
+                Text(roleLabel, style: AppTextStyles.bodySmall),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: AppColors.textTertiary),
+        ],
       ),
     );
   }

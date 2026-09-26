@@ -8,7 +8,7 @@ Maps §4 of the brief onto concrete screens, state, and data. Each section notes
 - **Client record ≠ user account.** The domain identity is a **`person`**. A person may link to an `auth.users` account or not. Elderly / 1-on-1 PT clients never open the app; staff operate their profile, program, and history on their behalf.
 - **App-client onboarding:** coach/physio adds the client → sends an invite → client downloads → creates a profile with basic info → linked to their coach.
 
-**UI:** staff "Clients" tab lists persons; tapping opens the record. An "Invite" action generates a link/code. The invited client's signup binds their new account to the pre-existing person row.
+**UI:** staff "Clients" tab lists users_data; tapping opens the record. An "Invite" action generates a link/code. The invited client's signup binds their new account to the pre-existing person row.
 
 ## 4.2 Exercise library (coach-owned) → `features/exercises` · CP1
 
@@ -102,4 +102,4 @@ The shared coach/physio record and the screening-vs-clinical split live in the C
 
 ## Data model touchpoints
 
-Every screen above reads/writes tables defined in [`Lynx-backend/docs/00-data-model.md`](../../Lynx-backend/docs/00-data-model.md). The load-bearing ones for v1: `persons`, `exercises`, `programs`/`sessions`/`session_exercises`, `assignments` (+ instance sessions/exercises), `logged_entries`, `health_flags`, `groups`.
+Every screen above reads/writes tables defined in [`Lynx-backend/docs/00-data-model.md`](../../Lynx-backend/docs/00-data-model.md). The load-bearing ones for v1: `users_data`, `exercises`, `programs`/`sessions`/`session_exercises`, `assignments` (+ instance sessions/exercises), `logged_entries`, `health_flags`, `groups`.

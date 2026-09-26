@@ -19,7 +19,7 @@ supabase status          # shows API URL + keys
 # Studio: http://localhost:55323   API: http://127.0.0.1:55321
 ```
 
-Migrations applied at CP0: `tenants` (+ Lynx Center seed), `persons`, `person_roles`, the RLS helper functions, and tenant-isolation policies. CP1 adds `exercises`, `tags`, `exercise_tags`. See `../Lynx-backend/docs/`.
+Migrations applied at CP0: `tenants` (+ Lynx Center seed), `users_data`, `person_roles`, the RLS helper functions, and tenant-isolation policies. CP1 adds `exercises`, `tags`, `exercise_tags`. See `../Lynx-backend/docs/`.
 
 > **After adding a new migration**, `supabase start` alone won't apply it to an existing local DB volume — run `supabase db reset` (recreates the DB from all migrations + seed).
 
@@ -52,7 +52,7 @@ The app resolves the signed-in user to a `person` (tenant + roles) and shows:
 - **staff** (owner/coach/physio) → Clients · Library · Review · Profile
 - **authenticated but no linked person** → "finish setup" screen
 
-To actually land in a shell you need a linked person. For local testing: create a user in Studio (`http://localhost:55323` → Authentication), then in SQL insert a `persons` row with that `auth_user_id` under the Lynx tenant and a `person_roles` row (e.g. `coach`). Without a link you'll (correctly) see the finish-setup screen.
+To actually land in a shell you need a linked person. For local testing: create a user in Studio (`http://localhost:55323` → Authentication), then in SQL insert a `users_data` row with that `auth_user_id` under the Lynx tenant and a `person_roles` row (e.g. `coach`). Without a link you'll (correctly) see the finish-setup screen.
 
 ## What's implemented in CP0
 

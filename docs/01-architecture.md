@@ -108,7 +108,7 @@ This is the model decision that "touches everything." Concretely:
 - The unit of identity in the domain is a **`person`** (client record), which *may* be linked to an `auth.users` account, or may not.
 - All training data (assignments, logged entries, history) references `person_id`, **never** `auth.uid()` directly.
 - A logging action can originate from the client themselves *or* from a coach acting on the person's behalf; both write the same `logged_entries` rows attributed to the same `person_id`.
-- RLS resolves "which persons can I see/act on" via the staff's role + assignment, not via ownership of the account. Detail in [backend security doc](../../Lynx-backend/docs/01-security-and-rls.md).
+- RLS resolves "which users_data can I see/act on" via the staff's role + assignment, not via ownership of the account. Detail in [backend security doc](../../Lynx-backend/docs/01-security-and-rls.md).
 
 ## Configuration & flavors
 

@@ -27,7 +27,7 @@ Checkpoints are ordered by dependency, not by calendar. The brief is explicit th
 - **Auth: email + password with OTP** email verification & OTP password reset (6-digit codes, no magic-link deep links); Google/Apple SSO wired but **gated off** (`--dart-define=ENABLE_SSO=true`); `currentUserProvider` reads **role + `tenant_id`**; router redirects by role and to a "finish setup / accept invite" screen when no `person` is linked yet.
 - **Tenant-aware repositories**: base repository pattern scopes every query to `current tenant_id`.
 
-**Backend** → CP-B0: `supabase init`, seed **tenant #1 (Lynx Center)**, enable the **email provider** with OTP email templates surfacing `{{ .Token }}` (Google/Apple added when SSO is switched on), and the identity core (`tenants`, `persons` + `tenant_id`, `person_roles`) with **tenant-isolation RLS**.
+**Backend** → CP-B0: `supabase init`, seed **tenant #1 (Lynx Center)**, enable the **email provider** with OTP email templates surfacing `{{ .Token }}` (Google/Apple added when SSO is switched on), and the identity core (`tenants`, `users_data` + `tenant_id`, `person_roles`) with **tenant-isolation RLS**.
 
 **Website** (`Lynx-website`) — ✅ done this round: top-right **Log in** button + profile menu, login modal with Google/Apple/magic-link (EN + SL), sharing this backend. Fill `assets/js/config.js` with the Supabase URL + publishable key and it goes live ([website auth-setup](../../Lynx-website/docs/auth-setup.md)).
 
@@ -160,6 +160,7 @@ Checkpoints are ordered by dependency, not by calendar. The brief is explicit th
 > - ✅ **Dark mode** (light + dark, semantic `AppColors`) — beyond original scope.
 > - ✅ **Auth → OTP** (email verification + password reset), removing magic-link deep-link fragility.
 > - ✅ **GDPR consent-copy draft** (`08-gdpr-consent-draft.md`); backend **seed/demo data** (`supabase/seed.sql`, `scripts/seed_test_data.sql`).
+> - ✅ **Profiles & avatars** — customizable DiceBear (notionists) avatar builder or photo upload, role-colored, shown app-wide; settings profile header; **first-run onboarding** (name/avatar/DOB). Spine table renamed `users_data` → `users_data`.
 >
 > **Left**
 > - ⬜ **Tests:** repository unit tests for the training-engine data layer; **golden tests** for the daily-loop screens (only render tests exist today — `test/render/`).

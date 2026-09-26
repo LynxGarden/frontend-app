@@ -151,6 +151,105 @@ class AppLocalizationsEn extends AppLocalizations {
   String get category => 'Category';
 
   @override
+  String get profileSettings => 'Profile settings';
+
+  @override
+  String get editProfile => 'Edit profile';
+
+  @override
+  String get firstName => 'First name';
+
+  @override
+  String get lastName => 'Last name';
+
+  @override
+  String get dateOfBirth => 'Date of birth';
+
+  @override
+  String get notSet => 'Not set';
+
+  @override
+  String get avatar => 'Avatar';
+
+  @override
+  String get chooseAvatar => 'Choose avatar';
+
+  @override
+  String get buildAvatar => 'Build avatar';
+
+  @override
+  String get editAvatar => 'Edit avatar';
+
+  @override
+  String get uploadPhoto => 'Upload photo';
+
+  @override
+  String get removePhoto => 'Remove';
+
+  @override
+  String get shuffle => 'Shuffle';
+
+  @override
+  String get saveAvatar => 'Save avatar';
+
+  @override
+  String get avNone => 'None';
+
+  @override
+  String get avHair => 'Hair';
+
+  @override
+  String get avEyes => 'Eyes';
+
+  @override
+  String get avEyebrows => 'Eyebrows';
+
+  @override
+  String get avMouth => 'Mouth';
+
+  @override
+  String get avNose => 'Nose';
+
+  @override
+  String get avGlasses => 'Glasses';
+
+  @override
+  String get avBeard => 'Beard';
+
+  @override
+  String get avClothing => 'Clothing';
+
+  @override
+  String get onboardingNameTitle => 'What\'s your name?';
+
+  @override
+  String get onboardingNameSubtitle =>
+      'This is how you\'ll appear to your coach and clients.';
+
+  @override
+  String get onboardingAvatarTitle => 'Pick an avatar';
+
+  @override
+  String get onboardingAvatarSubtitle =>
+      'Build one or upload a photo. You can change it anytime.';
+
+  @override
+  String get onboardingDobTitle => 'Your date of birth';
+
+  @override
+  String get onboardingDobSubtitle =>
+      'Optional — helps your coach tailor your training.';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get finish => 'Finish';
+
+  @override
+  String get next => 'Next';
+
+  @override
   String get save => 'Save';
 
   @override
@@ -301,12 +400,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newClient => 'New client';
-
-  @override
-  String get firstName => 'First name';
-
-  @override
-  String get lastName => 'Last name';
 
   @override
   String get phone => 'Phone';

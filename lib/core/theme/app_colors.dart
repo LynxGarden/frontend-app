@@ -75,4 +75,16 @@ class AppColors {
   static Color get warning => dark ? const Color(0xFFE0A64D) : const Color(0xFFB26A00);
   static Color get error => dark ? const Color(0xFFE5645B) : const Color(0xFFB3261E);
   static Color get info => primary;
+
+  // --- avatar role backgrounds/rings ----------------------------------------
+  // The disc stays LIGHT in both themes so black line-art avatars + initials
+  // read; role is conveyed by a subtle tinted fill and a strong colored ring.
+  static Color get avatarClientBg => const Color(0xFFE6EEE9); // pale sage
+  static Color get avatarCoachBg => const Color(0xFFF2E7DF); // pale clay
+  static Color get avatarPhysioBg => const Color(0xFFDDEBEA); // pale teal
+  static Color get avatarClientRing => dark ? const Color(0xFF3E8F63) : forest;
+  static Color get avatarCoachRing =>
+      dark ? const Color(0xFFC9744E) : const Color(0xFF9A4A2C);
+  static Color get avatarPhysioRing =>
+      dark ? const Color(0xFF4F9E98) : const Color(0xFF2E6E6A);
 }

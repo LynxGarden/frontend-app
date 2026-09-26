@@ -11,7 +11,9 @@ import 'package:lynx_app/features/clients/presentation/add_client_screen.dart';
 import 'package:lynx_app/features/clients/presentation/client_detail_screen.dart';
 import 'package:lynx_app/features/clients/providers/clients_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/models/app_user.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
+import 'package:lynx_app/shared/widgets/app_avatar.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/collapsing_header.dart';
@@ -156,10 +158,11 @@ class _ClientCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: ListTile(
         onTap: onTap,
-        leading: CircleAvatar(
-          backgroundColor: AppColors.primary,
-          child: Text(client.initials,
-              style: AppTextStyles.button.copyWith(color: AppColors.onPrimary)),
+        leading: AppAvatar(
+          avatarKind: client.avatarKind,
+          avatarValue: client.avatarValue,
+          initials: client.initials,
+          role: AppRole.client,
         ),
         title: Text(client.fullName,
             maxLines: 1,

@@ -380,6 +380,198 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get category;
 
+  /// No description provided for @profileSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile settings'**
+  String get profileSettings;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get editProfile;
+
+  /// No description provided for @firstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get firstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get lastName;
+
+  /// No description provided for @dateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get dateOfBirth;
+
+  /// No description provided for @notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get notSet;
+
+  /// No description provided for @avatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar'**
+  String get avatar;
+
+  /// No description provided for @chooseAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose avatar'**
+  String get chooseAvatar;
+
+  /// No description provided for @buildAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Build avatar'**
+  String get buildAvatar;
+
+  /// No description provided for @editAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit avatar'**
+  String get editAvatar;
+
+  /// No description provided for @uploadPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload photo'**
+  String get uploadPhoto;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removePhoto;
+
+  /// No description provided for @shuffle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle'**
+  String get shuffle;
+
+  /// No description provided for @saveAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Save avatar'**
+  String get saveAvatar;
+
+  /// No description provided for @avNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get avNone;
+
+  /// No description provided for @avHair.
+  ///
+  /// In en, this message translates to:
+  /// **'Hair'**
+  String get avHair;
+
+  /// No description provided for @avEyes.
+  ///
+  /// In en, this message translates to:
+  /// **'Eyes'**
+  String get avEyes;
+
+  /// No description provided for @avEyebrows.
+  ///
+  /// In en, this message translates to:
+  /// **'Eyebrows'**
+  String get avEyebrows;
+
+  /// No description provided for @avMouth.
+  ///
+  /// In en, this message translates to:
+  /// **'Mouth'**
+  String get avMouth;
+
+  /// No description provided for @avNose.
+  ///
+  /// In en, this message translates to:
+  /// **'Nose'**
+  String get avNose;
+
+  /// No description provided for @avGlasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Glasses'**
+  String get avGlasses;
+
+  /// No description provided for @avBeard.
+  ///
+  /// In en, this message translates to:
+  /// **'Beard'**
+  String get avBeard;
+
+  /// No description provided for @avClothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Clothing'**
+  String get avClothing;
+
+  /// No description provided for @onboardingNameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s your name?'**
+  String get onboardingNameTitle;
+
+  /// No description provided for @onboardingNameSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This is how you\'ll appear to your coach and clients.'**
+  String get onboardingNameSubtitle;
+
+  /// No description provided for @onboardingAvatarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an avatar'**
+  String get onboardingAvatarTitle;
+
+  /// No description provided for @onboardingAvatarSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Build one or upload a photo. You can change it anytime.'**
+  String get onboardingAvatarSubtitle;
+
+  /// No description provided for @onboardingDobTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your date of birth'**
+  String get onboardingDobTitle;
+
+  /// No description provided for @onboardingDobSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — helps your coach tailor your training.'**
+  String get onboardingDobSubtitle;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @finish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get finish;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
   /// No description provided for @save.
   ///
   /// In en, this message translates to:
@@ -643,18 +835,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New client'**
   String get newClient;
-
-  /// No description provided for @firstName.
-  ///
-  /// In en, this message translates to:
-  /// **'First name'**
-  String get firstName;
-
-  /// No description provided for @lastName.
-  ///
-  /// In en, this message translates to:
-  /// **'Last name'**
-  String get lastName;
 
   /// No description provided for @phone.
   ///
