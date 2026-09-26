@@ -75,12 +75,30 @@ class ProgramRepository {
           .eq('tenant_id', tenantId)
           .eq('owner_id', ownerId)
           .eq('is_template', true)
+          .order('sort_order')
           .order('name');
       return (rows as List)
           .map((r) => Program.fromJson(Map<String, dynamic>.from(r as Map)))
           .toList();
     } catch (e) {
       throw AppException('Could not load your programs.', cause: e);
+    }
+  }
+
+  /// Persist a manual drag-to-reorder of the program list.
+  static Future<void> setProgramOrder({
+    required String tenantId,
+    required List<String> orderedIds,
+  }) async {
+    try {
+      for (var i = 0; i < orderedIds.length; i++) {
+        await _t('programs')
+            .update({'sort_order': i})
+            .eq('id', orderedIds[i])
+            .eq('tenant_id', tenantId);
+      }
+    } catch (e) {
+      throw AppException('Could not reorder programs.', cause: e);
     }
   }
 

@@ -51,6 +51,8 @@
   "searchExercises": "Išči vaje",
   "tags": "Oznake",
   "addTag": "Dodaj oznako",
+  "tagName": "Ime oznake",
+  "category": "Kategorija",
   "save": "Shrani",
   "delete": "Izbriši",
   "cancel": "Prekliči",

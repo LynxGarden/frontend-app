@@ -146,6 +146,12 @@ class AppLocalizationsSl extends AppLocalizations {
   String get addTag => 'Dodaj oznako';
 
   @override
+  String get tagName => 'Ime oznake';
+
+  @override
+  String get category => 'Kategorija';
+
+  @override
   String get save => 'Shrani';
 
   @override

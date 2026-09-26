@@ -145,6 +145,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addTag => 'Add tag';
 
   @override
+  String get tagName => 'Tag name';
+
+  @override
+  String get category => 'Category';
+
+  @override
   String get save => 'Save';
 
   @override

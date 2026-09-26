@@ -16,6 +16,7 @@ import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_button.dart';
+import 'package:lynx_app/shared/widgets/app_chip.dart';
 import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
@@ -44,11 +45,16 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
 
   bool get _isEdit => widget.exercise != null;
 
+  /// Name is required — Save stays disabled until it has non-whitespace text.
+  bool get _canSave => _name.text.trim().isNotEmpty;
+
   @override
   void initState() {
     super.initState();
     final e = widget.exercise;
-    _name = TextEditingController(text: e?.name ?? '');
+    _name = TextEditingController(text: e?.name ?? '')
+      ..addListener(() => setState(() {})); // toggles the Save button
+
     _description = TextEditingController(text: e?.description ?? '');
     _videoUrl = TextEditingController(text: e?.videoUrl ?? '');
     _videoStoragePath = e?.videoStoragePath;
@@ -212,6 +218,7 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
           Expanded(
             child: SafeArea(
               top: false,
+              bottom: false,
               child: Form(
                 key: _formKey,
                 child: ListView(
@@ -320,15 +327,26 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xxl),
-              AppButton(
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Pinned footer — Save stays visible above the scroll + keyboard.
+          Container(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+            ),
+            child: SafeArea(
+              top: false,
+              child: AppButton(
                 label: l.save,
                 isExpanded: true,
                 isLoading: _saving,
-                onPressed: _saving ? null : _save,
-              ),
-                  ],
-                ),
+                onPressed: (_saving || !_canSave) ? null : _save,
               ),
             ),
           ),
@@ -391,21 +409,33 @@ class _AddTagDialogState extends State<_AddTagDialog> {
     final l = AppLocalizations.of(context);
     return AlertDialog(
       backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
       title: Text(l.addTag, style: AppTextStyles.heading3),
       content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          DropdownButton<TagCategory>(
-            value: _category,
-            isExpanded: true,
-            onChanged: (c) => setState(() => _category = c ?? _category),
-            items: [
-              for (final c in TagCategory.values)
-                DropdownMenuItem(value: c, child: Text(tagCategoryLabel(l, c))),
-            ],
+          Text(
+            l.category.toUpperCase(),
+            style: AppTextStyles.label.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.sm),
-          AppTextField(label: l.tags, controller: _label, hintText: ''),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final c in TagCategory.values)
+                AppChip(
+                  label: tagCategoryLabel(l, c),
+                  selected: _category == c,
+                  onTap: () => setState(() => _category = c),
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppTextField(label: l.tagName, controller: _label, hintText: ''),
         ],
       ),
       actions: [

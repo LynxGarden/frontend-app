@@ -31,24 +31,30 @@ class AppNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final leading = showBack
+        ? _CircleButton(
+            icon: Icons.chevron_left,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              (onBack ?? () => Navigator.of(context).maybePop()).call();
+            },
+          )
+        : const SizedBox(width: 40);
+
     return SafeArea(
       bottom: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
             AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.sm),
-        child: Row(
+        // Stack (not Row) so the title is centered on the full width regardless
+        // of how wide the leading/trailing slots are (e.g. two trailing actions).
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            if (showBack)
-              _CircleButton(
-                icon: Icons.chevron_left,
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  (onBack ?? () => Navigator.of(context).maybePop()).call();
-                },
-              )
-            else
-              const SizedBox(width: 40),
-            Expanded(
+            // Horizontal inset keeps a long title from colliding with the
+            // buttons on either side.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl * 2),
               child: Text(
                 title,
                 textAlign: TextAlign.center,
@@ -57,7 +63,9 @@ class AppNavBar extends StatelessWidget {
                 style: AppTextStyles.heading3.copyWith(fontSize: 18),
               ),
             ),
-            trailing ?? const SizedBox(width: 40),
+            Align(alignment: Alignment.centerLeft, child: leading),
+            if (trailing != null)
+              Align(alignment: Alignment.centerRight, child: trailing!),
           ],
         ),
       ),

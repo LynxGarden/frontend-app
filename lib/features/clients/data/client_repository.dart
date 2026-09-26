@@ -18,12 +18,30 @@ class ClientRepository {
               'id, first_name, last_name, email, phone, lifecycle_stage, locale, auth_user_id, person_roles!inner(role)')
           .eq('tenant_id', tenantId)
           .eq('person_roles.role', 'client')
+          .order('sort_order')
           .order('first_name');
       return (rows as List)
           .map((r) => Client.fromJson(Map<String, dynamic>.from(r as Map)))
           .toList();
     } catch (e) {
       throw AppException('Could not load clients.', cause: e);
+    }
+  }
+
+  /// Persist a manual drag-to-reorder of the client list.
+  static Future<void> setClientOrder({
+    required String tenantId,
+    required List<String> orderedIds,
+  }) async {
+    try {
+      for (var i = 0; i < orderedIds.length; i++) {
+        await SupabaseClientWrapper.db('persons')
+            .update({'sort_order': i})
+            .eq('id', orderedIds[i])
+            .eq('tenant_id', tenantId);
+      }
+    } catch (e) {
+      throw AppException('Could not reorder clients.', cause: e);
     }
   }
 

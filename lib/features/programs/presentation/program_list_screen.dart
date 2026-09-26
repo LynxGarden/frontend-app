@@ -17,14 +17,41 @@ import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// The coach's program template library.
-class ProgramListScreen extends ConsumerWidget {
+class ProgramListScreen extends ConsumerStatefulWidget {
   const ProgramListScreen({super.key});
 
-  Future<void> _openEditor(BuildContext context, WidgetRef ref, String programId) async {
+  @override
+  ConsumerState<ProgramListScreen> createState() => _ProgramListScreenState();
+}
+
+class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
+  /// Local copy for optimistic drag-reorder; kept in sync with the provider.
+  List<Program>? _programs;
+
+  String get _tenantId =>
+      ref.read(currentUserProvider).valueOrNull?.tenantId ?? '';
+
+  Future<void> _openEditor(String programId) async {
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => ProgramEditorScreen(programId: programId)),
     );
     ref.invalidate(programTemplatesProvider);
+  }
+
+  Future<void> _reorder(int oldIndex, int newIndex) async {
+    final list = [...?_programs];
+    if (oldIndex < 0 || oldIndex >= list.length) return;
+    final item = list.removeAt(oldIndex);
+    list.insert(newIndex, item);
+    setState(() => _programs = list);
+    try {
+      await ProgramRepository.setProgramOrder(
+        tenantId: _tenantId,
+        orderedIds: list.map((p) => p.id).toList(),
+      );
+    } on AppException catch (e) {
+      if (mounted) AppToast.show(context, title: e.message, blur: false);
+    }
   }
 
   Future<void> _create(BuildContext context, WidgetRef ref) async {
@@ -55,16 +82,23 @@ class ProgramListScreen extends ConsumerWidget {
         name: name,
       );
       ref.invalidate(programTemplatesProvider);
-      if (context.mounted) await _openEditor(context, ref, id);
+      if (context.mounted) await _openEditor(id);
     } on AppException catch (e) {
       if (context.mounted) AppToast.show(context, title: e.message, blur: false);
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    // Keep the local (optimistically-reorderable) copy in sync with the provider.
+    ref.listen(programTemplatesProvider, (prev, next) {
+      next.whenData((p) {
+        if (mounted) setState(() => _programs = p);
+      });
+    });
     final programsAsync = ref.watch(programTemplatesProvider);
+    final programs = _programs;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -78,29 +112,35 @@ class ProgramListScreen extends ConsumerWidget {
         label: Text(l.newProgram),
       ),
       body: SafeArea(
-        child: programsAsync.when(
-          loading: () => const SkeletonList(),
-          error: (_, _) =>
-              Center(child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall)),
-          data: (programs) => programs.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
-                    child: Text(l.programsEmpty,
-                        textAlign: TextAlign.center, style: AppTextStyles.bodySmall),
-                  ),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 96),
-                  itemCount: programs.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (_, i) => _ProgramCard(
-                    program: programs[i],
-                    onTap: () => _openEditor(context, ref, programs[i].id),
-                  ),
-                ),
-        ),
+        child: programs == null && programsAsync.isLoading
+            ? const SkeletonList()
+            : programs == null && programsAsync.hasError
+                ? Center(
+                    child: Text(l.somethingWentWrong,
+                        style: AppTextStyles.bodySmall))
+                : (programs == null || programs.isEmpty)
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          child: Text(l.programsEmpty,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.bodySmall),
+                        ),
+                      )
+                    : ReorderableListView.builder(
+                        padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 96),
+                        itemCount: programs.length,
+                        onReorderItem: _reorder,
+                        itemBuilder: (_, i) => Padding(
+                          key: ValueKey(programs[i].id),
+                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                          child: _ProgramCard(
+                            program: programs[i],
+                            onTap: () => _openEditor(programs[i].id),
+                          ),
+                        ),
+                      ),
       ),
     );
   }

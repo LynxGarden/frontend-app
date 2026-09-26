@@ -23,7 +23,8 @@ class TrainingSession {
       ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
     return TrainingSession(
       id: json['id'] as String,
-      label: json['label'] as String,
+      // Null-tolerant: the shallow templates query selects `sessions(id)` only.
+      label: (json['label'] as String?) ?? '',
       orderIndex: (json['order_index'] as int?) ?? 0,
       exercises: exercises,
     );

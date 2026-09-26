@@ -368,6 +368,18 @@ abstract class AppLocalizations {
   /// **'Add tag'**
   String get addTag;
 
+  /// No description provided for @tagName.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag name'**
+  String get tagName;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
   /// No description provided for @save.
   ///
   /// In en, this message translates to:
