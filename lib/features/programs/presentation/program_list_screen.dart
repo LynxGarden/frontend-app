@@ -14,6 +14,7 @@ import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
+import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// The coach's program template library.
 class ProgramListScreen extends ConsumerWidget {
@@ -69,7 +70,8 @@ class ProgramListScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(title: Text(l.programsTitle, style: AppTextStyles.heading3)),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.forest,
+        heroTag: 'fab_programs',
+        backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         onPressed: () => _create(context, ref),
         icon: const Icon(Icons.add),
@@ -77,8 +79,7 @@ class ProgramListScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: programsAsync.when(
-          loading: () =>
-              const Center(child: CircularProgressIndicator(color: AppColors.forest)),
+          loading: () => const SkeletonList(),
           error: (_, _) =>
               Center(child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall)),
           data: (programs) => programs.isEmpty
@@ -121,7 +122,7 @@ class _ProgramCard extends StatelessWidget {
             style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
         subtitle: Text(l.sessionCount(program.sessionCount),
             style: AppTextStyles.bodySmall),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+        trailing: Icon(Icons.chevron_right, color: AppColors.textTertiary),
       ),
     );
   }

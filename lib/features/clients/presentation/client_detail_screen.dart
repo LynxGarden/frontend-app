@@ -86,7 +86,7 @@ class ClientDetailScreen extends ConsumerWidget {
             for (final p in templates)
               ListTile(
                 title: Text(p.name, style: AppTextStyles.body),
-                trailing: const Icon(Icons.add, color: AppColors.forest),
+                trailing: Icon(Icons.add, color: AppColors.primary),
                 onTap: () => Navigator.of(context).pop(p),
               ),
             const SizedBox(height: AppSpacing.md),
@@ -169,7 +169,7 @@ class ClientDetailScreen extends ConsumerWidget {
                     onPressed: () => _invite(context, ref),
                     child: Text(l.inviteToApp,
                         style: AppTextStyles.bodySmall
-                            .copyWith(color: AppColors.forest)),
+                            .copyWith(color: AppColors.primary)),
                   )
                 : null,
           ),
@@ -298,7 +298,7 @@ class _FlagRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 20),
+          Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 20),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
@@ -312,7 +312,7 @@ class _FlagRow extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, size: 18, color: AppColors.textTertiary),
+            icon: Icon(Icons.close, size: 18, color: AppColors.textTertiary),
             onPressed: onDelete,
           ),
         ],

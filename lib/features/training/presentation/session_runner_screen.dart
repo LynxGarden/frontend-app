@@ -86,11 +86,12 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
       backgroundColor: AppColors.background,
       floatingActionButton: (session != null && user != null)
           ? FloatingActionButton.extended(
-              backgroundColor: AppColors.forest,
+              heroTag: 'fab_session_runner',
+              backgroundColor: AppColors.primary,
               foregroundColor: AppColors.onPrimary,
               onPressed: _completing ? null : () => _complete(session),
               icon: _completing
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
@@ -105,8 +106,8 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
           AppNavBar(title: session?.label ?? '…'),
           Expanded(
             child: async.when(
-              loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppColors.forest)),
+              loading: () => Center(
+                  child: CircularProgressIndicator(color: AppColors.primary)),
               error: (_, _) => Center(
                   child: Text(l.somethingWentWrong,
                       style: AppTextStyles.bodySmall)),
@@ -281,7 +282,7 @@ class _ExerciseRunnerCardState extends ConsumerState<_ExerciseRunnerCard> {
                           .copyWith(fontWeight: FontWeight.w700, fontSize: 17)),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.swap_horiz, color: AppColors.forest),
+                  icon: Icon(Icons.swap_horiz, color: AppColors.primary),
                   tooltip: l.swapExercise,
                   onPressed: widget.onSwap,
                 ),
@@ -312,12 +313,12 @@ class _ExerciseRunnerCardState extends ConsumerState<_ExerciseRunnerCard> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.play_circle_outline,
-                        size: 18, color: AppColors.forest),
+                    Icon(Icons.play_circle_outline,
+                        size: 18, color: AppColors.primary),
                     const SizedBox(width: 6),
                     Text(l.watchVideo,
                         style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.forest,
+                            color: AppColors.primary,
                             fontWeight: FontWeight.w600)),
                   ],
                 ),
@@ -336,7 +337,7 @@ class _ExerciseRunnerCardState extends ConsumerState<_ExerciseRunnerCard> {
                   padding: const EdgeInsets.only(bottom: 2),
                   child: Row(
                     children: [
-                      const Icon(Icons.check, size: 15, color: AppColors.success),
+                      Icon(Icons.check, size: 15, color: AppColors.success),
                       const SizedBox(width: 6),
                       Text('${l.setN(s.setIndex)}: ${s.summary}',
                           style: AppTextStyles.bodySmall),
@@ -369,14 +370,14 @@ class _ExerciseRunnerCardState extends ConsumerState<_ExerciseRunnerCard> {
                   height: 48,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.forest,
+                      backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.onPrimary,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppRadius.md)),
                     ),
                     onPressed: _saving ? null : _logSet,
                     child: _saving
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(
@@ -442,7 +443,7 @@ class _LastTimeBlock extends StatelessWidget {
         children: [
           Text(l.lastTime.toUpperCase(),
               style: AppTextStyles.label.copyWith(
-                  color: AppColors.forest,
+                  color: AppColors.primary,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.4)),
           const SizedBox(height: 4),
@@ -516,7 +517,7 @@ class _NumField extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
-                borderSide: const BorderSide(color: AppColors.forest),
+                borderSide: BorderSide(color: AppColors.primary),
               ),
             ),
           ),

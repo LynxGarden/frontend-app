@@ -15,6 +15,7 @@ import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/collapsing_header.dart';
+import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// Staff Groups tab: list rosters, create a new one, drill into a group.
 class GroupsListScreen extends ConsumerStatefulWidget {
@@ -66,7 +67,8 @@ class _GroupsListScreenState extends ConsumerState<GroupsListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.forest,
+        heroTag: 'fab_groups',
+        backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         onPressed: _create,
         icon: const Icon(Icons.add),
@@ -78,11 +80,7 @@ class _GroupsListScreenState extends ConsumerState<GroupsListScreen> {
         slivers: [
           SliverCollapsingHeader(title: l.groupsTitle, controller: _scroll),
           async.when(
-            loading: () => const SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                  child: CircularProgressIndicator(color: AppColors.forest)),
-            ),
+            loading: () => const SliverSkeletonList(),
             error: (_, _) => SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
@@ -117,7 +115,7 @@ class _GroupsListScreenState extends ConsumerState<GroupsListScreen> {
                                 .copyWith(fontWeight: FontWeight.w600)),
                         subtitle: Text(l.memberCount(g.memberCount),
                             style: AppTextStyles.bodySmall),
-                        trailing: const Icon(Icons.chevron_right,
+                        trailing: Icon(Icons.chevron_right,
                             color: AppColors.textTertiary),
                         onTap: () {
                           HapticFeedback.selectionClick();
@@ -173,7 +171,7 @@ class _NewGroupDialogState extends State<_NewGroupDialog> {
         ),
         FilledButton(
           style: FilledButton.styleFrom(
-              backgroundColor: AppColors.forest, foregroundColor: AppColors.onPrimary),
+              backgroundColor: AppColors.primary, foregroundColor: AppColors.onPrimary),
           onPressed: () => Navigator.of(context).pop(_controller.text),
           child: Text(l.create),
         ),

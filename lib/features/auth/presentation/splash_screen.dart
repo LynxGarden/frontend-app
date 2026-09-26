@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lynx_app/core/theme/app_colors.dart';
-import 'package:lynx_app/core/theme/app_text_styles.dart';
-import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/supabase/supabase_client.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -51,7 +49,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       final session = SupabaseClientWrapper.auth.currentSession;
 
       if (session == null) {
-        if (mounted) context.go('/login');
+        if (mounted) context.go('/welcome');
         return;
       }
 
@@ -68,7 +66,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
       if (mounted) context.go('/app');
     } catch (_) {
-      if (mounted) context.go('/login');
+      if (mounted) context.go('/welcome');
     }
   }
 
@@ -79,16 +77,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-            child: Text(
-              'Lynx',
-              style: AppTextStyles.heading1.copyWith(
-                color: AppColors.primary,
-                fontSize: 44,
-                letterSpacing: -1,
-              ),
-            ),
+          child: Image.asset(
+            'assets/icons/logo.png',
+            width: 120,
+            height: 120,
           ),
         ),
       ),

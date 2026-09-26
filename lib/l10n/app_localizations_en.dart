@@ -547,4 +547,185 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoUploaded => 'Video uploaded';
+
+  @override
+  String get welcomeTagline => 'Train. Log. Progress.';
+
+  @override
+  String get welcomeSubtitle => 'Your training and physio, in one place.';
+
+  @override
+  String get getStarted => 'Create an account';
+
+  @override
+  String get welcomeTerms =>
+      'By continuing, you agree to our Terms of Service and Privacy Policy.';
+
+  @override
+  String get loginHeading => 'Welcome back';
+
+  @override
+  String get loginHeadingSub => 'Log in to continue.';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get passwordHint => 'Enter your password';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get noAccountPrompt => 'Don\'t have an account? ';
+
+  @override
+  String get signUpLink => 'Sign up';
+
+  @override
+  String get emailRequired => 'Email is required';
+
+  @override
+  String get passwordRequired => 'Password is required';
+
+  @override
+  String get incorrectCredentials => 'Incorrect email or password.';
+
+  @override
+  String get signupTitle => 'Create your account';
+
+  @override
+  String get signupSubtitle => 'Let\'s get you set up.';
+
+  @override
+  String get createPasswordHint => 'Create a password';
+
+  @override
+  String get repeatPasswordLabel => 'Repeat password';
+
+  @override
+  String get repeatPasswordHint => 'Confirm your password';
+
+  @override
+  String get passwordsDontMatch => 'Passwords don\'t match.';
+
+  @override
+  String get emailInUse => 'An account with this email already exists.';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get createAccountButton => 'Create account';
+
+  @override
+  String get verifyEmailTitle => 'Verify your email';
+
+  @override
+  String verifyEmailBody(String email) {
+    return 'Enter the 6-digit code we sent to $email.';
+  }
+
+  @override
+  String get resendCode => 'Resend code';
+
+  @override
+  String get codeResent => 'We sent a new code.';
+
+  @override
+  String get forgotTitle => 'Forgot password?';
+
+  @override
+  String get forgotBody => 'Enter your email and we\'ll send you a reset code.';
+
+  @override
+  String get sendResetCode => 'Send reset code';
+
+  @override
+  String get resetTitle => 'Reset password';
+
+  @override
+  String resetCodeBody(String email) {
+    return 'Enter the 6-digit code we sent to $email, then choose a new password.';
+  }
+
+  @override
+  String get newPasswordLabel => 'New password';
+
+  @override
+  String get resetSuccess => 'Password updated. Please log in.';
+
+  @override
+  String get backToLogin => 'Back to log in';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get secProfile => 'Profile';
+
+  @override
+  String get secGeneral => 'General';
+
+  @override
+  String get secSecurity => 'Security';
+
+  @override
+  String get secAccount => 'Account';
+
+  @override
+  String get roleLabel => 'Role';
+
+  @override
+  String get roleOwner => 'Owner';
+
+  @override
+  String get roleCoach => 'Coach';
+
+  @override
+  String get rolePhysio => 'Physio';
+
+  @override
+  String get roleClient => 'Client';
+
+  @override
+  String get changePassword => 'Change password';
+
+  @override
+  String get logoutTitle => 'Log out?';
+
+  @override
+  String get logoutBody => 'You\'ll need to sign in again to use the app.';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountTitle => 'Delete account?';
+
+  @override
+  String get deleteAccountBody =>
+      'This permanently deletes your account and all your data. This cannot be undone.';
+
+  @override
+  String get accountDeleted => 'Your account was deleted.';
+
+  @override
+  String get couldNotDeleteAccount =>
+      'Could not delete your account. Please try again.';
 }

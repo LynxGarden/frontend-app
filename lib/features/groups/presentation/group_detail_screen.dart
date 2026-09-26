@@ -57,7 +57,7 @@ class GroupDetailScreen extends ConsumerWidget {
             for (final c in candidates)
               ListTile(
                 title: Text(c.fullName, style: AppTextStyles.body),
-                trailing: const Icon(Icons.add, color: AppColors.forest),
+                trailing: Icon(Icons.add, color: AppColors.primary),
                 onTap: () => Navigator.of(context).pop(c.id),
               ),
             const SizedBox(height: AppSpacing.md),
@@ -114,7 +114,7 @@ class GroupDetailScreen extends ConsumerWidget {
             for (final p in templates)
               ListTile(
                 title: Text(p.name, style: AppTextStyles.body),
-                trailing: const Icon(Icons.add, color: AppColors.forest),
+                trailing: Icon(Icons.add, color: AppColors.primary),
                 onTap: () => Navigator.of(context).pop(p),
               ),
             const SizedBox(height: AppSpacing.md),
@@ -175,7 +175,8 @@ class GroupDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.forest,
+        heroTag: 'fab_group_detail',
+        backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         onPressed: () => _assign(context, ref),
         icon: const Icon(Icons.assignment_outlined),
@@ -209,7 +210,7 @@ class GroupDetailScreen extends ConsumerWidget {
                     onTap: () => _addMember(context, ref),
                     child: Text('+ ${l.addMember}',
                         style: AppTextStyles.bodySmall
-                            .copyWith(color: AppColors.forest, fontWeight: FontWeight.w600)),
+                            .copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
@@ -217,8 +218,8 @@ class GroupDetailScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.sm),
             Expanded(
               child: membersAsync.when(
-                loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppColors.forest)),
+                loading: () => Center(
+                    child: CircularProgressIndicator(color: AppColors.primary)),
                 error: (_, _) => Center(
                     child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall)),
                 data: (members) {
@@ -240,7 +241,7 @@ class GroupDetailScreen extends ConsumerWidget {
                         child: ListTile(
                           title: Text(m.name, style: AppTextStyles.body),
                           trailing: IconButton(
-                            icon: const Icon(Icons.close, color: AppColors.textTertiary),
+                            icon: Icon(Icons.close, color: AppColors.textTertiary),
                             tooltip: l.remove,
                             onPressed: () => _removeMember(context, ref, m.id),
                           ),

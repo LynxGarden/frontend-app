@@ -24,4 +24,10 @@ class RevenueCatService {
 
   /// No-op — nothing to restore.
   static Future<void> restore() async {}
+
+  /// No-op — clear the RevenueCat identity on logout/account deletion so the
+  /// next user doesn't inherit this one's entitlements.
+  static Future<void> logOut() async {
+    // TODO: Purchases.logOut()
+  }
 }

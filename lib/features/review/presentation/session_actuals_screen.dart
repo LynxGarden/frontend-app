@@ -35,8 +35,8 @@ class SessionActualsScreen extends ConsumerWidget {
           AppNavBar(title: title),
           Expanded(
             child: async.when(
-              loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppColors.forest)),
+              loading: () => Center(
+                  child: CircularProgressIndicator(color: AppColors.primary)),
               error: (_, _) => Center(
                   child: Text(l.somethingWentWrong,
                       style: AppTextStyles.bodySmall)),

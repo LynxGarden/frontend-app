@@ -195,7 +195,8 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.forest,
+        heroTag: 'fab_program_editor',
+        backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         onPressed: _addSession,
         icon: const Icon(Icons.add),
@@ -223,8 +224,8 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
           ),
           Expanded(
             child: _loading
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.forest))
+                ? Center(
+                    child: CircularProgressIndicator(color: AppColors.primary))
                 : program == null
                     ? Center(
                         child: Text(l.somethingWentWrong,

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:lynx_app/features/profile/presentation/profile_screen.dart';
+import 'package:lynx_app/features/settings/presentation/settings_screen.dart';
 import 'package:lynx_app/features/training/presentation/train_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/feature_placeholder.dart';
 import 'package:lynx_app/shared/widgets/main_shell.dart';
 
-/// Tabs a client sees: Train · Progress · Profile.
+/// Tabs a client sees: Train · Progress · Settings.
 class ClientShell extends StatelessWidget {
   const ClientShell({super.key});
 
@@ -31,10 +31,10 @@ class ClientShell extends StatelessWidget {
           ),
         ),
         ShellTab(
-          label: l.navProfile,
-          sfSymbol: 'person',
-          materialIcon: Icons.person_outline,
-          screen: const ProfileScreen(),
+          label: l.navSettings,
+          sfSymbol: 'gearshape',
+          materialIcon: Icons.settings_outlined,
+          screen: const SettingsScreen(),
         ),
       ],
     );

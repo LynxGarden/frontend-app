@@ -138,8 +138,10 @@ lib/
 
 ## Features (checkpoints; all CP0–CP5 delivered, CP6 = launch hardening in progress)
 
-1. **Auth** — email **OTP** (6-digit code, no magic-link deep links) + optional
-   Google/Apple SSO (gated off via `--dart-define=ENABLE_SSO=true`). `features/auth`.
+1. **Auth** — **email + password** with **OTP** email verification + **OTP**
+   password reset (6-digit codes, no magic-link deep links). Welcome → login /
+   signup / verify-email / forgot-password / reset-password. Optional Google/Apple
+   SSO gated off via `--dart-define=ENABLE_SSO=true`. `features/auth`.
 2. **Exercise library** (CP1) — coach-owned, tag-faceted, link-based video. `features/exercises`.
 3. **Program builder** (CP2) — programs = ordered sessions of prescribed exercises;
    templates. No calendar. `features/programs`.
@@ -218,6 +220,18 @@ SECURITY DEFINER RPCs (clients can't write staff-only rows): `assign_template`,
 12. **Code generation** — run `dart run build_runner build` after adding/editing Riverpod-annotated providers or Freezed models
 13. **No backend/SQL work in this repo** — schema/migration/edge-function changes go through the official Supabase agent skills (`npx skills add supabase/agent-skills`), not through Claude editing this codebase directly
 14. **Docs are part of every feature (fumadocs)** — no feature is "done" until its fumadocs page exists and is current. Whenever you build or change a feature, add/update the matching fumadocs MDX page (frontend feature, screen, flow, or backend table/RPC/RLS) in the same change set as the code — never as a follow-up. This applies retroactively too: backfill docs for anything already built but undocumented. Keep the fumadocs pages the single source of truth for how a feature works; the `fumadocs-doc-sync` skill flags drift and the `docs-deploy` skill publishes.
+15. **Dark mode is part of every feature.** The app ships **light + dark**
+   (forest-on-cream ↔ a flipped deep-forest dark theme). Every screen/widget must
+   look right in both. Drive all colors through the **`AppColors` semantic
+   getters** (`background`, `surface`, `surfaceBorder`, `textPrimary`,
+   `textSecondary`, `textTertiary`, `primary`, `onPrimary`, `success`, `error`,
+   …) — these resolve against `AppColors.dark` at build time. **Never hardcode
+   `Colors.white`/`Colors.black`/hex for surfaces or text**, and avoid the raw
+   brand tokens (`AppColors.forest`, `cream`, `ink`) for adaptive UI — use the
+   semantic getters so it flips. Any **new** semantic color must define a dark
+   value in `app_colors.dart`. Theme mode is user-selectable in Settings
+   (`themeModeProvider`, System/Light/Dark) and persisted. Because the getters
+   aren't `const`, don't wrap color-bearing widgets in `const`.
 
 ## UI Styling Patterns & Conventions
 

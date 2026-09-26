@@ -125,7 +125,8 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.forest,
+        heroTag: 'fab_session_editor',
+        backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         onPressed: _addExercise,
         icon: const Icon(Icons.add),
@@ -136,8 +137,8 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
           AppNavBar(title: session?.label ?? '…'),
           Expanded(
             child: loading
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.forest))
+                ? Center(
+                    child: CircularProgressIndicator(color: AppColors.primary))
                 : session == null
                     ? Center(
                         child: Text(l.somethingWentWrong,
@@ -211,11 +212,11 @@ class _ExerciseCard extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.edit_outlined, color: AppColors.forest),
+              icon: Icon(Icons.edit_outlined, color: AppColors.primary),
               onPressed: onEdit,
             ),
             IconButton(
-              icon: const Icon(Icons.close, color: AppColors.textTertiary),
+              icon: Icon(Icons.close, color: AppColors.textTertiary),
               tooltip: l.remove,
               onPressed: onRemove,
             ),

@@ -40,8 +40,8 @@ class _ExercisePicker extends ConsumerWidget {
           ),
           Expanded(
             child: exercisesAsync.when(
-              loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppColors.forest)),
+              loading: () => Center(
+                  child: CircularProgressIndicator(color: AppColors.primary)),
               error: (_, _) => Center(
                   child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall)),
               data: (items) => items.isEmpty
@@ -59,7 +59,7 @@ class _ExercisePicker extends ConsumerWidget {
                             ? null
                             : Text(items[i].tags.map((t) => t.label).join(' · '),
                                 style: AppTextStyles.bodySmall),
-                        trailing: const Icon(Icons.add, color: AppColors.forest),
+                        trailing: Icon(Icons.add, color: AppColors.primary),
                         onTap: () => Navigator.of(context).pop(items[i]),
                       ),
                     ),

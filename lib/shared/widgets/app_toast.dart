@@ -178,7 +178,7 @@ class _AppToastWidgetState extends State<_AppToastWidget>
                             GestureDetector(
                               onTap: _dismiss,
                               behavior: HitTestBehavior.opaque,
-                              child: const Padding(
+                              child: Padding(
                                 padding: EdgeInsets.all(4),
                                 child: Icon(Icons.close, size: 18, color: AppColors.textSecondary),
                               ),

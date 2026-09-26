@@ -6,20 +6,28 @@ import 'app_text_styles.dart';
 class AppTheme {
   AppTheme._();
 
-  /// The Lynx theme — light, forest-on-cream.
-  static ThemeData get light {
+  /// Light theme (default) — used directly by the error/setup page.
+  static ThemeData get light => build(dark: false);
+
+  /// Dark theme — the flipped brand (deep forest background, cream text).
+  static ThemeData get dark => build(dark: true);
+
+  /// Builds the theme for the given brightness. Reads `AppColors.*`, which
+  /// `MyApp` has already resolved to the same [dark] value before calling this.
+  static ThemeData build({required bool dark}) {
     return ThemeData(
-      brightness: Brightness.light,
+      brightness: dark ? Brightness.dark : Brightness.light,
       scaffoldBackgroundColor: AppColors.background,
       primaryColor: AppColors.primary,
-      colorScheme: const ColorScheme.light(
+      colorScheme: ColorScheme(
+        brightness: dark ? Brightness.dark : Brightness.light,
         primary: AppColors.primary,
-        secondary: AppColors.forestHover,
-        surface: AppColors.surface,
-        error: AppColors.error,
         onPrimary: AppColors.onPrimary,
+        secondary: AppColors.forestHover,
         onSecondary: AppColors.onPrimary,
+        surface: AppColors.surface,
         onSurface: AppColors.textPrimary,
+        error: AppColors.error,
         onError: Colors.white,
       ),
 
@@ -46,13 +54,14 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        titleTextStyle: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary),
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        titleTextStyle:
+            AppTextStyles.heading3.copyWith(color: AppColors.textPrimary),
+        iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
 
-      bottomSheetTheme: const BottomSheetThemeData(
+      bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
         ),
         modalBarrierColor: Colors.black54,
@@ -68,23 +77,23 @@ class AppTheme {
         hintStyle: AppTextStyles.body.copyWith(color: AppColors.textTertiary),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(color: AppColors.surfaceBorder),
+          borderSide: BorderSide(color: AppColors.surfaceBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(color: AppColors.surfaceBorder),
+          borderSide: BorderSide(color: AppColors.surfaceBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(color: AppColors.error),
+          borderSide: BorderSide(color: AppColors.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+          borderSide: BorderSide(color: AppColors.error, width: 1.5),
         ),
         errorStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
       ),

@@ -83,7 +83,6 @@ dependencies:
   # Localization — the app ships in English + Slovenian.
   flutter_localizations:
     sdk: flutter
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

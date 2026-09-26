@@ -6,11 +6,12 @@ import 'package:lynx_app/core/supabase/supabase_client.dart';
 
 // Auth screens
 import 'package:lynx_app/features/auth/presentation/splash_screen.dart';
+import 'package:lynx_app/features/auth/presentation/welcome_screen.dart';
 import 'package:lynx_app/features/auth/presentation/login_screen.dart';
 import 'package:lynx_app/features/auth/presentation/signup_screen.dart';
+import 'package:lynx_app/features/auth/presentation/verify_email_screen.dart';
 import 'package:lynx_app/features/auth/presentation/forgot_password_screen.dart';
-import 'package:lynx_app/features/auth/presentation/check_email_screen.dart';
-import 'package:lynx_app/features/auth/presentation/verification_successful_screen.dart';
+import 'package:lynx_app/features/auth/presentation/reset_password_screen.dart';
 import 'package:lynx_app/features/auth/presentation/change_password_screen.dart';
 
 // App screens
@@ -30,11 +31,11 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 class _AuthNotifier extends ChangeNotifier {
   _AuthNotifier() {
     SupabaseClientWrapper.auth.onAuthStateChange.listen((data) {
-      // A password-reset deep link makes Supabase emit `passwordRecovery`
-      // (with a temporary session). Latch it so the redirect below forces the
-      // user onto the reset screen instead of treating the recovery session
-      // as a normal sign-in and dropping them on /home. Cleared once the
-      // password is actually changed (`userUpdated`) or they sign out.
+      // Verifying a password-reset OTP emits `passwordRecovery` with a
+      // temporary session. Latch it so the redirect below pins the user on the
+      // reset screen instead of treating recovery as a normal sign-in (which
+      // would drop them into the app before they set a new password). Cleared
+      // once the password is changed (`userUpdated`) or they sign out.
       switch (data.event) {
         case AuthChangeEvent.passwordRecovery:
           isRecovering = true;
@@ -57,6 +58,16 @@ final _authNotifier = _AuthNotifier();
 // Router provider
 // ---------------------------------------------------------------------------
 
+/// Public (unauthenticated) auth routes.
+const _publicRoutes = <String>[
+  '/welcome',
+  '/login',
+  '/signup',
+  '/verify-email',
+  '/forgot-password',
+  '/reset-password',
+];
+
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
@@ -66,89 +77,53 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (BuildContext context, GoRouterState state) {
       final currentPath = state.matchedLocation;
 
-      // Allow splash to handle its own navigation.
+      // Splash resolves its own destination.
       if (currentPath == '/splash') return null;
 
       // Password recovery takes precedence: keep the user on the reset screen
-      // (reached via the /auth/reset-password deep link) until they set a new
-      // password, rather than bouncing the recovery session to /home.
+      // (where they verified the code) until the new password is set. Returning
+      // null preserves the `?email=` query param they arrived with.
       if (_authNotifier.isRecovering) {
-        return currentPath == '/auth/reset-password'
-            ? null
-            : '/auth/reset-password';
+        return currentPath == '/reset-password' ? null : '/reset-password';
       }
 
-      final session = SupabaseClientWrapper.auth.currentSession;
-      final isAuthenticated = session != null;
+      final isAuthenticated =
+          SupabaseClientWrapper.auth.currentSession != null;
+      final isPublicRoute = _publicRoutes.contains(currentPath);
 
-      // Recovery just finished (password changed → `userUpdated` cleared the
-      // flag): move off the reset screen into the app.
-      if (currentPath == '/auth/reset-password' && isAuthenticated) {
-        return '/app';
-      }
+      // Not authenticated → landing.
+      if (!isAuthenticated && !isPublicRoute) return '/welcome';
 
-      const publicRoutes = [
-        '/login',
-        '/signup',
-        '/forgot-password',
-        '/check-email',
-        '/verification-successful',
-      ];
-
-      final isPublicRoute = publicRoutes.contains(currentPath);
-
-      // Not authenticated → go to login.
-      if (!isAuthenticated && !isPublicRoute) return '/login';
-
-      // Authenticated but on a public auth route → go to splash to resolve.
+      // Authenticated but on an auth route → resolve via splash.
       if (isAuthenticated && isPublicRoute) return '/splash';
 
       return null;
     },
     routes: [
-      // ── Auth routes ────────────────────────────────────────────
+      // ── Auth ───────────────────────────────────────────────────
+      GoRoute(path: '/splash', builder: (c, s) => const SplashScreen()),
+      GoRoute(path: '/welcome', builder: (c, s) => const WelcomeScreen()),
+      GoRoute(path: '/login', builder: (c, s) => const LoginScreen()),
+      GoRoute(path: '/signup', builder: (c, s) => const SignupScreen()),
       GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/signup',
-        builder: (context, state) => const SignupScreen(),
+        path: '/verify-email',
+        builder: (c, s) =>
+            VerifyEmailScreen(email: s.uri.queryParameters['email'] ?? ''),
       ),
       GoRoute(
         path: '/forgot-password',
-        builder: (context, state) => const ForgotPasswordScreen(),
+        builder: (c, s) => const ForgotPasswordScreen(),
       ),
       GoRoute(
-        path: '/check-email',
-        builder: (context, state) {
-          final email = state.uri.queryParameters['email'] ?? '';
-          return CheckEmailScreen(email: email);
-        },
-      ),
-      GoRoute(
-        path: '/verification-successful',
-        builder: (context, state) => const VerificationSuccessfulScreen(),
-      ),
-      // Landing route for the password-reset deep link
-      // (`DeepLinkConfig.authCallback`). The `passwordRecovery` redirect above
-      // forces the user here; ChangePasswordScreen sets the new password.
-      GoRoute(
-        path: '/auth/reset-password',
-        builder: (context, state) => const ChangePasswordScreen(),
+        path: '/reset-password',
+        builder: (c, s) =>
+            ResetPasswordScreen(email: s.uri.queryParameters['email'] ?? ''),
       ),
 
       // ── Main app ───────────────────────────────────────────────
       // RootShell resolves the user's role/tenant and shows the client or
       // staff shell (or the finish-setup screen when not linked yet).
-      GoRoute(
-        path: '/app',
-        builder: (context, state) => const RootShell(),
-      ),
+      GoRoute(path: '/app', builder: (c, s) => const RootShell()),
 
       // ── Settings ───────────────────────────────────────────────
       GoRoute(
@@ -163,13 +138,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-
-      // TODO: Add more routes as needed.
-      // Example:
-      // GoRoute(
-      //   path: '/dates',
-      //   builder: (context, state) => const DatesScreen(),
-      // ),
     ],
   );
 });

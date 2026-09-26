@@ -10,6 +10,7 @@ import 'package:lynx_app/features/review/providers/review_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/collapsing_header.dart';
+import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// Staff Review tab: a recent feed of sessions clients have completed across the
 /// tenant (review-on-login). Tap one to see the actuals.
@@ -37,7 +38,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
-        color: AppColors.forest,
+        color: AppColors.primary,
         onRefresh: () => ref.refresh(reviewFeedProvider.future),
         child: CustomScrollView(
           controller: _scroll,
@@ -45,11 +46,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
           slivers: [
             SliverCollapsingHeader(title: l.reviewTitle, controller: _scroll),
             async.when(
-              loading: () => const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                    child: CircularProgressIndicator(color: AppColors.forest)),
-              ),
+              loading: () => const SliverSkeletonList(),
               error: (_, _) => SliverFillRemaining(
                 hasScrollBody: false,
                 child: Center(
@@ -71,7 +68,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.check_circle_outline,
+                            Icon(Icons.check_circle_outline,
                                 size: 44, color: AppColors.textTertiary),
                             const SizedBox(height: AppSpacing.md),
                             Text(l.reviewEmpty,
@@ -109,7 +106,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.bodySmall,
                           ),
-                          trailing: const Icon(Icons.chevron_right,
+                          trailing: Icon(Icons.chevron_right,
                               color: AppColors.textTertiary),
                           onTap: () {
                             HapticFeedback.selectionClick();

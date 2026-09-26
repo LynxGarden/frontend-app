@@ -37,9 +37,9 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
             final dx = bounds.width * (_controller.value * 2 - 0.5);
             return LinearGradient(
               colors: [
-                AppColors.surfaceLight,
-                AppColors.surfaceBorder,
-                AppColors.surfaceLight,
+                AppColors.skeletonBase,
+                AppColors.skeletonHighlight,
+                AppColors.skeletonBase,
               ],
               stops: const [0.35, 0.5, 0.65],
               begin: Alignment.centerLeft,
@@ -85,7 +85,7 @@ class SkeletonBox extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
+        color: AppColors.skeletonBase,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
     );

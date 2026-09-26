@@ -12,6 +12,7 @@ import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
 import 'package:lynx_app/features/programs/presentation/program_list_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
+import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// Coach exercise library: searchable list, tag filter, add/edit/delete.
 class ExerciseLibraryScreen extends ConsumerStatefulWidget {
@@ -81,15 +82,16 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const ProgramListScreen()),
             ),
-            icon: const Icon(Icons.dashboard_customize_outlined,
-                size: 18, color: AppColors.forest),
+            icon: Icon(Icons.dashboard_customize_outlined,
+                size: 18, color: AppColors.primary),
             label: Text(l.programsTitle,
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.forest)),
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary)),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.forest,
+        heroTag: 'fab_library',
+        backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         onPressed: () => _openEditor(),
         icon: const Icon(Icons.add),
@@ -120,8 +122,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
             ),
             Expanded(
               child: exercisesAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator(color: AppColors.forest)),
+                loading: () => const SkeletonList(),
                 error: (_, _) => Center(
                   child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall),
                 ),
@@ -202,10 +203,10 @@ class _TagFilterRow extends StatelessWidget {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
-            color: selected ? AppColors.forest : AppColors.surface,
+            color: selected ? AppColors.primary : AppColors.surface,
             borderRadius: BorderRadius.circular(99),
             border: Border.all(
-                color: selected ? AppColors.forest : AppColors.surfaceBorder),
+                color: selected ? AppColors.primary : AppColors.surfaceBorder),
           ),
           child: Text(
             label,
@@ -263,11 +264,11 @@ class _ExerciseTile extends StatelessWidget {
             ),
             if (exercise.hasVideo)
               IconButton(
-                icon: const Icon(Icons.play_circle_outline,
-                    color: AppColors.forest),
+                icon: Icon(Icons.play_circle_outline,
+                    color: AppColors.primary),
                 onPressed: onWatch,
               ),
-            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+            Icon(Icons.chevron_right, color: AppColors.textTertiary),
           ],
         ),
       ),

@@ -557,4 +557,187 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get videoUploaded => 'Video naložen';
+
+  @override
+  String get welcomeTagline => 'Treniraj. Beleži. Napreduj.';
+
+  @override
+  String get welcomeSubtitle => 'Tvoj trening in fizioterapija na enem mestu.';
+
+  @override
+  String get getStarted => 'Ustvari račun';
+
+  @override
+  String get welcomeTerms =>
+      'Z nadaljevanjem se strinjaš s Pogoji uporabe in Politiko zasebnosti.';
+
+  @override
+  String get loginHeading => 'Dobrodošel nazaj';
+
+  @override
+  String get loginHeadingSub => 'Prijavi se za nadaljevanje.';
+
+  @override
+  String get passwordLabel => 'Geslo';
+
+  @override
+  String get passwordHint => 'Vnesi geslo';
+
+  @override
+  String get forgotPassword => 'Pozabljeno geslo?';
+
+  @override
+  String get noAccountPrompt => 'Nimaš računa? ';
+
+  @override
+  String get signUpLink => 'Registracija';
+
+  @override
+  String get emailRequired => 'E-pošta je obvezna';
+
+  @override
+  String get passwordRequired => 'Geslo je obvezno';
+
+  @override
+  String get incorrectCredentials => 'Napačna e-pošta ali geslo.';
+
+  @override
+  String get signupTitle => 'Ustvari svoj račun';
+
+  @override
+  String get signupSubtitle => 'Pripravimo te.';
+
+  @override
+  String get createPasswordHint => 'Ustvari geslo';
+
+  @override
+  String get repeatPasswordLabel => 'Ponovi geslo';
+
+  @override
+  String get repeatPasswordHint => 'Potrdi geslo';
+
+  @override
+  String get passwordsDontMatch => 'Gesli se ne ujemata.';
+
+  @override
+  String get emailInUse => 'Račun s tem e-naslovom že obstaja.';
+
+  @override
+  String get alreadyHaveAccount => 'Že imaš račun? ';
+
+  @override
+  String get createAccountButton => 'Ustvari račun';
+
+  @override
+  String get verifyEmailTitle => 'Potrdi svoj e-naslov';
+
+  @override
+  String verifyEmailBody(String email) {
+    return 'Vnesi 6-mestno kodo, ki smo jo poslali na $email.';
+  }
+
+  @override
+  String get resendCode => 'Ponovno pošlji kodo';
+
+  @override
+  String get codeResent => 'Poslali smo novo kodo.';
+
+  @override
+  String get forgotTitle => 'Pozabljeno geslo?';
+
+  @override
+  String get forgotBody =>
+      'Vnesi e-pošto in poslali ti bomo kodo za ponastavitev.';
+
+  @override
+  String get sendResetCode => 'Pošlji kodo';
+
+  @override
+  String get resetTitle => 'Ponastavi geslo';
+
+  @override
+  String resetCodeBody(String email) {
+    return 'Vnesi 6-mestno kodo, ki smo jo poslali na $email, nato izberi novo geslo.';
+  }
+
+  @override
+  String get newPasswordLabel => 'Novo geslo';
+
+  @override
+  String get resetSuccess => 'Geslo posodobljeno. Prijavi se.';
+
+  @override
+  String get backToLogin => 'Nazaj na prijavo';
+
+  @override
+  String get settingsTitle => 'Nastavitve';
+
+  @override
+  String get navSettings => 'Nastavitve';
+
+  @override
+  String get appearance => 'Videz';
+
+  @override
+  String get themeSystem => 'Sistemsko';
+
+  @override
+  String get themeLight => 'Svetlo';
+
+  @override
+  String get themeDark => 'Temno';
+
+  @override
+  String get secProfile => 'Profil';
+
+  @override
+  String get secGeneral => 'Splošno';
+
+  @override
+  String get secSecurity => 'Varnost';
+
+  @override
+  String get secAccount => 'Račun';
+
+  @override
+  String get roleLabel => 'Vloga';
+
+  @override
+  String get roleOwner => 'Lastnik';
+
+  @override
+  String get roleCoach => 'Trener';
+
+  @override
+  String get rolePhysio => 'Fizioterapevt';
+
+  @override
+  String get roleClient => 'Stranka';
+
+  @override
+  String get changePassword => 'Spremeni geslo';
+
+  @override
+  String get logoutTitle => 'Odjava?';
+
+  @override
+  String get logoutBody =>
+      'Za uporabo aplikacije se boš moral znova prijaviti.';
+
+  @override
+  String get deleteAccount => 'Izbriši račun';
+
+  @override
+  String get deleteAccountTitle => 'Izbriši račun?';
+
+  @override
+  String get deleteAccountBody =>
+      'To trajno izbriše tvoj račun in vse tvoje podatke. Tega ni mogoče razveljaviti.';
+
+  @override
+  String get accountDeleted => 'Tvoj račun je bil izbrisan.';
+
+  @override
+  String get couldNotDeleteAccount =>
+      'Računa ni bilo mogoče izbrisati. Poskusi znova.';
 }

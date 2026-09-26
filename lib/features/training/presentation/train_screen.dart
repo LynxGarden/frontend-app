@@ -11,6 +11,7 @@ import 'package:lynx_app/features/training/providers/training_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/collapsing_header.dart';
+import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// The client's Train tab: their active program as a menu of sessions. Tapping a
 /// session opens the runner. The most-recently-completed session is badged.
@@ -38,7 +39,7 @@ class _TrainScreenState extends ConsumerState<TrainScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
-        color: AppColors.forest,
+        color: AppColors.primary,
         onRefresh: () => ref.refresh(activeAssignmentProvider.future),
         child: CustomScrollView(
           controller: _scroll,
@@ -46,11 +47,7 @@ class _TrainScreenState extends ConsumerState<TrainScreen> {
           slivers: [
             SliverCollapsingHeader(title: l.trainTitle, controller: _scroll),
             async.when(
-              loading: () => const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                    child: CircularProgressIndicator(color: AppColors.forest)),
-              ),
+              loading: () => const SliverTrainSkeleton(),
               error: (_, _) => SliverFillRemaining(
                 hasScrollBody: false,
                 child: _Message(
@@ -153,7 +150,7 @@ class _SessionCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+          Icon(Icons.chevron_right, color: AppColors.textTertiary),
         ],
       ),
     );
@@ -175,7 +172,7 @@ class _CompletedBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.check_circle, size: 13, color: AppColors.success),
+          Icon(Icons.check_circle, size: 13, color: AppColors.success),
           const SizedBox(width: 4),
           Text(
             l.completedBadge,
@@ -196,25 +193,27 @@ class _Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xl, AppSpacing.xxl * 2, AppSpacing.xl, AppSpacing.xl),
-          child: Column(
-            children: [
-              Icon(icon, size: 44, color: AppColors.textTertiary),
-              const SizedBox(height: AppSpacing.md),
-              Text(title,
-                  textAlign: TextAlign.center, style: AppTextStyles.heading3),
-              const SizedBox(height: AppSpacing.sm),
-              Text(body,
-                  textAlign: TextAlign.center, style: AppTextStyles.bodySmall),
-            ],
-          ),
+    // Non-scrolling: the enclosing CustomScrollView (with
+    // AlwaysScrollableScrollPhysics) owns scrolling and pull-to-refresh. Nesting
+    // a ListView inside SliverFillRemaining(hasScrollBody: false) creates a
+    // second viewport and trips the framework's `!semantics.parentDataDirty`
+    // assertion.
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 44, color: AppColors.textTertiary),
+            const SizedBox(height: AppSpacing.md),
+            Text(title,
+                textAlign: TextAlign.center, style: AppTextStyles.heading3),
+            const SizedBox(height: AppSpacing.sm),
+            Text(body,
+                textAlign: TextAlign.center, style: AppTextStyles.bodySmall),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

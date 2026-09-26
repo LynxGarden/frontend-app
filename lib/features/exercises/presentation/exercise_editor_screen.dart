@@ -256,7 +256,7 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.check_circle,
+                      Icon(Icons.check_circle,
                           size: 18, color: AppColors.success),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
@@ -352,10 +352,10 @@ class _TagChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? AppColors.forest : AppColors.surface,
+          color: selected ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(99),
           border: Border.all(
-            color: selected ? AppColors.forest : AppColors.surfaceBorder,
+            color: selected ? AppColors.primary : AppColors.surfaceBorder,
           ),
         ),
         child: Text(

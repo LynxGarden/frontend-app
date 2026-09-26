@@ -11,6 +11,7 @@ import 'package:lynx_app/features/clients/providers/clients_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/collapsing_header.dart';
+import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// Staff view of the tenant's clients.
 class ClientsListScreen extends ConsumerStatefulWidget {
@@ -51,7 +52,8 @@ class _ClientsListScreenState extends ConsumerState<ClientsListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.forest,
+        heroTag: 'fab_clients',
+        backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         onPressed: _add,
         icon: const Icon(Icons.person_add_alt_1),
@@ -63,11 +65,7 @@ class _ClientsListScreenState extends ConsumerState<ClientsListScreen> {
         slivers: [
           SliverCollapsingHeader(title: l.clientsTitle, controller: _scroll),
           clientsAsync.when(
-            loading: () => const SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                  child: CircularProgressIndicator(color: AppColors.forest)),
-            ),
+            loading: () => const SliverSkeletonCards(),
             error: (_, _) => SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
@@ -122,7 +120,7 @@ class _ClientCard extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         leading: CircleAvatar(
-          backgroundColor: AppColors.forest,
+          backgroundColor: AppColors.primary,
           child: Text(client.initials,
               style: AppTextStyles.button.copyWith(color: AppColors.onPrimary)),
         ),
@@ -134,7 +132,7 @@ class _ClientCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.bodySmall),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+        trailing: Icon(Icons.chevron_right, color: AppColors.textTertiary),
       ),
     );
   }

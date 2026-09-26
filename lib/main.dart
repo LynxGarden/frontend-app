@@ -3,11 +3,15 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:lynx_app/core/config/app_flavor.dart';
+import 'package:lynx_app/core/storage/local_storage_service.dart';
 import 'package:lynx_app/core/supabase/supabase_client.dart';
 import 'package:lynx_app/core/config/deeplink_config.dart';
+import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_theme.dart';
 import 'package:lynx_app/core/router/app_router.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/providers/locale_provider.dart';
+import 'package:lynx_app/shared/providers/theme_mode_provider.dart';
 
 /// Default entrypoint — resolves the flavor from `--dart-define=FLAVOR=`
 /// (defaults to dev). The flavored entrypoints (`main_dev.dart`,
@@ -23,6 +27,7 @@ Future<void> bootstrap(Flavor flavor) async {
   Object? initError;
   try {
     await dotenv.load(fileName: flavor.envFile);
+    await LocalStorageService.init();
     await SupabaseClientWrapper.init();
     DeepLinkConfig.debugPrintSummary();
 
@@ -55,19 +60,41 @@ class MyApp extends ConsumerWidget {
     }
 
     final router = ref.watch(routerProvider);
+    final locale = ref.watch(localeProvider);
+    final mode = ref.watch(themeModeProvider);
+
+    // Resolve the effective brightness (explicit override, or the OS for system)
+    // and flip the palette before the tree builds so every `AppColors.*` getter
+    // resolves to the right theme.
+    final platformDark = WidgetsBinding
+            .instance.platformDispatcher.platformBrightness ==
+        Brightness.dark;
+    final effectiveDark =
+        mode == ThemeMode.dark || (mode == ThemeMode.system && platformDark);
+    AppColors.dark = effectiveDark;
+
     return MaterialApp.router(
       title: 'Lynx',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
+      // We resolve brightness manually (above), so a single theme is supplied.
+      theme: AppTheme.build(dark: effectiveDark),
+      locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
       // Clamp accessibility text scaling so large-font settings can't overflow
       // fixed-height controls (steppers, pills, nav) across device sizes.
+      // Colors are read from `AppColors.*` statics (not `Theme.of`), so a theme
+      // toggle won't repaint on its own. Keying the subtree by brightness forces
+      // a full rebuild of the current screens (GoRouter keeps the location) so
+      // every widget re-reads the palette.
       builder: (context, child) => MediaQuery.withClampedTextScaling(
         minScaleFactor: 1.0,
         maxScaleFactor: 1.3,
-        child: child!,
+        child: KeyedSubtree(
+          key: ValueKey(effectiveDark),
+          child: child!,
+        ),
       ),
     );
   }

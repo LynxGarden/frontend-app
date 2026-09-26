@@ -48,6 +48,18 @@ class SupabaseClientWrapper {
   }) =>
       _client.rpc<T>(fn, params: params);
 
+  /// A realtime stream of rows from [table], emitting the current snapshot and
+  /// then re-emitting on every insert/update/delete (RLS-scoped to the caller).
+  ///
+  /// Usage: `SupabaseClientWrapper.stream('assignments', primaryKey: ['id'])
+  ///   .eq('person_id', id)`. Requires the table to be in the
+  /// `supabase_realtime` publication (backend migration).
+  static SupabaseStreamFilterBuilder stream(
+    String table, {
+    required List<String> primaryKey,
+  }) =>
+      _client.from(table).stream(primaryKey: primaryKey);
+
   /// Supabase Storage client (upload / download files).
   static SupabaseStorageClient get storage => _client.storage;
 

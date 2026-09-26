@@ -35,8 +35,8 @@ class ClientReviewScreen extends ConsumerWidget {
           AppNavBar(title: l.completedSessions),
           Expanded(
             child: async.when(
-              loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppColors.forest)),
+              loading: () => Center(
+                  child: CircularProgressIndicator(color: AppColors.primary)),
               error: (_, _) => Center(
                   child: Text(l.somethingWentWrong,
                       style: AppTextStyles.bodySmall)),
@@ -65,7 +65,7 @@ class ClientReviewScreen extends ConsumerWidget {
                         .formatFullDate(s.completedAt.toLocal()),
                     style: AppTextStyles.bodySmall,
                   ),
-                  trailing: const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+                  trailing: Icon(Icons.chevron_right, color: AppColors.textTertiary),
                   onTap: () {
                     HapticFeedback.selectionClick();
                     Navigator.of(context).push(MaterialPageRoute(

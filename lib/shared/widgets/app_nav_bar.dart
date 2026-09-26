@@ -83,7 +83,7 @@ class _CircleButton extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(color: AppColors.surfaceBorder),
         ),
-        child: Icon(icon, size: 22, color: AppColors.forest),
+        child: Icon(icon, size: 22, color: AppColors.primary),
       ),
     );
   }
@@ -119,7 +119,7 @@ class AppNavBarAction extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(color: AppColors.surfaceBorder),
         ),
-        child: Icon(icon, size: 20, color: tint ?? AppColors.forest),
+        child: Icon(icon, size: 20, color: tint ?? AppColors.primary),
       ),
     );
     return tooltip == null ? button : Tooltip(message: tooltip!, child: button);

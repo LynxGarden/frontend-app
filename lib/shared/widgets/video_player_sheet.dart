@@ -98,7 +98,7 @@ class _VideoPlayerViewState extends State<_VideoPlayerView> {
               VideoProgressIndicator(
                 _controller,
                 allowScrubbing: true,
-                colors: const VideoProgressColors(playedColor: AppColors.forest),
+                colors: VideoProgressColors(playedColor: AppColors.primary),
               ),
           ],
         ),
