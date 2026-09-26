@@ -126,7 +126,7 @@ class ReviewRepository {
     required Set<String> personIds,
   }) async {
     if (personIds.isEmpty) return const {};
-    final rows = await SupabaseClientWrapper.db('persons')
+    final rows = await SupabaseClientWrapper.db('users_data')
         .select('id, first_name, last_name')
         .eq('tenant_id', tenantId)
         .inFilter('id', personIds.toList());

@@ -62,7 +62,7 @@ class GroupRepository {
   }) async {
     try {
       final rows = await SupabaseClientWrapper.db('group_members')
-          .select('id, person_id, persons!inner(first_name, last_name)')
+          .select('id, person_id, users_data!inner(first_name, last_name)')
           .eq('tenant_id', tenantId)
           .eq('group_id', groupId);
       return (rows as List)

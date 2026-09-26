@@ -35,7 +35,7 @@ class GroupMember {
   final String name;
 
   factory GroupMember.fromJson(Map<String, dynamic> json) {
-    final p = json['persons'];
+    final p = json['users_data'];
     final name = p is Map
         ? [p['first_name'], p['last_name']]
             .whereType<String>()

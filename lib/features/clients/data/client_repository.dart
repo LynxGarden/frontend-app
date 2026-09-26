@@ -13,7 +13,7 @@ class ClientRepository {
   /// Clients (persons holding the client role) in the tenant.
   static Future<List<Client>> listClients(String tenantId) async {
     try {
-      final rows = await SupabaseClientWrapper.db('persons')
+      final rows = await SupabaseClientWrapper.db('users_data')
           .select(
               'id, first_name, last_name, email, phone, lifecycle_stage, locale, auth_user_id, person_roles!inner(role)')
           .eq('tenant_id', tenantId)
@@ -35,7 +35,7 @@ class ClientRepository {
   }) async {
     try {
       for (var i = 0; i < orderedIds.length; i++) {
-        await SupabaseClientWrapper.db('persons')
+        await SupabaseClientWrapper.db('users_data')
             .update({'sort_order': i})
             .eq('id', orderedIds[i])
             .eq('tenant_id', tenantId);
@@ -50,7 +50,7 @@ class ClientRepository {
     required String personId,
   }) async {
     try {
-      final row = await SupabaseClientWrapper.db('persons')
+      final row = await SupabaseClientWrapper.db('users_data')
           .select(
               'id, first_name, last_name, email, phone, lifecycle_stage, locale, auth_user_id')
           .eq('id', personId)
@@ -72,7 +72,7 @@ class ClientRepository {
     String? phone,
   }) async {
     try {
-      final person = await SupabaseClientWrapper.db('persons')
+      final person = await SupabaseClientWrapper.db('users_data')
           .insert({
             'tenant_id': tenantId,
             'first_name': firstName.trim(),

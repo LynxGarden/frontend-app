@@ -167,7 +167,7 @@ Schema + RLS live in `Lynx-backend` (migrations CP-B0…B5). Every domain table
 carries `tenant_id` (tenant-isolation RLS is the first predicate everywhere).
 Load-bearing tables:
 
-- `tenants`; `persons` (the spine — `auth_user_id` nullable = account-less), `person_roles`.
+- `tenants`; `users_data` (the spine, formerly `persons` — `auth_user_id` nullable = account-less), `person_roles`.
 - `exercises` / `tags` / `exercise_tags` (coach-owned library).
 - `programs` / `sessions` / `session_exercises` (template side).
 - `assignments` / `assignment_sessions` / `assignment_exercises` (per-client

@@ -14,7 +14,7 @@ class SessionRepository {
     if (authUser == null) return null;
 
     try {
-      final personRow = await SupabaseClientWrapper.db('persons')
+      final personRow = await SupabaseClientWrapper.db('users_data')
           .select('id, tenant_id, first_name, last_name, email, locale')
           .eq('auth_user_id', authUser.id)
           .maybeSingle();
