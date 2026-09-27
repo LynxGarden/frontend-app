@@ -9,7 +9,9 @@ import 'package:lynx_app/features/clients/data/client_repository.dart';
 import 'package:lynx_app/features/clients/data/models/client.dart';
 import 'package:lynx_app/features/clients/presentation/add_client_screen.dart';
 import 'package:lynx_app/features/clients/presentation/client_detail_screen.dart';
+import 'package:lynx_app/features/chat/providers/chat_providers.dart';
 import 'package:lynx_app/features/clients/providers/clients_provider.dart';
+import 'package:lynx_app/shared/widgets/unread_badge.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/models/app_user.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
@@ -17,6 +19,7 @@ import 'package:lynx_app/shared/widgets/app_avatar.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/collapsing_header.dart';
+import 'package:lynx_app/shared/widgets/main_shell.dart';
 import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// Staff view of the tenant's clients.
@@ -83,16 +86,22 @@ class _ClientsListScreenState extends ConsumerState<ClientsListScreen> {
     });
     final clientsAsync = ref.watch(clientsProvider);
     final clients = _clients;
+    // Unread chat messages per client (drives the red badge on each card).
+    final unreadCounts =
+        ref.watch(coachUnreadCountsProvider).valueOrNull ?? const {};
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab_clients',
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        onPressed: _add,
-        icon: const Icon(Icons.person_add_alt_1),
-        label: Text(l.newClient),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: AppBottomBar.fabBottomInset(context)),
+        child: FloatingActionButton.extended(
+          heroTag: 'fab_clients',
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          onPressed: _add,
+          icon: const Icon(Icons.person_add_alt_1),
+          label: Text(l.newClient),
+        ),
       ),
       body: CustomScrollView(
         controller: _scroll,
@@ -122,8 +131,8 @@ class _ClientsListScreenState extends ConsumerState<ClientsListScreen> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.xxl),
+              padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs,
+                  AppSpacing.lg, MediaQuery.paddingOf(context).bottom + AppSpacing.md),
               sliver: SliverReorderableList(
                 itemCount: clients.length,
                 onReorderItem: _reorder,
@@ -134,6 +143,7 @@ class _ClientsListScreenState extends ConsumerState<ClientsListScreen> {
                     padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                     child: _ClientCard(
                       client: clients[i],
+                      unread: unreadCounts[clients[i].id] ?? 0,
                       onTap: () => _open(clients[i]),
                     ),
                   ),
@@ -147,9 +157,11 @@ class _ClientsListScreenState extends ConsumerState<ClientsListScreen> {
 }
 
 class _ClientCard extends StatelessWidget {
-  const _ClientCard({required this.client, required this.onTap});
+  const _ClientCard(
+      {required this.client, required this.onTap, this.unread = 0});
   final Client client;
   final VoidCallback onTap;
+  final int unread;
 
   @override
   Widget build(BuildContext context) {
@@ -158,11 +170,18 @@ class _ClientCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: ListTile(
         onTap: onTap,
-        leading: AppAvatar(
-          avatarKind: client.avatarKind,
-          avatarValue: client.avatarValue,
-          initials: client.initials,
-          role: AppRole.client,
+        leading: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            AppAvatar(
+              avatarKind: client.avatarKind,
+              avatarValue: client.avatarValue,
+              initials: client.initials,
+              role: AppRole.client,
+            ),
+            if (unread > 0)
+              Positioned(right: -2, top: -2, child: UnreadBadge(count: unread)),
+          ],
         ),
         title: Text(client.fullName,
             maxLines: 1,

@@ -191,6 +191,7 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final program = _program;
+    final topInset = AppNavBar.estimatedHeight(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -202,42 +203,31 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
         icon: const Icon(Icons.add),
         label: Text(l.addSession),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          AppNavBar(
-            title: l.editProgram,
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AppNavBarAction(
-                  icon: Icons.check,
-                  onTap: _saveDetails,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                AppNavBarAction(
-                  icon: Icons.delete_outline,
-                  onTap: _confirmDeleteProgram,
-                  tint: AppColors.error,
-                ),
-              ],
-            ),
-          ),
-          Expanded(
+          Positioned.fill(
             child: _loading
-                ? Center(
-                    child: CircularProgressIndicator(color: AppColors.primary))
+                ? Padding(
+                    padding: EdgeInsets.only(top: topInset),
+                    child: Center(
+                        child: CircularProgressIndicator(
+                            color: AppColors.primary)),
+                  )
                 : program == null
-                    ? Center(
-                        child: Text(l.somethingWentWrong,
-                            style: AppTextStyles.bodySmall))
+                    ? Padding(
+                        padding: EdgeInsets.only(top: topInset),
+                        child: Center(
+                            child: Text(l.somethingWentWrong,
+                                style: AppTextStyles.bodySmall)),
+                      )
                     : SafeArea(
                         top: false,
                         child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
+                      padding: EdgeInsets.fromLTRB(
+                          AppSpacing.lg, topInset + AppSpacing.md, AppSpacing.lg, 0),
                       child: Column(
                         children: [
                           AppTextField(
@@ -279,6 +269,30 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
                         ],
                       ),
                     ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: AppNavBar(
+              title: l.editProgram,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppNavBarAction(
+                    icon: Icons.check,
+                    onTap: _saveDetails,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  AppNavBarAction(
+                    icon: Icons.delete_outline,
+                    onTap: _confirmDeleteProgram,
+                    tint: AppColors.error,
+                  ),
+                ],
+              ),
+              blurred: true,
+            ),
           ),
         ],
       ),

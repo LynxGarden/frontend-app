@@ -81,8 +81,8 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                   );
                 }
                 return SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.xxl),
+                  padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs,
+                      AppSpacing.lg, MediaQuery.paddingOf(context).bottom + AppSpacing.md),
                   sliver: SliverList.builder(
                     itemCount: sessions.length,
                     itemBuilder: (context, i) {

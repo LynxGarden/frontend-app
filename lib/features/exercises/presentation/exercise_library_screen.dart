@@ -13,6 +13,7 @@ import 'package:lynx_app/features/exercises/presentation/tag_labels.dart';
 import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
 import 'package:lynx_app/features/programs/presentation/program_list_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/widgets/main_shell.dart';
 import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// Coach exercise library: searchable list, tag filter, add/edit/delete.
@@ -109,15 +110,22 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab_library',
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        onPressed: () => _openEditor(),
-        icon: const Icon(Icons.add),
-        label: Text(l.newExercise),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: AppBottomBar.fabBottomInset(context)),
+        child: FloatingActionButton.extended(
+          heroTag: 'fab_library',
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          onPressed: () => _openEditor(),
+          icon: const Icon(Icons.add),
+          label: Text(l.newExercise),
+        ),
       ),
+      // bottom:false — the shell's extendBody makes MediaQuery.padding.bottom the
+      // bar height, so a bottom SafeArea would reserve an empty band here; the
+      // ListView's own bottom padding clears the floating bar instead.
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             const SizedBox(height: AppSpacing.sm),
@@ -162,8 +170,8 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                     );
                   }
                   return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 96),
+                    padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm,
+                        AppSpacing.lg, MediaQuery.paddingOf(context).bottom + AppSpacing.md),
                     itemCount: items.length,
                     itemBuilder: (_, i) => _ExerciseTile(
                       exercise: items[i],

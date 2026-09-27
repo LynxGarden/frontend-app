@@ -15,6 +15,7 @@ import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
+import 'package:lynx_app/shared/widgets/frosted_nav_scaffold.dart';
 
 /// A single group: its members (add/remove) and the group-assign action.
 class GroupDetailScreen extends ConsumerWidget {
@@ -172,36 +173,33 @@ class GroupDetailScreen extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final membersAsync = ref.watch(groupMembersProvider(groupId));
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab_group_detail',
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        onPressed: () => _assign(context, ref),
-        icon: const Icon(Icons.assignment_outlined),
-        label: Text(l.assignProgram),
+    return FrostedNavScaffold(
+      title: groupName,
+      trailing: AppNavBarAction(
+        icon: Icons.delete_outline,
+        onTap: () => _delete(context, ref),
+        tint: AppColors.error,
+        tooltip: l.delete,
       ),
-      body: Column(
-        children: [
-          AppNavBar(
-            title: groupName,
-            trailing: AppNavBarAction(
-              icon: Icons.delete_outline,
-              onTap: () => _delete(context, ref),
-              tint: AppColors.error,
-              tooltip: l.delete,
-            ),
-          ),
-          Expanded(
-            child: SafeArea(
-              top: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+      footer: SafeArea(
+        top: false,
+        child: FloatingActionButton.extended(
+          heroTag: 'fab_group_detail',
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          onPressed: () => _assign(context, ref),
+          icon: const Icon(Icons.assignment_outlined),
+          label: Text(l.assignProgram),
+        ),
+      ),
+      builder: (context, topInset) => SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
+              padding: EdgeInsets.fromLTRB(
+                  AppSpacing.lg, topInset + AppSpacing.md, AppSpacing.lg, 0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -252,11 +250,8 @@ class GroupDetailScreen extends ConsumerWidget {
                 },
               ),
             ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -6,7 +6,7 @@ import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/features/review/providers/review_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
-import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
+import 'package:lynx_app/shared/widgets/frosted_nav_scaffold.dart';
 
 /// Drill-in for one completed session: each exercise + the actuals the client
 /// logged (their most recent occasion for that movement).
@@ -28,26 +28,22 @@ class SessionActualsScreen extends ConsumerWidget {
     final async =
         ref.watch(sessionActualsProvider((sessionId: sessionId, personId: personId)));
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          AppNavBar(title: title),
-          Expanded(
-            child: async.when(
-              loading: () => Center(
-                  child: CircularProgressIndicator(color: AppColors.primary)),
-              error: (_, _) => Center(
-                  child: Text(l.somethingWentWrong,
-                      style: AppTextStyles.bodySmall)),
-              data: (items) => SafeArea(
-                top: false,
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: items.length,
-                  itemBuilder: (context, i) {
-                    final ex = items[i];
-                    return Container(
+    return FrostedNavScaffold(
+      title: title,
+      builder: (context, topInset) => async.when(
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        error: (_, _) => Center(
+            child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall)),
+        data: (items) => SafeArea(
+          top: false,
+          child: ListView.builder(
+            padding: EdgeInsets.fromLTRB(
+                AppSpacing.lg, topInset + AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
+            itemCount: items.length,
+            itemBuilder: (context, i) {
+              final ex = items[i];
+              return Container(
               margin: const EdgeInsets.only(bottom: AppSpacing.sm),
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
@@ -79,13 +75,10 @@ class SessionActualsScreen extends ConsumerWidget {
                     ),
                 ],
               ),
-                    );
-                  },
-                ),
-              ),
-            ),
+              );
+            },
           ),
-        ],
+        ),
       ),
     );
   }

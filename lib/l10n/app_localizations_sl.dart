@@ -40,6 +40,15 @@ class AppLocalizationsSl extends AppLocalizations {
   String get emailHint => 'ti@epošta.si';
 
   @override
+  String get firstNameHint => 'npr. Alex';
+
+  @override
+  String get lastNameHint => 'npr. Novak';
+
+  @override
+  String get phoneHint => 'npr. +386 40 123 456';
+
+  @override
   String get sendMagicLink => 'Pošlji povezavo';
 
   @override
@@ -63,6 +72,42 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get navProgress => 'Napredek';
+
+  @override
+  String get navChat => 'Klepet';
+
+  @override
+  String get chatTitle => 'Klepet';
+
+  @override
+  String get openChat => 'Odpri klepet';
+
+  @override
+  String get noMessagesYet => 'Še ni sporočil. Pozdravi 👋';
+
+  @override
+  String get typing => 'piše…';
+
+  @override
+  String get messagePlaceholder => 'Sporočilo…';
+
+  @override
+  String get preview => 'Predogled';
+
+  @override
+  String get chatNoCoach => 'Nimaš dodeljenega trenerja.';
+
+  @override
+  String get careTeam => 'Ekipa';
+
+  @override
+  String get assignStaff => 'Dodeli osebje';
+
+  @override
+  String get noCareTeam => 'Ni dodeljenega osebja.';
+
+  @override
+  String get seeNewMessages => 'Poglej nova sporočila';
 
   @override
   String get navProfile => 'Profil';
@@ -173,7 +218,7 @@ class AppLocalizationsSl extends AppLocalizations {
   String get avatar => 'Avatar';
 
   @override
-  String get chooseAvatar => 'Izberi avatar';
+  String get chooseAvatar => 'Izberi profilno sliko';
 
   @override
   String get buildAvatar => 'Ustvari avatar';
@@ -221,14 +266,26 @@ class AppLocalizationsSl extends AppLocalizations {
   String get avClothing => 'Oblačila';
 
   @override
+  String get avGender => 'Spol';
+
+  @override
+  String get genderMale => 'Moški';
+
+  @override
+  String get genderFemale => 'Ženska';
+
+  @override
   String get onboardingNameTitle => 'Kako ti je ime?';
 
   @override
-  String get onboardingNameSubtitle =>
-      'Tako te bodo videli tvoj trener in stranke.';
+  String get onboardingNameSubtitle => 'Tako te bo videl tvoj trener.';
 
   @override
-  String get onboardingAvatarTitle => 'Izberi avatar';
+  String get onboardingNameSubtitleStaff =>
+      'Tako te bodo videle tvoje stranke.';
+
+  @override
+  String get onboardingAvatarTitle => 'Izberi profilno sliko';
 
   @override
   String get onboardingAvatarSubtitle =>

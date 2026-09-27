@@ -176,7 +176,10 @@ class _SkeletonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      // Match the loaded list's card spacing: there each card carries AppCard's
+      // own 8px bottom margin AND an 8px wrapper Padding (16px total between
+      // cards), so mirror that with a single AppSpacing.md bottom margin here.
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -263,13 +266,16 @@ class _ShellSkeletonState extends State<ShellSkeleton> {
     return Scaffold(
       backgroundColor: AppColors.background,
       // Real title + real action shown instantly; only the list is skeletoned.
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab_clients',
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        onPressed: () {},
-        icon: const Icon(Icons.person_add_alt_1),
-        label: Text(l.newClient),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: AppBottomBar.fabBottomInset(context)),
+        child: FloatingActionButton.extended(
+          heroTag: 'fab_clients',
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          onPressed: () {},
+          icon: const Icon(Icons.person_add_alt_1),
+          label: Text(l.newClient),
+        ),
       ),
       body: CustomScrollView(
         controller: _scroll,

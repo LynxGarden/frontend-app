@@ -61,10 +61,16 @@ class AppTheme {
 
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: AppColors.surface,
+        modalBackgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
         ),
         modalBarrierColor: Colors.black54,
+        // App-wide drag handle ("thumb" dash) — subtle warm-grey pill.
+        showDragHandle: true,
+        dragHandleColor: AppColors.textTertiary.withValues(alpha: 0.4),
+        dragHandleSize: const Size(40, 4),
       ),
 
       inputDecorationTheme: InputDecorationTheme(

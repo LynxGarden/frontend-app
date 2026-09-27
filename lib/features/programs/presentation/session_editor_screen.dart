@@ -121,6 +121,7 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
     final async = ref.watch(sessionEditorProvider(_key));
     final session = _session;
     final loading = session == null && async.isLoading;
+    final topInset = AppNavBar.estimatedHeight(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -132,26 +133,35 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
         icon: const Icon(Icons.add),
         label: Text(l.addExercise),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          AppNavBar(title: session?.label ?? '…'),
-          Expanded(
+          Positioned.fill(
             child: loading
-                ? Center(
-                    child: CircularProgressIndicator(color: AppColors.primary))
+                ? Padding(
+                    padding: EdgeInsets.only(top: topInset),
+                    child: Center(
+                        child: CircularProgressIndicator(
+                            color: AppColors.primary)),
+                  )
                 : session == null
-                    ? Center(
-                        child: Text(l.somethingWentWrong,
-                            style: AppTextStyles.bodySmall))
+                    ? Padding(
+                        padding: EdgeInsets.only(top: topInset),
+                        child: Center(
+                            child: Text(l.somethingWentWrong,
+                                style: AppTextStyles.bodySmall)),
+                      )
                     : session.exercises.isEmpty
-                        ? Center(
-                            child: Text(l.comingSoon,
-                                style: AppTextStyles.bodySmall))
+                        ? Padding(
+                            padding: EdgeInsets.only(top: topInset),
+                            child: Center(
+                                child: Text(l.comingSoon,
+                                    style: AppTextStyles.bodySmall)),
+                          )
                         : SafeArea(
                             top: false,
                             child: ReorderableListView.builder(
-                              padding: const EdgeInsets.fromLTRB(
-                                  AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 96),
+                              padding: EdgeInsets.fromLTRB(
+                                  AppSpacing.lg, topInset + AppSpacing.sm, AppSpacing.lg, 96),
                               itemCount: session.exercises.length,
                               onReorderItem: _reorder,
                               itemBuilder: (context, i) {
@@ -165,6 +175,12 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
                               },
                             ),
                           ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: AppNavBar(title: session?.label ?? '…', blurred: true),
           ),
         ],
       ),

@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lynx_app/core/notifications/onesignal_service.dart';
 import 'package:lynx_app/core/purchases/revenue_cat_service.dart';
 import 'package:lynx_app/core/storage/secure_storage_service.dart';
+import 'package:lynx_app/core/supabase/supabase_client.dart';
 import 'package:lynx_app/features/auth/data/auth_repository.dart';
+import 'package:lynx_app/features/chat/providers/chat_providers.dart';
 import 'package:lynx_app/features/clients/providers/clients_provider.dart';
 import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
 import 'package:lynx_app/features/groups/providers/groups_provider.dart';
@@ -56,6 +58,15 @@ class SessionService {
     activeAssignmentProvider,
     sessionRunnerProvider,
     lastEntriesProvider,
+    // chat
+    conversationProvider,
+    messagesProvider,
+    recentMessagesProvider,
+    chatImageUrlProvider,
+    assignedStaffProvider,
+    clientUnreadCountProvider,
+    clientUnreadByStaffProvider,
+    coachUnreadCountsProvider,
   ];
 
   /// Tears everything down. Safe to call when the backend session is already
@@ -76,19 +87,26 @@ class SessionService {
       await RevenueCatService.logOut();
     } catch (_) {}
 
-    // 2. Supabase auth — clears its own persisted session/token store.
+    // 2. Realtime — tear down every open subscription (chat streams + typing
+    // channels, live assignments) so none keeps delivering the old account's
+    // data on a shared device.
+    try {
+      await SupabaseClientWrapper.removeAllChannels();
+    } catch (_) {}
+
+    // 3. Supabase auth — clears its own persisted session/token store.
     if (!alreadySignedOut) {
       try {
         await AuthRepository.signOut();
       } catch (_) {}
     }
 
-    // 3. Sensitive local values (any tokens/secrets we may have stashed).
+    // 4. Sensitive local values (any tokens/secrets we may have stashed).
     try {
       await SecureStorageService.deleteAll();
     } catch (_) {}
 
-    // 4. In-memory app state — drop every user-scoped provider so nothing
+    // 5. In-memory app state — drop every user-scoped provider so nothing
     // survives into the next session. Done last, after sign-out, so any
     // dependent recompute sees the signed-out state.
     for (final p in _userScoped) {

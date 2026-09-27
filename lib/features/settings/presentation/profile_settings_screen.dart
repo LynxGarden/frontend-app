@@ -12,6 +12,7 @@ import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_avatar.dart';
 import 'package:lynx_app/shared/widgets/app_button.dart';
 import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
+import 'package:lynx_app/shared/widgets/app_segmented_control.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 
@@ -28,6 +29,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
   final _first = TextEditingController();
   final _last = TextEditingController();
   DateTime? _dob;
+  String? _gender;
   bool _seeded = false;
   bool _saving = false;
 
@@ -57,6 +59,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
         firstName: _first.text,
         lastName: _last.text,
         dateOfBirth: _dob,
+        gender: _gender,
       );
       ref.invalidate(currentUserProvider);
       if (!mounted) return;
@@ -78,6 +81,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
       _first.text = user.firstName ?? '';
       _last.text = user.lastName ?? '';
       _dob = user.dateOfBirth;
+      _gender = user.gender ?? 'male'; // Male preselected by default.
       _seeded = true;
     }
 
@@ -103,6 +107,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                               personId: user.personId,
                               tenantId: user.tenantId,
                               role: user.primaryRole,
+                              gender: _gender,
                               currentKind: user.avatarKind,
                               currentValue: user.avatarValue,
                             ),
@@ -136,6 +141,19 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen> {
                           controller: _last,
                           hintText: '',
                           textInputAction: TextInputAction.done,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(l.avGender.toUpperCase(),
+                            style: AppTextStyles.label
+                                .copyWith(color: AppColors.textSecondary)),
+                        const SizedBox(height: AppSpacing.sm),
+                        AppSegmentedControl<String>(
+                          selected: _gender,
+                          segments: [
+                            AppSegment(value: 'male', label: l.genderMale),
+                            AppSegment(value: 'female', label: l.genderFemale),
+                          ],
+                          onChanged: (g) => setState(() => _gender = g),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         Text(l.dateOfBirth,

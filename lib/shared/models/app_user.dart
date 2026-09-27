@@ -32,6 +32,7 @@ class AppUser {
     this.avatarKind,
     this.avatarValue,
     this.dateOfBirth,
+    this.gender,
     this.onboardingComplete = false,
   });
 
@@ -48,6 +49,9 @@ class AppUser {
   final String? avatarKind;
   final String? avatarValue;
   final DateTime? dateOfBirth;
+
+  /// Optional self-selected gender ('male' / 'female'); biases avatar generation.
+  final String? gender;
   final bool onboardingComplete;
 
   /// Display name, falling back to email then a dash.
@@ -97,6 +101,7 @@ class AppUser {
       avatarKind: json['avatar_kind'] as String?,
       avatarValue: json['avatar_value'] as String?,
       dateOfBirth: dob == null ? null : DateTime.tryParse(dob),
+      gender: json['gender'] as String?,
       onboardingComplete: (json['onboarding_complete'] as bool?) ?? false,
     );
   }

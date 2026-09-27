@@ -13,8 +13,8 @@ import 'package:lynx_app/features/training/data/training_repository.dart';
 import 'package:lynx_app/features/training/providers/training_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
-import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
+import 'package:lynx_app/shared/widgets/frosted_nav_scaffold.dart';
 
 /// The gym-facing session runner: per exercise show the target, the video, the
 /// LAST TIME actuals, inputs to log today's sets, and a swap action. A FAB marks
@@ -82,60 +82,56 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
     final async = ref.watch(sessionRunnerProvider(_key));
     final session = async.valueOrNull;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      floatingActionButton: (session != null && user != null)
-          ? FloatingActionButton.extended(
-              heroTag: 'fab_session_runner',
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
-              onPressed: _completing ? null : () => _complete(session),
-              icon: _completing
-                  ? SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: AppColors.onPrimary),
-                    )
-                  : const Icon(Icons.check),
-              label: Text(l.markComplete),
+    return FrostedNavScaffold(
+      title: session?.label ?? '…',
+      footer: (session != null && user != null)
+          ? SafeArea(
+              top: false,
+              child: FloatingActionButton.extended(
+                heroTag: 'fab_session_runner',
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                onPressed: _completing ? null : () => _complete(session),
+                icon: _completing
+                    ? SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: AppColors.onPrimary),
+                      )
+                    : const Icon(Icons.check),
+                label: Text(l.markComplete),
+              ),
             )
           : null,
-      body: Column(
-        children: [
-          AppNavBar(title: session?.label ?? '…'),
-          Expanded(
-            child: async.when(
-              loading: () => Center(
-                  child: CircularProgressIndicator(color: AppColors.primary)),
-              error: (_, _) => Center(
-                  child: Text(l.somethingWentWrong,
-                      style: AppTextStyles.bodySmall)),
-              data: (session) => (session == null || user == null)
-                  ? Center(
-                      child: Text(l.somethingWentWrong,
-                          style: AppTextStyles.bodySmall))
-                  : SafeArea(
-                      top: false,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 96),
-                        itemCount: session.exercises.length,
-                        itemBuilder: (context, i) {
-                          final ex = session.exercises[i];
-                          return _ExerciseRunnerCard(
-                            key: ValueKey(ex.id),
-                            exercise: ex,
-                            tenantId: user.tenantId,
-                            personId: user.personId,
-                            onSwap: () => _swap(ex),
-                          );
-                        },
-                      ),
-                    ),
-            ),
-          ),
-        ],
+      builder: (context, topInset) => async.when(
+        loading: () => Center(
+            child: CircularProgressIndicator(color: AppColors.primary)),
+        error: (_, _) => Center(
+            child: Text(l.somethingWentWrong,
+                style: AppTextStyles.bodySmall)),
+        data: (session) => (session == null || user == null)
+            ? Center(
+                child: Text(l.somethingWentWrong,
+                    style: AppTextStyles.bodySmall))
+            : SafeArea(
+                top: false,
+                child: ListView.builder(
+                  padding: EdgeInsets.fromLTRB(
+                      AppSpacing.lg, topInset + AppSpacing.sm, AppSpacing.lg, 96),
+                  itemCount: session.exercises.length,
+                  itemBuilder: (context, i) {
+                    final ex = session.exercises[i];
+                    return _ExerciseRunnerCard(
+                      key: ValueKey(ex.id),
+                      exercise: ex,
+                      tenantId: user.tenantId,
+                      personId: user.personId,
+                      onSwap: () => _swap(ex),
+                    );
+                  },
+                ),
+              ),
       ),
     );
   }

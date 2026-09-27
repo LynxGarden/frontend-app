@@ -39,6 +39,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailHint => 'you@email.com';
 
   @override
+  String get firstNameHint => 'e.g. Alex';
+
+  @override
+  String get lastNameHint => 'e.g. Novak';
+
+  @override
+  String get phoneHint => 'e.g. +386 40 123 456';
+
+  @override
   String get sendMagicLink => 'Send magic link';
 
   @override
@@ -62,6 +71,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navProgress => 'Progress';
+
+  @override
+  String get navChat => 'Chat';
+
+  @override
+  String get chatTitle => 'Chat';
+
+  @override
+  String get openChat => 'Open chat';
+
+  @override
+  String get noMessagesYet => 'No messages yet. Say hi 👋';
+
+  @override
+  String get typing => 'typing…';
+
+  @override
+  String get messagePlaceholder => 'Message…';
+
+  @override
+  String get preview => 'Preview';
+
+  @override
+  String get chatNoCoach => 'You don\'t have a coach assigned yet.';
+
+  @override
+  String get careTeam => 'Care team';
+
+  @override
+  String get assignStaff => 'Assign staff';
+
+  @override
+  String get noCareTeam => 'No staff assigned yet.';
+
+  @override
+  String get seeNewMessages => 'See new messages';
 
   @override
   String get navProfile => 'Profile';
@@ -172,7 +217,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get avatar => 'Avatar';
 
   @override
-  String get chooseAvatar => 'Choose avatar';
+  String get chooseAvatar => 'Choose profile picture';
 
   @override
   String get buildAvatar => 'Build avatar';
@@ -220,14 +265,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get avClothing => 'Clothing';
 
   @override
+  String get avGender => 'Gender';
+
+  @override
+  String get genderMale => 'Male';
+
+  @override
+  String get genderFemale => 'Female';
+
+  @override
   String get onboardingNameTitle => 'What\'s your name?';
 
   @override
   String get onboardingNameSubtitle =>
-      'This is how you\'ll appear to your coach and clients.';
+      'This is how you\'ll appear to your coach.';
 
   @override
-  String get onboardingAvatarTitle => 'Pick an avatar';
+  String get onboardingNameSubtitleStaff =>
+      'This is how you\'ll appear to your clients.';
+
+  @override
+  String get onboardingAvatarTitle => 'Pick a profile picture';
 
   @override
   String get onboardingAvatarSubtitle =>

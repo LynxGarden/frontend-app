@@ -20,6 +20,7 @@ import 'package:lynx_app/shared/widgets/app_chip.dart';
 import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
+import 'package:lynx_app/shared/widgets/frosted_nav_scaffold.dart';
 
 /// Create / edit an exercise. Returns `true` via pop when saved so the caller
 /// can refresh the library.
@@ -199,31 +200,43 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
     final l = AppLocalizations.of(context);
     final tagsAsync = ref.watch(exerciseTagsProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          AppNavBar(
-            title: _isEdit ? l.editExercise : l.newExercise,
-            trailing: _isEdit
-                ? AppNavBarAction(
-                    icon: Icons.delete_outline,
-                    onTap: () {
-                      if (!_saving) _confirmDelete();
-                    },
-                    tint: AppColors.error,
-                  )
-                : null,
+    return FrostedNavScaffold(
+      title: _isEdit ? l.editExercise : l.newExercise,
+      trailing: _isEdit
+          ? AppNavBarAction(
+              icon: Icons.delete_outline,
+              onTap: () {
+                if (!_saving) _confirmDelete();
+              },
+              tint: AppColors.error,
+            )
+          : null,
+      footer: Container(
+        padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: AppButton(
+            label: l.save,
+            isExpanded: true,
+            isLoading: _saving,
+            onPressed: (_saving || !_canSave) ? null : _save,
           ),
-          Expanded(
-            child: SafeArea(
-              top: false,
-              bottom: false,
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  children: [
+        ),
+      ),
+      builder: (context, topInset) => SafeArea(
+        top: false,
+        bottom: false,
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(
+                AppSpacing.lg, topInset + AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
+            children: [
               AppTextField(
                 label: l.exerciseName,
                 controller: _name,
@@ -327,30 +340,9 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
                   ],
                 ),
               ),
-                  ],
-                ),
-              ),
-            ),
+            ],
           ),
-          // Pinned footer — Save stays visible above the scroll + keyboard.
-          Container(
-            padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
-            ),
-            child: SafeArea(
-              top: false,
-              child: AppButton(
-                label: l.save,
-                isExpanded: true,
-                isLoading: _saving,
-                onPressed: (_saving || !_canSave) ? null : _save,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

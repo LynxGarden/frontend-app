@@ -74,52 +74,62 @@ class _AddClientScreenState extends ConsumerState<AddClientScreen> {
         children: [
           AppNavBar(title: l.newClient),
           Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                children: [
+                  AppTextField(
+                    label: l.firstName,
+                    controller: _first,
+                    hintText: l.firstNameHint,
+                    textInputAction: TextInputAction.next,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? l.nameRequired
+                        : null,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  AppTextField(
+                    label: l.lastName,
+                    controller: _last,
+                    hintText: l.lastNameHint,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  AppTextField(
+                    label: l.emailLabel,
+                    controller: _email,
+                    hintText: l.emailHint,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  AppTextField(
+                    label: l.phone,
+                    controller: _phone,
+                    hintText: l.phoneHint,
+                    keyboardType: TextInputType.phone,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Pinned footer — Save stays visible above the scroll + keyboard
+          // (the Scaffold resizes for the keyboard, lifting this above it).
+          Container(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+            ),
             child: SafeArea(
               top: false,
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  children: [
-              AppTextField(
-                label: l.firstName,
-                controller: _first,
-                hintText: '',
-                textInputAction: TextInputAction.next,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? l.nameRequired : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: l.lastName,
-                controller: _last,
-                hintText: '',
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: l.emailLabel,
-                controller: _email,
-                hintText: l.emailHint,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                label: l.phone,
-                controller: _phone,
-                hintText: '',
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              AppButton(
+              child: AppButton(
                 label: l.save,
                 isExpanded: true,
                 isLoading: _saving,
                 onPressed: _saving ? null : _save,
-              ),
-                  ],
-                ),
               ),
             ),
           ),

@@ -67,4 +67,14 @@ class SupabaseClientWrapper {
   ///
   /// Usage: `SupabaseClientWrapper.functions.invoke('fn-name', body: {...})`.
   static FunctionsClient get functions => _client.functions;
+
+  /// A realtime channel for broadcast/presence (e.g. chat typing indicators).
+  ///
+  /// Usage: `SupabaseClientWrapper.channel('typing:$conversationId')`.
+  static RealtimeChannel channel(String name) => _client.channel(name);
+
+  /// Tear down every open realtime subscription (chat streams, typing channels,
+  /// live assignments). Called on logout / account deletion so no channel keeps
+  /// delivering the previous account's data on a shared device.
+  static Future<void> removeAllChannels() => _client.removeAllChannels();
 }

@@ -240,8 +240,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           SliverCollapsingHeader(title: l.settingsTitle, controller: _scroll),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.xxl),
+              // Bottom pad clears the floating tab bar (its height comes through
+              // MediaQuery.padding.bottom now that the shell uses extendBody).
+              padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm,
+                  AppSpacing.lg, MediaQuery.paddingOf(context).bottom + AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

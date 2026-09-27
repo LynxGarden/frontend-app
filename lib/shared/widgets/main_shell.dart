@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,12 +18,17 @@ class ShellTab {
     required this.materialIcon,
     required this.screen,
     this.refreshProviders = const [],
+    this.showBadge = false,
   });
 
   final String label;
   final String sfSymbol;
   final IconData materialIcon;
   final Widget screen;
+
+  /// When true, a small red notification dot is overlaid on this tab (e.g. an
+  /// unread chat message).
+  final bool showBadge;
 
   /// Data providers to invalidate when this tab **gains focus** and on
   /// **app-resume** — so a `FutureProvider`-backed screen that's kept alive by
@@ -46,6 +52,21 @@ class MainShell extends ConsumerStatefulWidget {
 class _MainShellState extends ConsumerState<MainShell>
     with WidgetsBindingObserver {
   int _index = 0;
+
+  /// Bottom-bar scale: shrinks to 0.9 while scrolling down, restores to 1.0 on
+  /// scroll-up and on tab change.
+  double _barScale = 1.0;
+
+  bool _onUserScroll(UserScrollNotification n) {
+    if (n.metrics.axis != Axis.vertical) return false;
+    final target = switch (n.direction) {
+      ScrollDirection.reverse => 0.9, // scrolling down (content moves up)
+      ScrollDirection.forward => 1.0, // scrolling up
+      ScrollDirection.idle => _barScale,
+    };
+    if (target != _barScale) setState(() => _barScale = target);
+    return false;
+  }
 
   @override
   void initState() {
@@ -75,7 +96,10 @@ class _MainShellState extends ConsumerState<MainShell>
   void _select(int i) {
     if (i == _index) return;
     HapticFeedback.selectionClick();
-    setState(() => _index = i);
+    setState(() {
+      _index = i;
+      _barScale = 1.0; // restore the bar when switching tabs
+    });
     // Refresh the newly-focused tab's data (skipLoadingOnRefresh keeps the
     // previous content visible while it refetches — no skeleton flash).
     for (final p in widget.tabs[i].refreshProviders) {
@@ -88,17 +112,34 @@ class _MainShellState extends ConsumerState<MainShell>
     final tabs = widget.tabs;
     return Scaffold(
       backgroundColor: AppColors.background,
-      // Reserve the bottom bar's space so each tab's Scaffold lays its body and
-      // FAB *above* the bar (extendBody:true let the FAB fall behind it, making
-      // it untappable).
-      extendBody: false,
+      // Let the body extend behind the bottom bar so content reaches the screen
+      // edge and scrolls under the native translucent bar (the iOS look) — no
+      // reserved "container" band at the bottom. Each tab's scrollable adds the
+      // bar height to its bottom padding (via MediaQuery.padding.bottom, which
+      // Scaffold sets to the bar height when extendBody is true) so the last row
+      // isn't hidden behind the bar.
+      extendBody: true,
       resizeToAvoidBottomInset: false,
-      body: IndexedStack(
-        index: _index,
-        children: [for (final t in tabs) t.screen],
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: _onUserScroll,
+        child: IndexedStack(
+          index: _index,
+          // Disable ticking (and signal "not visible") for hidden tabs, so a
+          // kept-alive screen — e.g. the client's Chat tab — knows when it's
+          // actually on screen (via TickerMode.of) instead of always-active.
+          children: [
+            for (var i = 0; i < tabs.length; i++)
+              TickerMode(enabled: i == _index, child: tabs[i].screen),
+          ],
+        ),
       ),
-      bottomNavigationBar:
-          AppBottomBar(tabs: tabs, index: _index, onTap: _select),
+      bottomNavigationBar: AnimatedScale(
+        scale: _barScale,
+        alignment: Alignment.bottomCenter,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        child: AppBottomBar(tabs: tabs, index: _index, onTap: _select),
+      ),
     );
   }
 }
@@ -118,11 +159,74 @@ class AppBottomBar extends StatelessWidget {
   final int index;
   final ValueChanged<int> onTap;
 
+  /// Extra bottom offset a tab screen's [FloatingActionButton] needs so it
+  /// floats *above* the shell's bottom bar. Each tab is its own Scaffold with no
+  /// bottom bar, so with the shell's `extendBody:true` the FAB would anchor to
+  /// the screen bottom (behind the bar). The shell surfaces the bar height via
+  /// `MediaQuery.padding.bottom`; `endFloat` already lifts the FAB by the device
+  /// safe area (`viewPadding.bottom`), so we add only the remainder.
+  static double fabBottomInset(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final lift = mq.padding.bottom - mq.viewPadding.bottom;
+    return lift > 0 ? lift : 0;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Platform.isIOS
+    final bar = Platform.isIOS
         ? _CupertinoBar(tabs: tabs, index: index, onTap: onTap)
         : _MaterialPillBar(tabs: tabs, index: index, onTap: onTap);
+    if (!tabs.any((t) => t.showBadge)) return bar;
+    // Overlay red dots on badged tabs (CNTabBar has no native badge support).
+    return Stack(
+      children: [
+        bar,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Padding(
+              // Match each bar's geometry so the dot lands on the tab's icon.
+              padding: Platform.isIOS
+                  ? const EdgeInsets.only(top: 12)
+                  : const EdgeInsets.fromLTRB(22, 6, 22, 18),
+              child: Row(
+                children: [
+                  for (final t in tabs)
+                    Expanded(
+                      child: Align(
+                        alignment: Platform.isIOS
+                            ? const Alignment(0.5, -1)
+                            : const Alignment(0.55, -0.9),
+                        child: t.showBadge
+                            ? const _BadgeDot()
+                            : const SizedBox.shrink(),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A small red notification dot with a background-colored ring so it reads on
+/// the bar.
+class _BadgeDot extends StatelessWidget {
+  const _BadgeDot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 11,
+      height: 11,
+      decoration: BoxDecoration(
+        color: AppColors.error,
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.surface, width: 2),
+      ),
+    );
   }
 }
 
@@ -141,6 +245,10 @@ class _CupertinoBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 84,
+      // No backgroundColor → the native UITabBar uses its default translucent
+      // blur material and adapts to light/dark. With the shell's extendBody:true,
+      // content scrolls *under* it so it reads as a frosted floating bar (the
+      // iOS look), not a solid "container" band.
       child: CNTabBar(
         items: [
           for (final t in tabs)
@@ -149,7 +257,6 @@ class _CupertinoBar extends StatelessWidget {
         currentIndex: index,
         onTap: onTap,
         tint: AppColors.primary,
-        backgroundColor: AppColors.surface,
         height: 84,
       ),
     );

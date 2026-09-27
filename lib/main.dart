@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:flutter_quill/flutter_quill.dart';
 
 import 'package:lynx_app/core/config/app_flavor.dart';
 import 'package:lynx_app/core/storage/local_storage_service.dart';
@@ -53,7 +56,10 @@ class MyApp extends ConsumerWidget {
         title: 'Lynx',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: [
+          ...AppLocalizations.localizationsDelegates,
+          FlutterQuillLocalizations.delegate,
+        ],
         supportedLocales: AppLocalizations.supportedLocales,
         home: _SetupRequiredPage(error: initError),
       );
@@ -79,7 +85,10 @@ class MyApp extends ConsumerWidget {
       // We resolve brightness manually (above), so a single theme is supplied.
       theme: AppTheme.build(dark: effectiveDark),
       locale: locale,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: [
+          ...AppLocalizations.localizationsDelegates,
+          FlutterQuillLocalizations.delegate,
+        ],
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
       // Clamp accessibility text scaling so large-font settings can't overflow
@@ -88,12 +97,18 @@ class MyApp extends ConsumerWidget {
       // toggle won't repaint on its own. Keying the subtree by brightness forces
       // a full rebuild of the current screens (GoRouter keeps the location) so
       // every widget re-reads the palette.
-      builder: (context, child) => MediaQuery.withClampedTextScaling(
-        minScaleFactor: 1.0,
-        maxScaleFactor: 1.3,
-        child: KeyedSubtree(
-          key: ValueKey(effectiveDark),
-          child: child!,
+      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        // Status-bar icons contrast the background: dark icons on the light
+        // (cream) theme, light icons on dark. Screens use a custom header (no
+        // AppBar) so this app-level region governs the status bar globally.
+        value: effectiveDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+        child: MediaQuery.withClampedTextScaling(
+          minScaleFactor: 1.0,
+          maxScaleFactor: 1.3,
+          child: KeyedSubtree(
+            key: ValueKey(effectiveDark),
+            child: child!,
+          ),
         ),
       ),
     );

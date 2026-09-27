@@ -13,6 +13,7 @@ import 'package:lynx_app/shared/models/app_user.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_avatar.dart';
 import 'package:lynx_app/shared/widgets/app_button.dart';
+import 'package:lynx_app/shared/widgets/app_segmented_control.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 
@@ -29,6 +30,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _first = TextEditingController();
   final _last = TextEditingController();
   DateTime? _dob;
+  String? _gender;
   int _step = 0;
   bool _saving = false;
 
@@ -39,7 +41,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _first.text = user?.firstName ?? '';
     _last.text = user?.lastName ?? '';
     _dob = user?.dateOfBirth;
-    _first.addListener(() => setState(() {})); // toggles Next on the name step
+    _gender = user?.gender ?? 'male'; // Male preselected by default.
+    // Toggle Next as the required name-step fields change.
+    _first.addListener(() => setState(() {}));
+    _last.addListener(() => setState(() {}));
   }
 
   @override
@@ -60,6 +65,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       personId: user.personId,
       tenantId: user.tenantId,
       role: user.primaryRole,
+      gender: _gender,
       currentKind: user.avatarKind,
       currentValue: user.avatarValue,
     );
@@ -88,6 +94,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         firstName: _first.text,
         lastName: _last.text,
         dateOfBirth: _dob,
+        gender: _gender,
         markOnboarded: true,
       );
       ref.invalidate(currentUserProvider); // RootShell → shell
@@ -112,7 +119,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final user = ref.watch(currentUserProvider).valueOrNull;
-    final canProceed = _step != 0 || _first.text.trim().isNotEmpty;
+    // Name step requires first + last name and a gender selection.
+    final canProceed = _step != 0 ||
+        (_first.text.trim().isNotEmpty &&
+            _last.text.trim().isNotEmpty &&
+            _gender != null);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -122,24 +133,42 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Step dots
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (var i = 0; i < 3; i++)
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: i == _step ? 22 : 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: i == _step
-                            ? AppColors.primary
-                            : AppColors.surfaceBorder,
-                        borderRadius: BorderRadius.circular(AppRadius.pill),
+              // Back button (top-left) + centered step dots
+              SizedBox(
+                height: 40,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (_step > 0)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          onPressed: () => setState(() => _step--),
+                          icon: Icon(Icons.arrow_back,
+                              color: AppColors.textSecondary),
+                        ),
                       ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var i = 0; i < 3; i++)
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            width: i == _step ? 22 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: i == _step
+                                  ? AppColors.primary
+                                  : AppColors.surfaceBorder,
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.pill),
+                            ),
+                          ),
+                      ],
                     ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpacing.xl),
               Expanded(
@@ -149,15 +178,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
               Row(
                 children: [
-                  if (_step > 0)
-                    IconButton(
-                      onPressed: () => setState(() => _step--),
-                      icon: Icon(Icons.arrow_back, color: AppColors.textSecondary),
-                    ),
                   if (_step == 1 || _step == 2)
-                    TextButton(
+                    AppButton(
+                      label: l.skip,
+                      variant: AppButtonVariant.secondary,
                       onPressed: _next,
-                      child: Text(l.skip),
                     ),
                   const Spacer(),
                   SizedBox(
@@ -187,7 +212,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           children: [
             Text(l.onboardingNameTitle, style: AppTextStyles.heading1),
             const SizedBox(height: AppSpacing.sm),
-            Text(l.onboardingNameSubtitle,
+            Text(
+                (user?.isStaff ?? false)
+                    ? l.onboardingNameSubtitleStaff
+                    : l.onboardingNameSubtitle,
                 style: AppTextStyles.body
                     .copyWith(color: AppColors.textSecondary)),
             const SizedBox(height: AppSpacing.xl),
@@ -202,6 +230,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 controller: _last,
                 hintText: '',
                 textInputAction: TextInputAction.done),
+            const SizedBox(height: AppSpacing.lg),
+            Text(l.avGender.toUpperCase(),
+                style: AppTextStyles.label
+                    .copyWith(color: AppColors.textSecondary)),
+            const SizedBox(height: AppSpacing.sm),
+            AppSegmentedControl<String>(
+              selected: _gender,
+              segments: [
+                AppSegment(value: 'male', label: l.genderMale),
+                AppSegment(value: 'female', label: l.genderFemale),
+              ],
+              onChanged: (g) => setState(() => _gender = g),
+            ),
           ],
         );
       case 1:

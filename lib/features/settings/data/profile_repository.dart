@@ -20,6 +20,7 @@ class ProfileRepository {
     String? firstName,
     String? lastName,
     DateTime? dateOfBirth,
+    String? gender,
     bool markOnboarded = false,
   }) async {
     final patch = <String, dynamic>{};
@@ -29,6 +30,7 @@ class ProfileRepository {
       patch['date_of_birth'] =
           dateOfBirth.toIso8601String().split('T').first; // YYYY-MM-DD
     }
+    if (gender != null) patch['gender'] = gender;
     if (markOnboarded) patch['onboarding_complete'] = true;
     if (patch.isEmpty) return;
     try {

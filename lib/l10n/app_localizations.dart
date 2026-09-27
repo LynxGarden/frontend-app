@@ -158,6 +158,24 @@ abstract class AppLocalizations {
   /// **'you@email.com'**
   String get emailHint;
 
+  /// No description provided for @firstNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Alex'**
+  String get firstNameHint;
+
+  /// No description provided for @lastNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Novak'**
+  String get lastNameHint;
+
+  /// No description provided for @phoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. +386 40 123 456'**
+  String get phoneHint;
+
   /// No description provided for @sendMagicLink.
   ///
   /// In en, this message translates to:
@@ -205,6 +223,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Progress'**
   String get navProgress;
+
+  /// No description provided for @navChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get navChat;
+
+  /// No description provided for @chatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get chatTitle;
+
+  /// No description provided for @openChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Open chat'**
+  String get openChat;
+
+  /// No description provided for @noMessagesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet. Say hi 👋'**
+  String get noMessagesYet;
+
+  /// No description provided for @typing.
+  ///
+  /// In en, this message translates to:
+  /// **'typing…'**
+  String get typing;
+
+  /// No description provided for @messagePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Message…'**
+  String get messagePlaceholder;
+
+  /// No description provided for @preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get preview;
+
+  /// No description provided for @chatNoCoach.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have a coach assigned yet.'**
+  String get chatNoCoach;
+
+  /// No description provided for @careTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Care team'**
+  String get careTeam;
+
+  /// No description provided for @assignStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign staff'**
+  String get assignStaff;
+
+  /// No description provided for @noCareTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff assigned yet.'**
+  String get noCareTeam;
+
+  /// No description provided for @seeNewMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'See new messages'**
+  String get seeNewMessages;
 
   /// No description provided for @navProfile.
   ///
@@ -425,7 +515,7 @@ abstract class AppLocalizations {
   /// No description provided for @chooseAvatar.
   ///
   /// In en, this message translates to:
-  /// **'Choose avatar'**
+  /// **'Choose profile picture'**
   String get chooseAvatar;
 
   /// No description provided for @buildAvatar.
@@ -518,6 +608,24 @@ abstract class AppLocalizations {
   /// **'Clothing'**
   String get avClothing;
 
+  /// No description provided for @avGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get avGender;
+
+  /// No description provided for @genderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get genderMale;
+
+  /// No description provided for @genderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get genderFemale;
+
   /// No description provided for @onboardingNameTitle.
   ///
   /// In en, this message translates to:
@@ -527,13 +635,19 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingNameSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'This is how you\'ll appear to your coach and clients.'**
+  /// **'This is how you\'ll appear to your coach.'**
   String get onboardingNameSubtitle;
+
+  /// No description provided for @onboardingNameSubtitleStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'This is how you\'ll appear to your clients.'**
+  String get onboardingNameSubtitleStaff;
 
   /// No description provided for @onboardingAvatarTitle.
   ///
   /// In en, this message translates to:
-  /// **'Pick an avatar'**
+  /// **'Pick a profile picture'**
   String get onboardingAvatarTitle;
 
   /// No description provided for @onboardingAvatarSubtitle.

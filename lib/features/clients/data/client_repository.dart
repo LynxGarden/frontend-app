@@ -80,6 +80,9 @@ class ClientRepository {
             'email': _blankNull(email),
             'phone': _blankNull(phone),
             'created_by': createdBy,
+            // The creating staff becomes the client's assigned coach (drives
+            // 1:1 chat).
+            'primary_coach_id': createdBy,
           })
           .select('id')
           .single();

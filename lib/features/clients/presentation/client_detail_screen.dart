@@ -10,16 +10,25 @@ import 'package:lynx_app/features/clients/data/assignment_repository.dart';
 import 'package:lynx_app/features/clients/data/client_repository.dart';
 import 'package:lynx_app/features/clients/data/models/health_flag.dart';
 import 'package:lynx_app/features/clients/presentation/health_flag_labels.dart';
+import 'package:lynx_app/features/chat/data/chat_repository.dart';
+import 'package:lynx_app/features/chat/data/models/assigned_staff.dart';
+import 'package:lynx_app/features/chat/presentation/chat_screen.dart';
+import 'package:lynx_app/features/chat/providers/chat_providers.dart';
 import 'package:lynx_app/features/clients/providers/clients_provider.dart';
 import 'package:lynx_app/features/programs/data/models/program.dart';
 import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/features/review/presentation/client_review_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/models/app_user.dart';
+import 'package:lynx_app/shared/widgets/app_avatar.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
+import 'package:lynx_app/shared/widgets/frosted_nav_scaffold.dart';
+import 'package:lynx_app/shared/widgets/skeleton_loader.dart';
+import 'package:lynx_app/shared/widgets/unread_badge.dart';
 
 /// Client record: profile + safety flags + assigned programs, with assign and
 /// invite actions.
@@ -151,33 +160,166 @@ class ClientDetailScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _assignStaff(BuildContext context, WidgetRef ref) async {
+    final l = AppLocalizations.of(context);
+    final user = ref.read(currentUserProvider).valueOrNull;
+    if (user == null) return;
+    try {
+      final all = await ChatRepository.listAssignableStaff(user.tenantId);
+      final assigned =
+          ref.read(assignedStaffProvider(personId)).valueOrNull ?? const [];
+      final assignedIds = assigned.map((s) => s.staffPersonId).toSet();
+      final candidates = all
+          .where((s) =>
+              s.staffPersonId != personId &&
+              !assignedIds.contains(s.staffPersonId))
+          .toList();
+      if (!context.mounted) return;
+      await showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: AppColors.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+        ),
+        builder: (_) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Text(l.assignStaff, style: AppTextStyles.heading3),
+              ),
+              if (candidates.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+                  child: Text(l.noCareTeam, style: AppTextStyles.bodySmall),
+                )
+              else
+                for (final s in candidates)
+                  ListTile(
+                    leading: AppAvatar(
+                      avatarKind: s.avatarKind,
+                      avatarValue: s.avatarValue,
+                      initials: s.initials,
+                      role: s.role,
+                    ),
+                    title: Text(s.fullName,
+                        style: AppTextStyles.body
+                            .copyWith(fontWeight: FontWeight.w600)),
+                    subtitle: Text(_roleLabel(l, s.role),
+                        style: AppTextStyles.bodySmall),
+                    trailing: Icon(Icons.add, color: AppColors.primary),
+                    onTap: () async {
+                      try {
+                        await ChatRepository.assignStaff(
+                          tenantId: user.tenantId,
+                          clientPersonId: personId,
+                          staffPersonId: s.staffPersonId,
+                          createdBy: user.personId,
+                        );
+                        ref.invalidate(assignedStaffProvider(personId));
+                        if (context.mounted) Navigator.of(context).pop();
+                      } on AppException catch (e) {
+                        if (context.mounted) {
+                          AppToast.show(context, title: e.message, blur: false);
+                        }
+                      }
+                    },
+                  ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+          ),
+        ),
+      );
+    } on AppException catch (e) {
+      if (context.mounted) AppToast.show(context, title: e.message, blur: false);
+    }
+  }
+
+  Future<void> _unassignStaff(
+      BuildContext context, WidgetRef ref, AssignedStaff s) async {
+    try {
+      await ChatRepository.unassignStaff(
+        clientPersonId: personId,
+        staffPersonId: s.staffPersonId,
+      );
+      ref.invalidate(assignedStaffProvider(personId));
+    } on AppException catch (e) {
+      if (context.mounted) AppToast.show(context, title: e.message, blur: false);
+    }
+  }
+
+  static String _roleLabel(AppLocalizations l, AppRole role) {
+    switch (role) {
+      case AppRole.owner:
+        return l.roleOwner;
+      case AppRole.physio:
+        return l.rolePhysio;
+      case AppRole.coach:
+      case AppRole.client:
+        return l.roleCoach;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final clientAsync = ref.watch(clientProvider(personId));
     final flagsAsync = ref.watch(clientHealthFlagsProvider(personId));
     final assignmentsAsync = ref.watch(clientAssignmentsProvider(personId));
+    final careTeamAsync = ref.watch(assignedStaffProvider(personId));
+    final unread =
+        ref.watch(coachUnreadCountsProvider).valueOrNull?[personId] ?? 0;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          AppNavBar(
-            title: clientAsync.valueOrNull?.fullName ?? '…',
-            trailing: clientAsync.valueOrNull?.hasAccount == false
-                ? TextButton(
-                    onPressed: () => _invite(context, ref),
-                    child: Text(l.inviteToApp,
-                        style: AppTextStyles.bodySmall
-                            .copyWith(color: AppColors.primary)),
-                  )
-                : null,
-          ),
-          Expanded(
-            child: SafeArea(
-              top: false,
-              child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.lg),
+    return FrostedNavScaffold(
+      title: clientAsync.valueOrNull?.fullName ?? '…',
+      trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    AppNavBarAction(
+                      icon: Icons.chat_bubble_outline,
+                      onTap: () {
+                        final me =
+                            ref.read(currentUserProvider).valueOrNull?.personId;
+                        if (me == null) return;
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            clientPersonId: personId,
+                            staffPersonId: me,
+                            title: clientAsync.valueOrNull?.fullName ??
+                                l.chatTitle,
+                          ),
+                        ));
+                      },
+                      tooltip: l.openChat,
+                    ),
+                    if (unread > 0)
+                      Positioned(
+                          right: -4, top: -4, child: UnreadBadge(count: unread)),
+                  ],
+                ),
+                if (clientAsync.valueOrNull?.hasAccount == false) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  AppNavBarAction(
+                    icon: Icons.person_add_alt_1,
+                    onTap: () => _invite(context, ref),
+                    tooltip: l.inviteToApp,
+                  ),
+                ],
+              ],
+            ),
+      builder: (context, topInset) => SafeArea(
+        top: false,
+        child: clientAsync.isLoading
+            ? _ClientDetailSkeleton(topInset: topInset)
+            : ListView(
+                padding: EdgeInsets.fromLTRB(AppSpacing.lg,
+                    topInset + AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
                 children: [
             // Account status
             Text(
@@ -186,12 +328,50 @@ class ClientDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
 
+            // Care team
+            _SectionHeader(title: l.careTeam, actionLabel: l.assignStaff,
+                onAction: () => _assignStaff(context, ref)),
+            const SizedBox(height: AppSpacing.sm),
+            careTeamAsync.when(
+              loading: () => const _SkeletonRows(height: 64, count: 1),
+              error: (_, _) => Text(l.somethingWentWrong, style: AppTextStyles.bodySmall),
+              data: (staff) => staff.isEmpty
+                  ? Text(l.noCareTeam, style: AppTextStyles.bodySmall)
+                  : Column(
+                      children: [
+                        for (final s in staff)
+                          AppCard(
+                            padding: EdgeInsets.zero,
+                            child: ListTile(
+                              leading: AppAvatar(
+                                avatarKind: s.avatarKind,
+                                avatarValue: s.avatarValue,
+                                initials: s.initials,
+                                role: s.role,
+                              ),
+                              title: Text(s.fullName,
+                                  style: AppTextStyles.body
+                                      .copyWith(fontWeight: FontWeight.w600)),
+                              subtitle: Text(_roleLabel(l, s.role),
+                                  style: AppTextStyles.bodySmall),
+                              trailing: IconButton(
+                                icon: Icon(Icons.close,
+                                    color: AppColors.textTertiary),
+                                onPressed: () => _unassignStaff(context, ref, s),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+
             // Safety flags
             _SectionHeader(title: l.healthFlagsTitle, actionLabel: l.addHealthFlag,
                 onAction: () => _addFlag(context, ref)),
             const SizedBox(height: AppSpacing.sm),
             flagsAsync.when(
-              loading: () => const LinearProgressIndicator(),
+              loading: () => const _SkeletonRows(height: 44, count: 1),
               error: (_, _) => Text(l.somethingWentWrong, style: AppTextStyles.bodySmall),
               data: (flags) => flags.isEmpty
                   ? Text(l.noHealthFlags, style: AppTextStyles.bodySmall)
@@ -212,7 +392,7 @@ class ClientDetailScreen extends ConsumerWidget {
                 onAction: () => _assign(context, ref)),
             const SizedBox(height: AppSpacing.sm),
             assignmentsAsync.when(
-              loading: () => const LinearProgressIndicator(),
+              loading: () => const _SkeletonRows(height: 64, count: 2),
               error: (_, _) => Text(l.somethingWentWrong, style: AppTextStyles.bodySmall),
               data: (assignments) => assignments.isEmpty
                   ? Text(l.noAssignments, style: AppTextStyles.bodySmall)
@@ -247,7 +427,77 @@ class ClientDetailScreen extends ConsumerWidget {
                 ],
               ),
             ),
-          ),
+    );
+  }
+}
+
+/// Full-screen loading placeholder that mirrors the loaded layout: an account
+/// status line, then three sections (header + rows) matching the real content.
+class _ClientDetailSkeleton extends StatelessWidget {
+  const _ClientDetailSkeleton({this.topInset = 0});
+  final double topInset;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget header() => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            SkeletonBox(width: 160, height: 20),
+            SkeletonBox(width: 96, height: 13),
+          ],
+        );
+    Widget card({double height = 64}) => Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: SkeletonBox(
+              width: double.infinity, height: height, borderRadius: AppRadius.lg),
+        );
+
+    return SkeletonLoader(
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, topInset + AppSpacing.md,
+            AppSpacing.lg, AppSpacing.lg),
+        children: [
+          const SkeletonBox(width: 150, height: 12),
+          const SizedBox(height: AppSpacing.lg),
+          // Health flags
+          header(),
+          const SizedBox(height: AppSpacing.sm),
+          card(height: 44),
+          const SizedBox(height: AppSpacing.xl),
+          // Assignments
+          header(),
+          const SizedBox(height: AppSpacing.sm),
+          card(),
+          card(),
+          const SizedBox(height: AppSpacing.xl),
+          // Completed sessions
+          header(),
+        ],
+      ),
+    );
+  }
+}
+
+/// A small shimmering placeholder for a section that's still loading while the
+/// rest of the screen is already shown (health flags / assignments).
+class _SkeletonRows extends StatelessWidget {
+  const _SkeletonRows({required this.height, required this.count});
+  final double height;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonLoader(
+      child: Column(
+        children: [
+          for (var i = 0; i < count; i++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: SkeletonBox(
+                  width: double.infinity,
+                  height: height,
+                  borderRadius: AppRadius.md),
+            ),
         ],
       ),
     );

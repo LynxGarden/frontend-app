@@ -15,6 +15,7 @@ import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/collapsing_header.dart';
+import 'package:lynx_app/shared/widgets/main_shell.dart';
 import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// Staff Groups tab: list rosters, create a new one, drill into a group.
@@ -66,13 +67,16 @@ class _GroupsListScreenState extends ConsumerState<GroupsListScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab_groups',
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        onPressed: _create,
-        icon: const Icon(Icons.add),
-        label: Text(l.newGroup),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: AppBottomBar.fabBottomInset(context)),
+        child: FloatingActionButton.extended(
+          heroTag: 'fab_groups',
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          onPressed: _create,
+          icon: const Icon(Icons.add),
+          label: Text(l.newGroup),
+        ),
       ),
       body: CustomScrollView(
         controller: _scroll,
@@ -99,8 +103,8 @@ class _GroupsListScreenState extends ConsumerState<GroupsListScreen> {
                 );
               }
               return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.xxl),
+                padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs,
+                    AppSpacing.lg, MediaQuery.paddingOf(context).bottom + AppSpacing.md),
                 sliver: SliverList.builder(
                   itemCount: groups.length,
                   itemBuilder: (context, i) {

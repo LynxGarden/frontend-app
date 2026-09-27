@@ -25,6 +25,8 @@ class AppAvatar extends ConsumerWidget {
     required this.initials,
     this.role,
     this.radius = 22,
+    this.dicebearScale = 92,
+    this.dicebearTranslateY = 8,
   });
 
   final String? avatarKind;
@@ -32,6 +34,11 @@ class AppAvatar extends ConsumerWidget {
   final String initials;
   final AppRole? role;
   final double radius;
+
+  /// Framing for the DiceBear render. Defaults give the app-wide portrait crop;
+  /// the avatar builder overrides them to zoom feature thumbnails.
+  final int dicebearScale;
+  final int dicebearTranslateY;
 
   ({Color bg, Color ring}) _roleColors() {
     switch (role) {
@@ -57,7 +64,12 @@ class AppAvatar extends ConsumerWidget {
     Widget content;
     if (avatarKind == 'dicebear' && avatarValue != null) {
       content = CachedNetworkImage(
-        imageUrl: AvatarConfig.url(AvatarConfig.decode(avatarValue!), size: px),
+        imageUrl: AvatarConfig.url(
+          AvatarConfig.decode(avatarValue!),
+          size: px,
+          scale: dicebearScale,
+          translateY: dicebearTranslateY,
+        ),
         fit: BoxFit.contain,
         placeholder: (_, _) => _initials(colors.ring),
         errorWidget: (_, _, _) => _initials(colors.ring),
@@ -86,8 +98,12 @@ class AppAvatar extends ConsumerWidget {
         shape: BoxShape.circle,
         border: Border.all(color: colors.ring, width: radius >= 28 ? 2 : 1.5),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: content,
+      // Hard-clip the figure to the disc so a fill-framed avatar is cropped by
+      // the ring instead of ever spilling past it.
+      child: ClipOval(
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(width: size, height: size, child: content),
+      ),
     );
   }
 

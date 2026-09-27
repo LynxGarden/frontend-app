@@ -17,18 +17,29 @@ import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 /// Feature-by-feature builder for a DiceBear notionists avatar. Returns the
 /// chosen config map via [Navigator.pop] on save (null if cancelled).
 class AvatarBuilderScreen extends StatefulWidget {
-  const AvatarBuilderScreen({super.key, this.initialConfig, this.role});
+  const AvatarBuilderScreen(
+      {super.key, this.initialConfig, this.role, this.gender});
 
   final Map<String, dynamic>? initialConfig;
   final AppRole? role;
+
+  /// The person's profile gender ('male' / 'female' / null) — biases the
+  /// available features (females never get a beard) and the shuffle. Set on the
+  /// onboarding name step / profile settings, not here.
+  final String? gender;
 
   @override
   State<AvatarBuilderScreen> createState() => _AvatarBuilderScreenState();
 }
 
 class _AvatarBuilderScreenState extends State<AvatarBuilderScreen> {
-  late Map<String, dynamic> _config =
-      Map<String, dynamic>.from(widget.initialConfig ?? AvatarConfig.random());
+  late Map<String, dynamic> _config = Map<String, dynamic>.from(
+      widget.initialConfig ?? AvatarConfig.random(null, widget.gender));
+
+  /// Feature rows to show — beard is hidden for females.
+  List<AvatarCategory> get _categories => widget.gender == 'female'
+      ? [for (final c in notionistsCategories) if (c.key != 'beard') c]
+      : notionistsCategories;
 
   void _set(String key, String? value) {
     HapticFeedback.selectionClick();
@@ -37,7 +48,7 @@ class _AvatarBuilderScreenState extends State<AvatarBuilderScreen> {
 
   void _shuffle() {
     HapticFeedback.selectionClick();
-    setState(() => _config = AvatarConfig.random(Random()));
+    setState(() => _config = AvatarConfig.random(Random(), widget.gender));
   }
 
   @override
@@ -47,28 +58,39 @@ class _AvatarBuilderScreenState extends State<AvatarBuilderScreen> {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          AppNavBar(
-            title: l.buildAvatar,
-            trailing: AppNavBarAction(icon: Icons.casino_outlined, onTap: _shuffle),
-          ),
-          // Live preview
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: AppAvatar(
-              avatarKind: 'dicebear',
-              avatarValue: AvatarConfig.encode(_config),
-              initials: '',
-              role: widget.role,
-              radius: 52,
+          // Nav bar + live preview, separated from the feature list below by a
+          // hairline whose bottom corners are rounded (no background change).
+          CustomPaint(
+            foregroundPainter:
+                _BottomRoundedBorder(color: AppColors.surfaceBorder),
+            child: Column(
+              children: [
+                AppNavBar(
+                  title: l.buildAvatar,
+                  trailing: AppNavBarAction(
+                      icon: Icons.casino_outlined, onTap: _shuffle),
+                ),
+                // Live preview
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: AppAvatar(
+                    avatarKind: 'dicebear',
+                    avatarValue: AvatarConfig.encode(_config),
+                    initials: '',
+                    role: widget.role,
+                    radius: 52,
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(
                   0, AppSpacing.sm, 0, AppSpacing.md),
-              itemCount: notionistsCategories.length,
+              itemCount: _categories.length,
               itemBuilder: (_, i) => _CategoryRow(
-                category: notionistsCategories[i],
+                category: _categories[i],
                 config: _config,
                 role: widget.role,
                 onSelect: _set,
@@ -106,6 +128,16 @@ class _CategoryRow extends StatelessWidget {
   final AppRole? role;
   final void Function(String key, String? value) onSelect;
 
+  /// Zoom the thumbnail onto the feature this row edits: clothing shows the
+  /// chest/shoulders, everything else (hair/eyes/brows/lips/nose/glasses/beard)
+  /// is on the face, so we zoom onto the head.
+  // Values validated against the rendered PNGs (alpha bbox) so the head stays
+  // inside the circular clip across all hairstyles — the face is centered with
+  // ~10% margin and shoulders cropped; the clothing crop pans onto the torso.
+  ({int scale, int translateY}) get _crop => category.key == 'body'
+      ? (scale: 115, translateY: -24) // pan down to the clothing
+      : (scale: 140, translateY: 14); // head centered, fills with margin
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -134,8 +166,17 @@ class _CategoryRow extends StatelessWidget {
             itemBuilder: (_, i) {
               final value = values[i];
               final selected = current == value;
-              final preview = Map<String, dynamic>.from(config)
-                ..[category.key] = value;
+              // Thumbnail = the ACTUAL avatar being built (so gender/hair/etc
+              // stay consistent — a male avatar shows a male in every row) with
+              // just this one feature swapped. Face rows drop clothing so
+              // changing an outfit doesn't reload the face thumbnails.
+              final preview = Map<String, dynamic>.from(config);
+              if (category.key != 'body') preview.remove('body');
+              if (value == null) {
+                preview.remove(category.key);
+              } else {
+                preview[category.key] = value;
+              }
               return Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.sm),
                 child: GestureDetector(
@@ -159,6 +200,8 @@ class _CategoryRow extends StatelessWidget {
                             initials: '',
                             role: role,
                             radius: 30,
+                            dicebearScale: _crop.scale,
+                            dicebearTranslateY: _crop.translateY,
                           ),
                   ),
                 ),
@@ -203,4 +246,32 @@ class _CategoryRow extends StatelessWidget {
         return key;
     }
   }
+}
+
+/// Draws only the bottom edge of the header as a hairline with rounded bottom
+/// corners (a single-side [Border] can't take a radius in a [BoxDecoration]).
+class _BottomRoundedBorder extends CustomPainter {
+  _BottomRoundedBorder({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const r = AppRadius.lg;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    final path = Path()
+      ..moveTo(0, size.height - r)
+      ..quadraticBezierTo(0, size.height, r, size.height)
+      ..lineTo(size.width - r, size.height)
+      ..quadraticBezierTo(
+          size.width, size.height, size.width, size.height - r);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _BottomRoundedBorder oldDelegate) =>
+      oldDelegate.color != color;
 }

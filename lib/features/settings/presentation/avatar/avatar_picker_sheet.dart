@@ -26,6 +26,7 @@ Future<bool> showAvatarPicker(
   required String personId,
   required String tenantId,
   AppRole? role,
+  String? gender,
   String? currentKind,
   String? currentValue,
 }) async {
@@ -40,6 +41,7 @@ Future<bool> showAvatarPicker(
       personId: personId,
       tenantId: tenantId,
       role: role,
+      gender: gender,
       currentKind: currentKind,
       currentValue: currentValue,
     ),
@@ -53,6 +55,7 @@ class _AvatarPickerBody extends StatelessWidget {
     required this.personId,
     required this.tenantId,
     required this.role,
+    required this.gender,
     required this.currentKind,
     required this.currentValue,
   });
@@ -61,6 +64,7 @@ class _AvatarPickerBody extends StatelessWidget {
   final String personId;
   final String tenantId;
   final AppRole? role;
+  final String? gender;
   final String? currentKind;
   final String? currentValue;
 
@@ -70,7 +74,8 @@ class _AvatarPickerBody extends StatelessWidget {
         : null;
     final config = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
-        builder: (_) => AvatarBuilderScreen(initialConfig: initial, role: role),
+        builder: (_) =>
+            AvatarBuilderScreen(initialConfig: initial, role: role, gender: gender),
       ),
     );
     if (config == null) return;

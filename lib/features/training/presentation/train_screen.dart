@@ -68,8 +68,8 @@ class _TrainScreenState extends ConsumerState<TrainScreen> {
                   );
                 }
                 return SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.xxl),
+                  padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs,
+                      AppSpacing.lg, MediaQuery.paddingOf(context).bottom + AppSpacing.md),
                   sliver: SliverList.builder(
                     itemCount: assignment.sessions.length + 1,
                     itemBuilder: (context, i) {
