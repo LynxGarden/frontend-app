@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
+import 'package:supabase_flutter/supabase_flutter.dart'
+    show FileOptions, PostgrestException;
 
 import 'package:lynx_app/core/supabase/supabase_client.dart';
 import 'package:lynx_app/core/utils/app_exception.dart';
@@ -13,10 +14,11 @@ class ExerciseRepository {
   const ExerciseRepository._();
 
   static const _videoBucket = 'exercise-videos';
+  static const _thumbnailBucket = 'exercise-thumbnails';
 
   static const _select =
       'id, owner_id, name, description, video_url, video_storage_path, '
-      'exercise_tags(tags(id, category, label))';
+      'thumbnail_storage_path, exercise_tags(tags(id, category, label))';
 
   /// A coach's own exercises, alphabetical.
   static Future<List<Exercise>> listForOwner({
@@ -93,6 +95,7 @@ class ExerciseRepository {
     String? description,
     String? videoUrl,
     String? videoStoragePath,
+    String? thumbnailStoragePath,
     List<String> tagIds = const [],
   }) async {
     try {
@@ -105,6 +108,7 @@ class ExerciseRepository {
             'description': _nullIfBlank(description),
             'video_url': _nullIfBlank(videoUrl),
             'video_storage_path': _nullIfBlank(videoStoragePath),
+            'thumbnail_storage_path': _nullIfBlank(thumbnailStoragePath),
           })
           .select('id')
           .single();
@@ -124,6 +128,7 @@ class ExerciseRepository {
     String? description,
     String? videoUrl,
     String? videoStoragePath,
+    String? thumbnailStoragePath,
     List<String> tagIds = const [],
   }) async {
     try {
@@ -133,6 +138,7 @@ class ExerciseRepository {
             'description': _nullIfBlank(description),
             'video_url': _nullIfBlank(videoUrl),
             'video_storage_path': _nullIfBlank(videoStoragePath),
+            'thumbnail_storage_path': _nullIfBlank(thumbnailStoragePath),
           })
           .eq('id', exerciseId)
           .eq('tenant_id', tenantId);
@@ -151,6 +157,13 @@ class ExerciseRepository {
           .delete()
           .eq('id', exerciseId)
           .eq('tenant_id', tenantId);
+    } on PostgrestException catch (e) {
+      // 23503 = foreign_key_violation: the exercise is still referenced by a
+      // program template (session_exercises), which is ON DELETE RESTRICT.
+      if (e.code == '23503') {
+        throw AppException("Can't delete — this exercise is used in a program.");
+      }
+      throw AppException('Could not delete the exercise.', cause: e);
     } catch (e) {
       throw AppException('Could not delete the exercise.', cause: e);
     }
@@ -196,6 +209,45 @@ class ExerciseRepository {
   static Future<void> deleteVideo(String storagePath) async {
     try {
       await SupabaseClientWrapper.storage.from(_videoBucket).remove([storagePath]);
+    } catch (_) {/* best-effort */}
+  }
+
+  // ── Thumbnail storage (public bucket `exercise-thumbnails`) ────────────────
+
+  /// Uploads a thumbnail [file] to `{tenantId}/{uuid}.<ext>` and returns the
+  /// storage path (store it as the exercise's `thumbnail_storage_path`).
+  /// Staff-only per RLS.
+  static Future<String> uploadThumbnail({
+    required String tenantId,
+    required File file,
+  }) async {
+    try {
+      final ext = file.path.split('.').last.toLowerCase();
+      final name = DateTime.now().microsecondsSinceEpoch.toString();
+      final path = '$tenantId/$name.$ext';
+      await SupabaseClientWrapper.storage.from(_thumbnailBucket).upload(
+            path,
+            file,
+            fileOptions: const FileOptions(upsert: true),
+          );
+      return path;
+    } catch (e) {
+      throw AppException('Could not upload the thumbnail.', cause: e);
+    }
+  }
+
+  /// A stable public URL for a thumbnail (the bucket is public — no signing).
+  static String thumbnailPublicUrl(String storagePath) =>
+      SupabaseClientWrapper.storage
+          .from(_thumbnailBucket)
+          .getPublicUrl(storagePath);
+
+  /// Removes a thumbnail from storage (best-effort; ignores failures).
+  static Future<void> deleteThumbnail(String storagePath) async {
+    try {
+      await SupabaseClientWrapper.storage
+          .from(_thumbnailBucket)
+          .remove([storagePath]);
     } catch (_) {/* best-effort */}
   }
 

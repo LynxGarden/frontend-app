@@ -69,10 +69,24 @@ class ReviewRepository {
       final exRows = await SupabaseClientWrapper.db('assignment_exercises')
           .select('id, exercise_id, exercise_name, order_index')
           .eq('tenant_id', tenantId)
-          .eq('assignment_session_id', assignmentSessionId)
-          .order('order_index');
-      final exercises = (exRows as List).cast<Map>();
+          .eq('assignment_session_id', assignmentSessionId);
+      final exercises = (exRows as List)
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
       if (exercises.isEmpty) return const [];
+
+      // Sort in Dart with the SAME comparator the client runner uses
+      // (TrainingAssignmentSession.fromJson): order_index asc, then id asc.
+      // Sorting here rather than in the DB guarantees byte-for-byte agreement
+      // with the client even when order_index values collide (legacy all-zero
+      // rows) — a DB uuid ordering can differ from Dart's String.compareTo.
+      exercises.sort((a, b) {
+        final c = ((a['order_index'] as int?) ?? 0)
+            .compareTo((b['order_index'] as int?) ?? 0);
+        return c != 0
+            ? c
+            : (a['id'] as String).compareTo(b['id'] as String);
+      });
 
       final exerciseIds = exercises
           .map((e) => e['exercise_id'] as String?)

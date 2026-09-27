@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
+import 'package:lynx_app/features/exercises/data/exercise_repository.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise_tag.dart';
 import 'package:lynx_app/features/exercises/presentation/exercise_editor_screen.dart';
@@ -14,7 +15,7 @@ import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
 import 'package:lynx_app/features/programs/presentation/program_list_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/main_shell.dart';
-import 'package:lynx_app/shared/widgets/skeleton_list.dart';
+import 'package:lynx_app/shared/widgets/skeleton_loader.dart';
 
 /// Coach exercise library: searchable list, tag filter, add/edit/delete.
 class ExerciseLibraryScreen extends ConsumerStatefulWidget {
@@ -151,7 +152,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
             const SizedBox(height: AppSpacing.sm),
             Expanded(
               child: exercisesAsync.when(
-                loading: () => const SkeletonList(),
+                loading: () => const _ExerciseGridSkeleton(),
                 error: (_, _) => Center(
                   child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall),
                 ),
@@ -169,16 +170,17 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                       ),
                     );
                   }
-                  return ListView.separated(
+                  return GridView.builder(
                     padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm,
-                        AppSpacing.lg, MediaQuery.paddingOf(context).bottom + AppSpacing.md),
+                        AppSpacing.lg,
+                        MediaQuery.paddingOf(context).bottom + AppSpacing.md + 60),
+                    gridDelegate: _gridDelegate,
                     itemCount: items.length,
-                    itemBuilder: (_, i) => _ExerciseTile(
+                    itemBuilder: (_, i) => _ExerciseGridCard(
                       exercise: items[i],
                       onTap: () => _openEditor(items[i]),
                       onWatch: () => _watch(items[i]),
                     ),
-                    separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
                   );
                 },
               ),
@@ -241,17 +243,23 @@ class _FacetedTagFilter extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          // Left inset only — the pills scroll to the right edge (their trailing
+          // inset lives inside the scroll view, below) so the last chip isn't
+          // clipped against a dead gap.
+          padding: const EdgeInsets.only(left: AppSpacing.lg),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: searchOpen
-                ? Row(
+                ? Padding(
                     key: const ValueKey('search'),
-                    children: [
-                      Expanded(child: _searchField(l)),
-                      const SizedBox(width: AppSpacing.sm),
-                      _circleButton(Icons.close, onCloseSearch),
-                    ],
+                    padding: const EdgeInsets.only(right: AppSpacing.lg),
+                    child: Row(
+                      children: [
+                        Expanded(child: _searchField(l)),
+                        const SizedBox(width: AppSpacing.sm),
+                        _circleButton(Icons.close, onCloseSearch),
+                      ],
+                    ),
                   )
                 : Row(
                     key: const ValueKey('pills'),
@@ -261,6 +269,7 @@ class _FacetedTagFilter extends StatelessWidget {
                       Expanded(
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.only(right: AppSpacing.lg),
                           child: Row(children: [
                             _filterChip(l.filterAll,
                                 selected: activeCategory == null,
@@ -395,8 +404,18 @@ class _FacetedTagFilter extends StatelessWidget {
   }
 }
 
-class _ExerciseTile extends StatelessWidget {
-  const _ExerciseTile({
+/// 2-column grid geometry: square-ish cards with room for a title + tags line.
+const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
+  crossAxisCount: 2,
+  crossAxisSpacing: AppSpacing.md,
+  mainAxisSpacing: AppSpacing.md,
+  childAspectRatio: 0.72,
+);
+
+/// A library card: cover thumbnail on top, title + tags below. A small play
+/// badge overlays the image when the exercise has a video.
+class _ExerciseGridCard extends StatelessWidget {
+  const _ExerciseGridCard({
     required this.exercise,
     required this.onTap,
     required this.onWatch,
@@ -411,39 +430,150 @@ class _ExerciseTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(color: AppColors.surfaceBorder),
+          boxShadow: AppShadows.card,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
+              child: ClipRRect(
+                // Inset by the 1px border so the clip sits inside it, not on it.
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(AppRadius.lg - 1)),
+                child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _ExerciseThumbnail(path: exercise.thumbnailStoragePath),
+                  if (exercise.hasVideo)
+                    Positioned(
+                      right: AppSpacing.sm,
+                      bottom: AppSpacing.sm,
+                      child: GestureDetector(
+                        onTap: onWatch,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.55),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.play_arrow_rounded,
+                              size: 20, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.sm),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(exercise.name, style: AppTextStyles.body.copyWith(
-                      fontWeight: FontWeight.w600)),
-                  if (exercise.tags.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      exercise.tags.map((t) => t.label).join(' · '),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodySmall,
-                    ),
-                  ],
+                  Text(
+                    exercise.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.body
+                        .copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    exercise.tags.isEmpty
+                        ? '—'
+                        : exercise.tags.map((t) => t.label).join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bodySmall
+                        .copyWith(color: AppColors.textTertiary),
+                  ),
                 ],
               ),
             ),
-            if (exercise.hasVideo)
-              IconButton(
-                icon: Icon(Icons.play_circle_outline,
-                    color: AppColors.primary),
-                onPressed: onWatch,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The cover image for a card: the public thumbnail, or a neutral placeholder
+/// for legacy exercises saved before thumbnails were required.
+class _ExerciseThumbnail extends StatelessWidget {
+  const _ExerciseThumbnail({required this.path});
+  final String? path;
+
+  @override
+  Widget build(BuildContext context) {
+    if (path == null || path!.trim().isEmpty) return const _ThumbnailPlaceholder();
+    return Image.network(
+      ExerciseRepository.thumbnailPublicUrl(path!),
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, progress) =>
+          progress == null ? child : const _ThumbnailPlaceholder(),
+      errorBuilder: (_, _, _) => const _ThumbnailPlaceholder(),
+    );
+  }
+}
+
+class _ThumbnailPlaceholder extends StatelessWidget {
+  const _ThumbnailPlaceholder();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.surfaceLight,
+      alignment: Alignment.center,
+      child: Icon(Icons.fitness_center,
+          size: 28, color: AppColors.textTertiary),
+    );
+  }
+}
+
+/// Loading state matching the 2-column card grid.
+class _ExerciseGridSkeleton extends StatelessWidget {
+  const _ExerciseGridSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg,
+          MediaQuery.paddingOf(context).bottom + AppSpacing.md + 60),
+      gridDelegate: _gridDelegate,
+      itemCount: 6,
+      itemBuilder: (_, _) => Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: AppColors.surfaceBorder),
+          boxShadow: AppShadows.card,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(AppRadius.lg - 1)),
+                child: Container(color: AppColors.surfaceLight),
               ),
-            Icon(Icons.chevron_right, color: AppColors.textTertiary),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              child: SkeletonLoader(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    SkeletonBox(width: 110, height: 14),
+                    SizedBox(height: 6),
+                    SkeletonBox(width: 70, height: 11),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

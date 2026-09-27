@@ -34,7 +34,8 @@ class SessionRepository {
       // A linked person with no explicit role row is treated as a client.
       if (roles.isEmpty) roles.add(AppRole.client);
 
-      return AppUser.fromJson(Map<String, dynamic>.from(personRow), roles);
+      return AppUser.fromJson(Map<String, dynamic>.from(personRow), roles,
+          authUserId: authUser.id);
     } catch (e) {
       throw AppException(
         'Could not load your profile. Please try again.',

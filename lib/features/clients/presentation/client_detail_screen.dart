@@ -18,6 +18,8 @@ import 'package:lynx_app/features/clients/providers/clients_provider.dart';
 import 'package:lynx_app/features/programs/data/models/program.dart';
 import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/features/review/presentation/client_review_screen.dart';
+import 'package:lynx_app/features/review/presentation/session_actuals_screen.dart';
+import 'package:lynx_app/features/review/providers/review_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/models/app_user.dart';
 import 'package:lynx_app/shared/widgets/app_avatar.dart';
@@ -89,7 +91,9 @@ class ClientDetailScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              // Tight top: the theme drag handle already reserves space above.
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.lg),
               child: Text(l.assignProgram, style: AppTextStyles.heading3),
             ),
             for (final p in templates)
@@ -187,7 +191,9 @@ class ClientDetailScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
+                // Tight top: the theme drag handle already reserves space above.
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.lg),
                 child: Text(l.assignStaff, style: AppTextStyles.heading3),
               ),
               if (candidates.isEmpty)
@@ -270,6 +276,7 @@ class ClientDetailScreen extends ConsumerWidget {
     final flagsAsync = ref.watch(clientHealthFlagsProvider(personId));
     final assignmentsAsync = ref.watch(clientAssignmentsProvider(personId));
     final careTeamAsync = ref.watch(assignedStaffProvider(personId));
+    final completedAsync = ref.watch(clientCompletedProvider(personId));
     final unread =
         ref.watch(coachUnreadCountsProvider).valueOrNull?[personId] ?? 0;
 
@@ -423,6 +430,46 @@ class ClientDetailScreen extends ConsumerWidget {
                   clientName: clientAsync.valueOrNull?.fullName ?? '',
                 ),
               )),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            completedAsync.when(
+              loading: () => const _SkeletonRows(height: 64, count: 1),
+              error: (_, _) =>
+                  Text(l.somethingWentWrong, style: AppTextStyles.bodySmall),
+              data: (sessions) => sessions.isEmpty
+                  ? Text(l.reviewEmpty, style: AppTextStyles.bodySmall)
+                  : Column(
+                      children: [
+                        // Preview the few most recent; "View" opens the full list.
+                        for (final s in sessions.take(3))
+                          AppCard(
+                            padding: EdgeInsets.zero,
+                            child: ListTile(
+                              title: Text('${s.assignmentName} · ${s.label}',
+                                  style: AppTextStyles.body
+                                      .copyWith(fontWeight: FontWeight.w600)),
+                              subtitle: Text(
+                                MaterialLocalizations.of(context)
+                                    .formatFullDate(s.completedAt.toLocal()),
+                                style: AppTextStyles.bodySmall,
+                              ),
+                              trailing: Icon(Icons.chevron_right,
+                                  color: AppColors.textTertiary),
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (_) => SessionActualsScreen(
+                                    sessionId: s.assignmentSessionId,
+                                    personId: personId,
+                                    title:
+                                        '${s.label} · ${clientAsync.valueOrNull?.fullName ?? ''}',
+                                  ),
+                                ));
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
             ),
                 ],
               ),

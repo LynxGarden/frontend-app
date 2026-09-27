@@ -22,6 +22,8 @@ class FrostedNavScaffold extends StatefulWidget {
     this.showBack = true,
     this.onBack,
     this.footer,
+    this.floatingActionButton,
+    this.floatingActionButtonLocation,
   });
 
   final String title;
@@ -30,6 +32,11 @@ class FrostedNavScaffold extends StatefulWidget {
   final VoidCallback? onBack;
   final Widget Function(BuildContext context, double topInset) builder;
   final Widget? footer;
+
+  /// A button that floats over the scrolling body (e.g. a FAB), instead of the
+  /// in-flow [footer] band. Positioned via [floatingActionButtonLocation].
+  final Widget? floatingActionButton;
+  final FloatingActionButtonLocation? floatingActionButtonLocation;
 
   @override
   State<FrostedNavScaffold> createState() => _FrostedNavScaffoldState();
@@ -50,6 +57,8 @@ class _FrostedNavScaffoldState extends State<FrostedNavScaffold> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: widget.floatingActionButton,
+      floatingActionButtonLocation: widget.floatingActionButtonLocation,
       body: Stack(
         children: [
           Positioned.fill(

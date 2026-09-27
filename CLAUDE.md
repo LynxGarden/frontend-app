@@ -232,6 +232,14 @@ SECURITY DEFINER RPCs (clients can't write staff-only rows): `assign_template`,
    value in `app_colors.dart`. Theme mode is user-selectable in Settings
    (`themeModeProvider`, System/Light/Dark) and persisted. Because the getters
    aren't `const`, don't wrap color-bearing widgets in `const`.
+16. **Loading skeletons, never spinners.** Every screen (or section) that awaits
+   data from the DB must render a **layout-matching skeleton** while loading — a
+   shape that mirrors the loaded UI (via `SkeletonLoader` + `SkeletonBox` from
+   `shared/widgets/skeleton_loader.dart`), so the swap to real data doesn't shift
+   anything. **Do not** ship a bare `CircularProgressIndicator` as a screen/section
+   loading state. Build a private `_XxxSkeleton` widget that reuses the real
+   screen's spacing/cards. Reserve spinners for in-button / inline pending states
+   (e.g. a save button), not for whole-screen or list/card loads.
 
 ## UI Styling Patterns & Conventions
 

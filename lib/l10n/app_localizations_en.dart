@@ -142,6 +142,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get comingSoon => 'Coming soon';
 
   @override
+  String get sessionsEmpty => 'No sessions added yet. Add your first session.';
+
+  @override
+  String get sessionExercisesEmpty =>
+      'No exercises added yet. Add your first exercise.';
+
+  @override
   String get settings => 'Settings';
 
   @override
@@ -590,6 +597,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get markComplete => 'Mark complete';
 
   @override
+  String get finishSessionTitle => 'Finish session';
+
+  @override
+  String get finishSessionBody =>
+      'You\'ve reached the end. Mark the session complete when you\'re done.';
+
+  @override
+  String exerciseCounter(int current, int total) {
+    return '$current of $total';
+  }
+
+  @override
   String get completedBadge => 'Completed';
 
   @override
@@ -704,6 +723,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoUploaded => 'Video uploaded';
+
+  @override
+  String get thumbnail => 'Thumbnail';
+
+  @override
+  String get addThumbnail => 'Add thumbnail';
+
+  @override
+  String get changeThumbnail => 'Change photo';
+
+  @override
+  String get thumbnailRequired => 'A thumbnail is required.';
+
+  @override
+  String get thumbnailHint => 'Tap to add a cover image';
 
   @override
   String get welcomeTagline => 'Train. Log. Progress.';

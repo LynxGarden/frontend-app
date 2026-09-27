@@ -26,6 +26,7 @@ class AppUser {
     required this.tenantId,
     required this.roles,
     required this.locale,
+    this.authUserId,
     this.firstName,
     this.lastName,
     this.email,
@@ -40,6 +41,11 @@ class AppUser {
   final String tenantId;
   final Set<AppRole> roles;
   final String locale;
+
+  /// The Supabase auth user this domain record belongs to. Lets the UI detect an
+  /// account switch (a stale cached user from a previous session) before the new
+  /// record loads, so the wrong role's shell never flashes.
+  final String? authUserId;
   final String? firstName;
   final String? lastName;
   final String? email;
@@ -88,12 +94,14 @@ class AppUser {
     return AppRole.client;
   }
 
-  factory AppUser.fromJson(Map<String, dynamic> json, Set<AppRole> roles) {
+  factory AppUser.fromJson(Map<String, dynamic> json, Set<AppRole> roles,
+      {String? authUserId}) {
     final dob = json['date_of_birth'] as String?;
     return AppUser(
       personId: json['id'] as String,
       tenantId: json['tenant_id'] as String,
       roles: roles,
+      authUserId: authUserId,
       locale: (json['locale'] as String?) ?? 'en',
       firstName: json['first_name'] as String?,
       lastName: json['last_name'] as String?,

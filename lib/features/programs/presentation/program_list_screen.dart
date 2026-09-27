@@ -14,6 +14,7 @@ import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
+import 'package:lynx_app/shared/widgets/reorder_proxy.dart';
 import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// The coach's program template library.
@@ -98,7 +99,11 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
       });
     });
     final programsAsync = ref.watch(programTemplatesProvider);
-    final programs = _programs;
+    // Prefer the optimistic local copy (for drag-reorder), but fall back to the
+    // provider's current value: `ref.listen` only fires on *changes*, so it
+    // misses a value that was already resolved before this screen mounted —
+    // which otherwise renders the empty state over real data.
+    final programs = _programs ?? programsAsync.valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -112,8 +117,9 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
         label: Text(l.newProgram),
       ),
       body: SafeArea(
+        bottom: false,
         child: programs == null && programsAsync.isLoading
-            ? const SkeletonList()
+            ? const ProgramSkeletonList()
             : programs == null && programsAsync.hasError
                 ? Center(
                     child: Text(l.somethingWentWrong,
@@ -131,6 +137,7 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
                         padding: const EdgeInsets.fromLTRB(
                             AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 96),
                         itemCount: programs.length,
+                        proxyDecorator: roundedReorderProxy,
                         onReorderItem: _reorder,
                         itemBuilder: (_, i) => Padding(
                           key: ValueKey(programs[i].id),

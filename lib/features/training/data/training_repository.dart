@@ -20,7 +20,8 @@ class TrainingRepository {
             'id, name, '
             'assignment_sessions(id, label, order_index, last_completed_at, '
             'assignment_exercises(id, exercise_id, swapped_from_exercise_id, '
-            'exercise_name, video_url, video_storage_path, order_index, sets, reps, weight, '
+            'exercise_name, video_url, video_storage_path, thumbnail_storage_path, '
+            'order_index, sets, reps, weight, '
             'load_intensity, rpe, time_seconds, tempo, rest_seconds, '
             'set_type_note, coach_note))',
           )
@@ -72,8 +73,9 @@ class TrainingRepository {
     }
   }
 
-  /// Records one set the client did today. `logged_by` = the client themselves.
-  static Future<void> logSet({
+  /// Records one set the client did today and returns the new entry id (so the
+  /// UI can later edit that exact set). `logged_by` = the client themselves.
+  static Future<String> logSet({
     required String tenantId,
     required String personId,
     required String exerciseId,
@@ -84,19 +86,46 @@ class TrainingRepository {
     int? timeSeconds,
   }) async {
     try {
-      await SupabaseClientWrapper.db('logged_entries').insert({
-        'tenant_id': tenantId,
-        'person_id': personId,
-        'exercise_id': exerciseId,
-        'assignment_exercise_id': assignmentExerciseId,
-        'set_index': setIndex,
-        'reps': reps,
-        'weight': weight,
-        'time_seconds': timeSeconds,
-        'logged_by': personId,
-      });
+      final row = await SupabaseClientWrapper.db('logged_entries')
+          .insert({
+            'tenant_id': tenantId,
+            'person_id': personId,
+            'exercise_id': exerciseId,
+            'assignment_exercise_id': assignmentExerciseId,
+            'set_index': setIndex,
+            'reps': reps,
+            'weight': weight,
+            'time_seconds': timeSeconds,
+            'logged_by': personId,
+          })
+          .select('id')
+          .single();
+      return row['id'] as String;
     } catch (e) {
       throw AppException('Could not save the set.', cause: e);
+    }
+  }
+
+  /// Updates an already-logged set (the client edits their own entry — allowed
+  /// directly under RLS: `person_id = logged_by = me`).
+  static Future<void> updateSet({
+    required String tenantId,
+    required String entryId,
+    int? reps,
+    num? weight,
+    int? timeSeconds,
+  }) async {
+    try {
+      await SupabaseClientWrapper.db('logged_entries')
+          .update({
+            'reps': reps,
+            'weight': weight,
+            'time_seconds': timeSeconds,
+          })
+          .eq('id', entryId)
+          .eq('tenant_id', tenantId);
+    } catch (e) {
+      throw AppException('Could not update the set.', cause: e);
     }
   }
 

@@ -52,7 +52,9 @@ class GroupDetailScreen extends ConsumerWidget {
           shrinkWrap: true,
           children: [
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              // Tight top: the theme drag handle already reserves space above.
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.lg),
               child: Text(l.addMember, style: AppTextStyles.heading3),
             ),
             for (final c in candidates)

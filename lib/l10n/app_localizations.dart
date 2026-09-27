@@ -362,6 +362,18 @@ abstract class AppLocalizations {
   /// **'Coming soon'**
   String get comingSoon;
 
+  /// No description provided for @sessionsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions added yet. Add your first session.'**
+  String get sessionsEmpty;
+
+  /// No description provided for @sessionExercisesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No exercises added yet. Add your first exercise.'**
+  String get sessionExercisesEmpty;
+
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
@@ -1202,6 +1214,24 @@ abstract class AppLocalizations {
   /// **'Mark complete'**
   String get markComplete;
 
+  /// No description provided for @finishSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish session'**
+  String get finishSessionTitle;
+
+  /// No description provided for @finishSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the end. Mark the session complete when you\'re done.'**
+  String get finishSessionBody;
+
+  /// No description provided for @exerciseCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {total}'**
+  String exerciseCounter(int current, int total);
+
   /// No description provided for @completedBadge.
   ///
   /// In en, this message translates to:
@@ -1393,6 +1423,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Video uploaded'**
   String get videoUploaded;
+
+  /// No description provided for @thumbnail.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnail'**
+  String get thumbnail;
+
+  /// No description provided for @addThumbnail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add thumbnail'**
+  String get addThumbnail;
+
+  /// No description provided for @changeThumbnail.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get changeThumbnail;
+
+  /// No description provided for @thumbnailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A thumbnail is required.'**
+  String get thumbnailRequired;
+
+  /// No description provided for @thumbnailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to add a cover image'**
+  String get thumbnailHint;
 
   /// No description provided for @welcomeTagline.
   ///

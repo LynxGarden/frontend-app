@@ -92,7 +92,9 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
     final l = AppLocalizations.of(context);
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
-      padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, bottom + AppSpacing.lg),
+      // Top padding is tight: the theme's drag handle already reserves space
+      // above the title, so a large top inset here just doubles the gap.
+      padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, bottom + AppSpacing.lg),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

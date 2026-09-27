@@ -15,6 +15,8 @@ import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
+import 'package:lynx_app/shared/widgets/reorder_proxy.dart';
+import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// Edits a program template: name/description + its ordered sessions.
 class ProgramEditorScreen extends ConsumerStatefulWidget {
@@ -207,12 +209,7 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
         children: [
           Positioned.fill(
             child: _loading
-                ? Padding(
-                    padding: EdgeInsets.only(top: topInset),
-                    child: Center(
-                        child: CircularProgressIndicator(
-                            color: AppColors.primary)),
-                  )
+                ? ProgramEditorSkeleton(topInset: topInset)
                 : program == null
                     ? Padding(
                         padding: EdgeInsets.only(top: topInset),
@@ -222,6 +219,7 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
                       )
                     : SafeArea(
                         top: false,
+                        bottom: false,
                         child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -248,11 +246,19 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
                     ),
                     Expanded(
                       child: program.sessions.isEmpty
-                          ? Center(child: Text(l.comingSoon, style: AppTextStyles.bodySmall))
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(AppSpacing.xl),
+                                child: Text(l.sessionsEmpty,
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyles.bodySmall),
+                              ),
+                            )
                           : ReorderableListView.builder(
                               padding: const EdgeInsets.fromLTRB(
                                   AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 96),
                               itemCount: program.sessions.length,
+                              proxyDecorator: roundedReorderProxy,
                               onReorderItem: _reorder,
                               itemBuilder: (context, i) {
                                 final s = program.sessions[i];

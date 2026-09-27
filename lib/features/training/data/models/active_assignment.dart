@@ -12,6 +12,7 @@ class TrainingExercise {
     required this.exerciseName,
     this.videoUrl,
     this.videoStoragePath,
+    this.thumbnailStoragePath,
     this.swappedFromExerciseId,
     this.sets,
     this.reps,
@@ -32,6 +33,9 @@ class TrainingExercise {
   final String exerciseName;
   final String? videoUrl;
   final String? videoStoragePath;
+  /// Path in the public `exercise-thumbnails` bucket (snapshotted at assign
+  /// time), or null for legacy assignments made before thumbnails existed.
+  final String? thumbnailStoragePath;
   final String? swappedFromExerciseId;
 
   final int? sets;
@@ -70,6 +74,7 @@ class TrainingExercise {
       exerciseName: (json['exercise_name'] as String?) ?? '',
       videoUrl: json['video_url'] as String?,
       videoStoragePath: json['video_storage_path'] as String?,
+      thumbnailStoragePath: json['thumbnail_storage_path'] as String?,
       swappedFromExerciseId: json['swapped_from_exercise_id'] as String?,
       sets: json['sets'] as int?,
       reps: json['reps'] as String?,
@@ -108,7 +113,12 @@ class TrainingAssignmentSession {
     final exercises = raw
         .map((e) => TrainingExercise.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList()
-      ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+      // Tie-break on id so the order is deterministic and matches the coach's
+      // review even when order_index values collide (e.g. legacy all-zero rows).
+      ..sort((a, b) {
+        final c = a.orderIndex.compareTo(b.orderIndex);
+        return c != 0 ? c : a.id.compareTo(b.id);
+      });
     return TrainingAssignmentSession(
       id: json['id'] as String,
       label: (json['label'] as String?) ?? '',

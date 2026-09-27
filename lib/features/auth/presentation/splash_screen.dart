@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/supabase/supabase_client.dart';
+import 'package:lynx_app/shared/providers/current_user_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -40,34 +41,21 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _resolveNavigation() async {
-    // Give the splash a minimum display time.
+    final session = SupabaseClientWrapper.auth.currentSession;
+
+    // Warm the domain user (role/tenant) while the splash is showing, so
+    // RootShell already has it resolved and skips its role-resolution skeleton —
+    // otherwise the user sees two skeletons in a row (shell then first tab).
+    final warm = session == null
+        ? null
+        : ref.read(currentUserProvider.future).catchError((_) => null);
+
+    // Give the splash a minimum display time (runs concurrently with the warm).
     await Future.delayed(const Duration(milliseconds: 1500));
+    if (warm != null) await warm; // RootShell surfaces any load error/null state
 
     if (!mounted) return;
-
-    try {
-      final session = SupabaseClientWrapper.auth.currentSession;
-
-      if (session == null) {
-        if (mounted) context.go('/welcome');
-        return;
-      }
-
-      // User is authenticated — go to home.
-      // TODO: Add onboarding check here if needed:
-      // final profile = await SupabaseClientWrapper.db('users')
-      //     .select('onboarding_completed')
-      //     .eq('id', session.user.id)
-      //     .maybeSingle();
-      // if (profile?['onboarding_completed'] != true) {
-      //   if (mounted) context.go('/onboarding');
-      //   return;
-      // }
-
-      if (mounted) context.go('/app');
-    } catch (_) {
-      if (mounted) context.go('/welcome');
-    }
+    context.go(session == null ? '/welcome' : '/app');
   }
 
   @override

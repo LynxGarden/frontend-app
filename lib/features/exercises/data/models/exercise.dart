@@ -10,6 +10,7 @@ class Exercise {
     this.description,
     this.videoUrl,
     this.videoStoragePath,
+    this.thumbnailStoragePath,
     this.tags = const [],
   });
 
@@ -20,6 +21,8 @@ class Exercise {
   final String? videoUrl;
   /// Path in the private `exercise-videos` bucket (hosted video), or null.
   final String? videoStoragePath;
+  /// Path in the public `exercise-thumbnails` bucket (cover image), or null.
+  final String? thumbnailStoragePath;
   final List<ExerciseTag> tags;
 
   bool get hasHostedVideo =>
@@ -27,9 +30,12 @@ class Exercise {
   bool get hasLinkVideo => videoUrl != null && videoUrl!.trim().isNotEmpty;
   bool get hasVideo => hasHostedVideo || hasLinkVideo;
 
+  bool get hasThumbnail =>
+      thumbnailStoragePath != null && thumbnailStoragePath!.trim().isNotEmpty;
+
   /// Parses a row selected with the embedded tags shape:
   /// `id, owner_id, name, description, video_url, video_storage_path,
-  ///  exercise_tags(tags(id, category, label))`
+  ///  thumbnail_storage_path, exercise_tags(tags(id, category, label))`
   factory Exercise.fromJson(Map<String, dynamic> json) {
     final tagJoins = (json['exercise_tags'] as List?) ?? const [];
     final tags = <ExerciseTag>[];
@@ -46,6 +52,7 @@ class Exercise {
       description: json['description'] as String?,
       videoUrl: json['video_url'] as String?,
       videoStoragePath: json['video_storage_path'] as String?,
+      thumbnailStoragePath: json['thumbnail_storage_path'] as String?,
       tags: tags,
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,6 +17,8 @@ import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
+import 'package:lynx_app/shared/widgets/reorder_proxy.dart';
+import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// Edits one session: its ordered exercises + prescriptions.
 class SessionEditorScreen extends ConsumerStatefulWidget {
@@ -35,6 +39,17 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
   /// Local copy for optimistic reorder; synced from [sessionEditorProvider] via
   /// `ref.listen` in build.
   TrainingSession? _session;
+
+  /// Scroll-driven frost/shrink for the floating nav bar (mirrors
+  /// [FrostedNavScaffold]): 0 at the top, ramps to 1 over the first 60px.
+  double _collapse = 0;
+
+  bool _onScroll(ScrollNotification n) {
+    if (n.metrics.axis != Axis.vertical) return false;
+    final t = (n.metrics.pixels / 60).clamp(0.0, 1.0);
+    if ((t - _collapse).abs() > 0.01) setState(() => _collapse = t);
+    return false;
+  }
 
   SessionEditorKey get _key =>
       (programId: widget.programId, sessionId: widget.sessionId);
@@ -119,7 +134,10 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
       });
     });
     final async = ref.watch(sessionEditorProvider(_key));
-    final session = _session;
+    // Fall back to the provider's current value: `ref.listen` only fires on
+    // *changes*, so it misses a value already resolved before this screen
+    // mounted — which otherwise shows the error state over a real session.
+    final session = _session ?? async.valueOrNull;
     final loading = session == null && async.isLoading;
     final topInset = AppNavBar.estimatedHeight(context);
 
@@ -136,13 +154,10 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: loading
-                ? Padding(
-                    padding: EdgeInsets.only(top: topInset),
-                    child: Center(
-                        child: CircularProgressIndicator(
-                            color: AppColors.primary)),
-                  )
+            child: NotificationListener<ScrollNotification>(
+              onNotification: _onScroll,
+              child: loading
+                ? SessionEditorSkeleton(topInset: topInset)
                 : session == null
                     ? Padding(
                         padding: EdgeInsets.only(top: topInset),
@@ -152,17 +167,21 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
                       )
                     : session.exercises.isEmpty
                         ? Padding(
-                            padding: EdgeInsets.only(top: topInset),
+                            padding: EdgeInsets.only(
+                                top: topInset, left: AppSpacing.xl, right: AppSpacing.xl),
                             child: Center(
-                                child: Text(l.comingSoon,
+                                child: Text(l.sessionExercisesEmpty,
+                                    textAlign: TextAlign.center,
                                     style: AppTextStyles.bodySmall)),
                           )
                         : SafeArea(
                             top: false,
+                            bottom: false,
                             child: ReorderableListView.builder(
                               padding: EdgeInsets.fromLTRB(
                                   AppSpacing.lg, topInset + AppSpacing.sm, AppSpacing.lg, 96),
                               itemCount: session.exercises.length,
+                              proxyDecorator: roundedReorderProxy,
                               onReorderItem: _reorder,
                               itemBuilder: (context, i) {
                                 final se = session.exercises[i];
@@ -175,12 +194,18 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
                               },
                             ),
                           ),
+            ),
           ),
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            child: AppNavBar(title: session?.label ?? '…', blurred: true),
+            child: AppNavBar(
+              title: session?.label ?? '…',
+              blurred: true,
+              frost: _collapse,
+              scale: lerpDouble(1.0, 0.9, _collapse)!,
+            ),
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -42,12 +43,17 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
   final Set<String> _selectedTagIds = {};
   bool _saving = false;
   bool _uploading = false;
+  bool _uploadingThumb = false;
   String? _videoStoragePath;
+  String? _thumbnailStoragePath;
+  File? _thumbnailPreview; // local file shown until/after upload
+  bool _thumbTouched = false; // show the "required" error only after interaction
 
   bool get _isEdit => widget.exercise != null;
 
-  /// Name is required — Save stays disabled until it has non-whitespace text.
-  bool get _canSave => _name.text.trim().isNotEmpty;
+  /// Name + thumbnail are required — Save stays disabled until both are set.
+  bool get _canSave =>
+      _name.text.trim().isNotEmpty && _thumbnailStoragePath != null;
 
   @override
   void initState() {
@@ -59,7 +65,39 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
     _description = TextEditingController(text: e?.description ?? '');
     _videoUrl = TextEditingController(text: e?.videoUrl ?? '');
     _videoStoragePath = e?.videoStoragePath;
+    _thumbnailStoragePath = e?.thumbnailStoragePath;
     _selectedTagIds.addAll(e?.tags.map((t) => t.id) ?? const []);
+  }
+
+  Future<void> _pickAndUploadThumbnail() async {
+    final user = ref.read(currentUserProvider).valueOrNull;
+    if (user == null) return;
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1280,
+      maxHeight: 1280,
+      imageQuality: 85,
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _thumbnailPreview = File(picked.path);
+      _thumbTouched = true;
+      _uploadingThumb = true;
+    });
+    try {
+      final path = await ExerciseRepository.uploadThumbnail(
+        tenantId: user.tenantId,
+        file: File(picked.path),
+      );
+      if (mounted) setState(() => _thumbnailStoragePath = path);
+    } on AppException catch (e) {
+      if (mounted) {
+        setState(() => _thumbnailPreview = null);
+        AppToast.show(context, title: e.message, blur: false);
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingThumb = false);
+    }
   }
 
   Future<void> _pickAndUploadVideo() async {
@@ -92,6 +130,12 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_thumbnailStoragePath == null) {
+      setState(() => _thumbTouched = true);
+      AppToast.show(context,
+          title: AppLocalizations.of(context).thumbnailRequired, blur: false);
+      return;
+    }
     final user = ref.read(currentUserProvider).valueOrNull;
     if (user == null) return;
 
@@ -105,6 +149,7 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
           description: _description.text,
           videoUrl: _videoUrl.text,
           videoStoragePath: _videoStoragePath,
+          thumbnailStoragePath: _thumbnailStoragePath,
           tagIds: _selectedTagIds.toList(),
         );
       } else {
@@ -115,6 +160,7 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
           description: _description.text,
           videoUrl: _videoUrl.text,
           videoStoragePath: _videoStoragePath,
+          thumbnailStoragePath: _thumbnailStoragePath,
           tagIds: _selectedTagIds.toList(),
         );
       }
@@ -237,6 +283,14 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
             padding: EdgeInsets.fromLTRB(
                 AppSpacing.lg, topInset + AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
             children: [
+              _ThumbnailPicker(
+                previewFile: _thumbnailPreview,
+                storagePath: _thumbnailStoragePath,
+                uploading: _uploadingThumb,
+                showError: _thumbTouched && _thumbnailStoragePath == null,
+                onTap: _uploadingThumb ? null : _pickAndUploadThumbnail,
+              ),
+              const SizedBox(height: AppSpacing.lg),
               AppTextField(
                 label: l.exerciseName,
                 controller: _name,
@@ -343,6 +397,133 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Required cover-image picker: a 16:9 tappable tile that shows the chosen image
+/// (local preview or the uploaded public URL), an upload spinner, or an empty
+/// prompt. Turns to the error color when the field is required but empty.
+class _ThumbnailPicker extends StatelessWidget {
+  const _ThumbnailPicker({
+    required this.previewFile,
+    required this.storagePath,
+    required this.uploading,
+    required this.showError,
+    required this.onTap,
+  });
+
+  final File? previewFile;
+  final String? storagePath;
+  final bool uploading;
+  final bool showError;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final hasImage = previewFile != null || storagePath != null;
+    final borderColor = showError ? AppColors.error : AppColors.surfaceBorder;
+
+    Widget image;
+    if (previewFile != null) {
+      image = Image.file(previewFile!, fit: BoxFit.cover);
+    } else if (storagePath != null) {
+      image = Image.network(
+        ExerciseRepository.thumbnailPublicUrl(storagePath!),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _empty(l, error: true),
+      );
+    } else {
+      image = _empty(l);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap?.call();
+          },
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.surfaceLight,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: borderColor),
+              ),
+              child: ClipRRect(
+                // Inset by the 1px border so the clip sits inside it, not on it.
+                borderRadius: BorderRadius.circular(AppRadius.lg - 1),
+                child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  image,
+                  if (uploading)
+                    Container(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator(),
+                    ),
+                  // "Change photo" affordance over an existing image.
+                  if (hasImage && !uploading)
+                    Positioned(
+                      right: AppSpacing.sm,
+                      bottom: AppSpacing.sm,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.photo_camera_outlined,
+                                size: 14, color: Colors.white),
+                            const SizedBox(width: 4),
+                            Text(l.changeThumbnail,
+                                style: AppTextStyles.bodySmall
+                                    .copyWith(color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (showError) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(l.thumbnailRequired,
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.error)),
+        ],
+      ],
+    );
+  }
+
+  Widget _empty(AppLocalizations l, {bool error = false}) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.add_photo_alternate_outlined,
+              size: 32, color: AppColors.textTertiary),
+          const SizedBox(height: AppSpacing.sm),
+          Text(l.addThumbnail,
+              style: AppTextStyles.bodySmall
+                  .copyWith(color: AppColors.textSecondary)),
+          const SizedBox(height: 2),
+          Text(l.thumbnailHint,
+              style: AppTextStyles.bodySmall
+                  .copyWith(color: AppColors.textTertiary)),
+        ],
       ),
     );
   }

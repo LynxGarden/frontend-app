@@ -20,6 +20,7 @@ import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/collapsing_header.dart';
 import 'package:lynx_app/shared/widgets/main_shell.dart';
+import 'package:lynx_app/shared/widgets/reorder_proxy.dart';
 import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
 /// Staff view of the tenant's clients.
@@ -135,6 +136,7 @@ class _ClientsListScreenState extends ConsumerState<ClientsListScreen> {
                   AppSpacing.lg, MediaQuery.paddingOf(context).bottom + AppSpacing.md),
               sliver: SliverReorderableList(
                 itemCount: clients.length,
+                proxyDecorator: roundedReorderProxy,
                 onReorderItem: _reorder,
                 itemBuilder: (_, i) => ReorderableDelayedDragStartListener(
                   key: ValueKey(clients[i].id),

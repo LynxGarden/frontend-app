@@ -143,6 +143,12 @@ class AppLocalizationsSl extends AppLocalizations {
   String get comingSoon => 'Kmalu na voljo';
 
   @override
+  String get sessionsEmpty => 'Ni še dodanih treningov. Dodajte prvi trening.';
+
+  @override
+  String get sessionExercisesEmpty => 'Ni še dodanih vaj. Dodajte prvo vajo.';
+
+  @override
   String get settings => 'Nastavitve';
 
   @override
@@ -302,7 +308,7 @@ class AppLocalizationsSl extends AppLocalizations {
   String get skip => 'Preskoči';
 
   @override
-  String get finish => 'Končaj';
+  String get finish => 'Zaključi';
 
   @override
   String get next => 'Naprej';
@@ -595,6 +601,18 @@ class AppLocalizationsSl extends AppLocalizations {
   String get markComplete => 'Označi kot dokončano';
 
   @override
+  String get finishSessionTitle => 'Zaključi trening';
+
+  @override
+  String get finishSessionBody =>
+      'Prišli ste do konca. Ko končate, označite trening kot dokončan.';
+
+  @override
+  String exerciseCounter(int current, int total) {
+    return '$current od $total';
+  }
+
+  @override
   String get completedBadge => 'Dokončano';
 
   @override
@@ -713,6 +731,21 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get videoUploaded => 'Video naložen';
+
+  @override
+  String get thumbnail => 'Sličica';
+
+  @override
+  String get addThumbnail => 'Dodaj sličico';
+
+  @override
+  String get changeThumbnail => 'Zamenjaj sliko';
+
+  @override
+  String get thumbnailRequired => 'Sličica je obvezna.';
+
+  @override
+  String get thumbnailHint => 'Tapnite za naslovno sliko';
 
   @override
   String get welcomeTagline => 'Treniraj. Beleži. Napreduj.';
