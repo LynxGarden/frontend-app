@@ -185,7 +185,7 @@ class AppLocalizationsSl extends AppLocalizations {
   String get exerciseVideoUrlHint => 'https://…';
 
   @override
-  String get watchVideo => 'Poglej video';
+  String get watchVideo => 'Oglej si video';
 
   @override
   String get searchExercises => 'Išči vaje';
@@ -929,4 +929,573 @@ class AppLocalizationsSl extends AppLocalizations {
   @override
   String get couldNotDeleteAccount =>
       'Računa ni bilo mogoče izbrisati. Poskusi znova.';
+
+  @override
+  String get navPrograms => 'Programi';
+
+  @override
+  String get allExercises => 'Vse vaje';
+
+  @override
+  String get viewAsList => 'Seznam';
+
+  @override
+  String get viewAsGrid => 'Mreža';
+
+  @override
+  String get phasesLabel => 'Faze';
+
+  @override
+  String get addPhase => 'Dodaj fazo';
+
+  @override
+  String get renamePhase => 'Preimenuj fazo';
+
+  @override
+  String get phaseName => 'Ime faze';
+
+  @override
+  String get phaseNameHint => 'npr. Faza 1';
+
+  @override
+  String get phasesEmpty => 'Še ni faz. Dodaj svojo prvo fazo.';
+
+  @override
+  String get deletePhaseTitle => 'Izbriši fazo?';
+
+  @override
+  String get deletePhaseBody =>
+      'To odstrani fazo in njene treninge. Tega ni mogoče razveljaviti.';
+
+  @override
+  String phaseCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count faz',
+      two: '$count fazi',
+      one: '1 faza',
+      zero: 'Ni faz',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get editSession => 'Uredi trening';
+
+  @override
+  String get duplicate => 'Podvoji';
+
+  @override
+  String get duplicateProgram => 'Podvoji program';
+
+  @override
+  String get deleteSessionTitle => 'Izbriši trening?';
+
+  @override
+  String get deleteSessionBody =>
+      'To odstrani trening in njegove vaje. Tega ni mogoče razveljaviti.';
+
+  @override
+  String get duplicatedToast => 'Podvojeno';
+
+  @override
+  String get movement => 'Gibanje';
+
+  @override
+  String get movementRequired => 'Izberi vsaj eno gibanje.';
+
+  @override
+  String get movementStrength => 'Moč';
+
+  @override
+  String get movementHypertrophy => 'Hipertrofija';
+
+  @override
+  String get movementPower => 'Eksplozivnost';
+
+  @override
+  String get movementPlyometric => 'Pliometrija';
+
+  @override
+  String get movementCardio => 'Kardio';
+
+  @override
+  String get movementMobility => 'Gibljivost';
+
+  @override
+  String get movementRehab => 'Rehabilitacija';
+
+  @override
+  String get movementWarmup => 'Ogrevanje';
+
+  @override
+  String get loggingFields => 'Polja za vnos';
+
+  @override
+  String get loggingFieldsHint => 'Kaj stranka beleži pri tej vaji.';
+
+  @override
+  String get noLoggingFields =>
+      'Ni polj po meri — stranka beleži ponovitve in težo.';
+
+  @override
+  String get addField => 'Dodaj polje';
+
+  @override
+  String get fieldLabel => 'Oznaka';
+
+  @override
+  String get fieldLabelHint => 'npr. Teža, Tempo, Naklon';
+
+  @override
+  String get fieldType => 'Tip';
+
+  @override
+  String get fieldUnit => 'Enota';
+
+  @override
+  String get fieldUnitHint => 'npr. kg, km/h, %, cm';
+
+  @override
+  String get fieldOptions => 'Možnosti';
+
+  @override
+  String get fieldOptionsHint => 'Ločeno z vejico';
+
+  @override
+  String get fieldIntensity => 'Enota intenzivnosti';
+
+  @override
+  String get metricTypeNumber => 'Število';
+
+  @override
+  String get metricTypeDecimal => 'Decimalka';
+
+  @override
+  String get metricTypeDuration => 'Čas';
+
+  @override
+  String get metricTypeText => 'Besedilo';
+
+  @override
+  String get metricTypeEnum => 'Izbira';
+
+  @override
+  String get intensityNone => 'Brez';
+
+  @override
+  String get trainingMethod => 'Metoda';
+
+  @override
+  String get methodNeedsMultiple => 'Ta metoda potrebuje 2 ali več vaj.';
+
+  @override
+  String get addToGroup => 'Dodaj vajo v skupino';
+
+  @override
+  String get methodStraight => 'Običajne serije';
+
+  @override
+  String get methodSuperset => 'Super serije';
+
+  @override
+  String get methodDropset => 'Drop serije';
+
+  @override
+  String get methodMechanicalDropset => 'Mehanski dropset';
+
+  @override
+  String get methodMyo => 'MYO ponovitve';
+
+  @override
+  String get methodMyoMatch => 'MYO match ponovitve';
+
+  @override
+  String get methodEmom => 'EMOM';
+
+  @override
+  String get methodE2mom => 'E2MOM';
+
+  @override
+  String get methodE3mom => 'E3MOM';
+
+  @override
+  String get methodRestPause => 'Rest-pause';
+
+  @override
+  String get methodRamp => 'Ramp';
+
+  @override
+  String get methodBackOff => 'Back-off';
+
+  @override
+  String get methodCluster => 'Cluster';
+
+  @override
+  String get methodContrast => 'Kontrast / PAP';
+
+  @override
+  String get methodTempo => 'Tempo';
+
+  @override
+  String get weekTag => 'Oznaka tedna';
+
+  @override
+  String get weekTagHint => 'Samo za trenerja, npr. Teden 1';
+
+  @override
+  String get presRir => 'RIR';
+
+  @override
+  String get intervalSeconds => 'Interval (sek)';
+
+  @override
+  String get exerciseDetails => 'Vaja';
+
+  @override
+  String get timer => 'Časovnik';
+
+  @override
+  String get timerStart => 'Začni';
+
+  @override
+  String get timerStop => 'Ustavi';
+
+  @override
+  String get timerReset => 'Ponastavi';
+
+  @override
+  String get myNotes => 'Moje opombe';
+
+  @override
+  String get myNotesHint => 'Zasebne opombe za to vajo — vidne samo tebi.';
+
+  @override
+  String get noteSaved => 'Opomba shranjena';
+
+  @override
+  String get saveNote => 'Shrani opombo';
+
+  @override
+  String get noDescription => 'Ni opisa.';
+
+  @override
+  String get aboutTraining => 'O tem treningu';
+
+  @override
+  String get progressTitle2 => 'Napredek';
+
+  @override
+  String get progressStreak => 'Niz';
+
+  @override
+  String get progressThisWeek => 'Ta teden';
+
+  @override
+  String progressVisits(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count obiskov',
+      two: '$count obiska',
+      one: '1 obisk',
+      zero: 'Ni obiskov',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get personalBests => 'Osebni rekordi';
+
+  @override
+  String get progressVolume => 'Volumen';
+
+  @override
+  String get progressResults => 'Rezultati';
+
+  @override
+  String get weeklyVolume => 'Tedenski volumen';
+
+  @override
+  String get bestWeight => 'Najboljša teža';
+
+  @override
+  String get bestReps => 'Največ ponovitev';
+
+  @override
+  String get bestVolume => 'Najboljši volumen serije';
+
+  @override
+  String get noProgressYet =>
+      'Še ni podatkov — zabeleži nekaj treningov in viden bo napredek.';
+
+  @override
+  String get progressNoExercises =>
+      'Še nič ni zabeleženo. Tvoje spremljane vaje se bodo pojavile tukaj.';
+
+  @override
+  String get progressPickExercise => 'Izberi vajo';
+
+  @override
+  String get navCalendar => 'Koledar';
+
+  @override
+  String get calendarTitle => 'Koledar';
+
+  @override
+  String get calendarBook => 'Rezerviraj';
+
+  @override
+  String get calendarActivity => 'Aktivnost';
+
+  @override
+  String get calendarHistory => 'Zgodovina';
+
+  @override
+  String get bookTraining => 'Rezerviraj trening';
+
+  @override
+  String get book => 'Rezerviraj';
+
+  @override
+  String get cancelBooking => 'Prekliči rezervacijo';
+
+  @override
+  String get bookedLabel => 'Rezervirano';
+
+  @override
+  String get slotFull => 'Polno';
+
+  @override
+  String placesLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Še $count mest',
+      two: 'Še $count mesti',
+      one: 'Še 1 mesto',
+      zero: 'Polno',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get yourBooking => 'Tvoja rezervacija';
+
+  @override
+  String get noBookingThisWeek => 'Ta teden ni rezervacije.';
+
+  @override
+  String get coachLabel => 'Trener';
+
+  @override
+  String get bookingConfirmed => 'Rezervirano!';
+
+  @override
+  String get bookingCancelled => 'Rezervacija preklicana';
+
+  @override
+  String get bookConfirmTitle => 'Rezerviraj ta termin?';
+
+  @override
+  String get bookConfirmBody =>
+      'Rezerviraš lahko en trening na dan in prekličeš do 2 uri prej.';
+
+  @override
+  String get finishedTrainings => 'Zaključeni treningi';
+
+  @override
+  String get noFinishedTrainings => 'Še ni zaključenih treningov.';
+
+  @override
+  String get healthLogs => 'Zdravstveni dnevnik';
+
+  @override
+  String get addLog => 'Dodaj vnos';
+
+  @override
+  String get logSleep => 'Spanje';
+
+  @override
+  String get logMeal => 'Obrok';
+
+  @override
+  String get logActivity => 'Aktivnost';
+
+  @override
+  String get logWeight => 'Teža';
+
+  @override
+  String get logWater => 'Voda';
+
+  @override
+  String get logValue => 'Vrednost';
+
+  @override
+  String get logNotes => 'Opombe';
+
+  @override
+  String get logSaved => 'Shranjeno';
+
+  @override
+  String get noLogsYet => 'Še nič ni zabeleženo.';
+
+  @override
+  String get importFromHealth => 'Uvozi iz Health';
+
+  @override
+  String get importFromStrava => 'Uvozi iz Strave';
+
+  @override
+  String get connectStrava => 'Poveži Stravo';
+
+  @override
+  String imported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Uvoženih $count vnosov',
+      two: 'Uvožena $count vnosa',
+      one: 'Uvožen 1 vnos',
+      zero: 'Ni za uvoz',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importUnavailable => 'Uvoz na tej napravi še ni na voljo.';
+
+  @override
+  String get reminders => 'Opomniki';
+
+  @override
+  String get addReminder => 'Dodaj opomnik';
+
+  @override
+  String get reminderTitle => 'Naslov';
+
+  @override
+  String get reminderTime => 'Čas';
+
+  @override
+  String get reminderMeasureWeight => 'Izmeri težo';
+
+  @override
+  String get reminderDrinkWater => 'Popij vodo';
+
+  @override
+  String get noReminders => 'Še ni opomnikov.';
+
+  @override
+  String get addToCalendar => 'Dodaj v koledar';
+
+  @override
+  String get addedToCalendar => 'Dodano v tvoj koledar';
+
+  @override
+  String get resetPhase => 'Ponastavi fazo';
+
+  @override
+  String get resetPhaseTitle => 'Ponastavi to fazo?';
+
+  @override
+  String get resetPhaseBody =>
+      'To počisti zaključek za vse treninge v fazi, da jo stranka začne znova.';
+
+  @override
+  String get phaseReset => 'Faza ponastavljena';
+
+  @override
+  String get notificationsTitle => 'Obvestila';
+
+  @override
+  String get noNotifications => 'Še ni obvestil.';
+
+  @override
+  String get markAllRead => 'Označi vse kot prebrano';
+
+  @override
+  String unreadCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count neprebranih',
+      two: '$count neprebrani',
+      one: '1 neprebrano',
+      zero: 'Nič neprebranih',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rateDifficulty => 'Kako težko je bilo?';
+
+  @override
+  String get difficulty => 'Zahtevnost';
+
+  @override
+  String get difficultyVeryEasy => 'Zelo lahko';
+
+  @override
+  String get difficultyEasy => 'Lahko';
+
+  @override
+  String get difficultyModerate => 'Zmerno';
+
+  @override
+  String get difficultyHard => 'Težko';
+
+  @override
+  String get difficultyMax => 'Na maksimumu';
+
+  @override
+  String get ratingSaved => 'Ocena shranjena';
+
+  @override
+  String get addComment => 'Dodaj komentar';
+
+  @override
+  String get commentHint => 'Napiši komentar…';
+
+  @override
+  String get comments => 'Komentarji';
+
+  @override
+  String get noComments => 'Še ni komentarjev.';
+
+  @override
+  String get commentPosted => 'Komentar objavljen';
+
+  @override
+  String get likeAction => 'Všeček';
+
+  @override
+  String get likedLabel => 'Všeč mi je';
+
+  @override
+  String get personalBest => 'Osebni rekord';
+
+  @override
+  String get noPersonalBest => 'Še ni osebnega rekorda.';
+
+  @override
+  String get billingTitle => 'Plačila';
+
+  @override
+  String get billing => 'Plačila';
+
+  @override
+  String get noInvoices => 'Še ni računov.';
+
+  @override
+  String get invoicePaid => 'Plačano';
+
+  @override
+  String get invoicePending => 'V čakanju';
+
+  @override
+  String paidOn(String date) {
+    return 'Plačano $date';
+  }
 }

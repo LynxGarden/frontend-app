@@ -8,18 +8,27 @@ import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/features/exercises/data/exercise_repository.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise_tag.dart';
+import 'package:lynx_app/features/exercises/data/models/movement.dart';
 import 'package:lynx_app/features/exercises/presentation/exercise_editor_screen.dart';
 import 'package:lynx_app/features/exercises/presentation/exercise_video.dart';
+import 'package:lynx_app/features/exercises/presentation/movement_labels.dart';
 import 'package:lynx_app/features/exercises/presentation/tag_labels.dart';
 import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
-import 'package:lynx_app/features/programs/presentation/program_list_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
+import 'package:lynx_app/shared/providers/view_mode_provider.dart';
+import 'package:lynx_app/shared/widgets/app_nav_bar.dart';
 import 'package:lynx_app/shared/widgets/main_shell.dart';
 import 'package:lynx_app/shared/widgets/skeleton_loader.dart';
 
-/// Coach exercise library: searchable list, tag filter, add/edit/delete.
+/// Coach exercise library: searchable list/grid, tag + movement filters,
+/// add/edit/delete. Shown as a tab-root (via Programs → "All exercises" it is
+/// pushed — pass [pushed] true for the circular-back detail chrome).
 class ExerciseLibraryScreen extends ConsumerStatefulWidget {
-  const ExerciseLibraryScreen({super.key});
+  const ExerciseLibraryScreen({super.key, this.pushed = false});
+
+  /// When true, render under an [AppNavBar] (pushed detail page) instead of the
+  /// tab-root app bar.
+  final bool pushed;
 
   @override
   ConsumerState<ExerciseLibraryScreen> createState() =>
@@ -32,6 +41,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
   bool _searchOpen = false;
   TagCategory? _activeCategory; // null = All categories
   String? _activeTagId; // null = all tags (within the active category)
+  final Set<Movement> _activeMovements = {};
 
   @override
   void initState() {
@@ -85,7 +95,9 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
           e.tags.any((t) => t.category == _activeCategory);
       final matchesTag =
           _activeTagId == null || e.tags.any((t) => t.id == _activeTagId);
-      return matchesQuery && matchesCategory && matchesTag;
+      final matchesMovement = _activeMovements.isEmpty ||
+          e.movements.any(_activeMovements.contains);
+      return matchesQuery && matchesCategory && matchesTag && matchesMovement;
     }).toList();
   }
 
@@ -94,23 +106,16 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
     final l = AppLocalizations.of(context);
     final exercisesAsync = ref.watch(exercisesProvider);
     final tagsAsync = ref.watch(exerciseTagsProvider);
+    final mode = ref.watch(viewModeProvider('exercises'));
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(l.libraryTitle, style: AppTextStyles.heading3),
-        actions: [
-          TextButton.icon(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ProgramListScreen()),
+      appBar: widget.pushed
+          ? null
+          : AppBar(
+              title: Text(l.libraryTitle, style: AppTextStyles.heading3),
+              actions: [_viewToggleButton(mode)],
             ),
-            icon: Icon(Icons.dashboard_customize_outlined,
-                size: 18, color: AppColors.primary),
-            label: Text(l.programsTitle,
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary)),
-          ),
-        ],
-      ),
       floatingActionButton: Padding(
         padding: EdgeInsets.only(bottom: AppBottomBar.fabBottomInset(context)),
         child: FloatingActionButton.extended(
@@ -122,24 +127,24 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
           label: Text(l.newExercise),
         ),
       ),
-      // bottom:false — the shell's extendBody makes MediaQuery.padding.bottom the
-      // bar height, so a bottom SafeArea would reserve an empty band here; the
-      // ListView's own bottom padding clears the floating bar instead.
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
+            if (widget.pushed)
+              AppNavBar(
+                title: l.allExercises,
+                trailing: _viewToggleAction(mode),
+              ),
             const SizedBox(height: AppSpacing.sm),
-            // Search icon + category facets share one row; the search expands
-            // across the row when tapped and collapses the pills.
             _FacetedTagFilter(
-              tags: tagsAsync.maybeWhen(
-                  data: (t) => t, orElse: () => const []),
+              tags:
+                  tagsAsync.maybeWhen(data: (t) => t, orElse: () => const []),
               activeCategory: _activeCategory,
               activeTagId: _activeTagId,
               onSelectCategory: (c) => setState(() {
                 _activeCategory = c;
-                _activeTagId = null; // reset tag when the facet changes
+                _activeTagId = null;
               }),
               onSelectTag: (id) => setState(() => _activeTagId = id),
               searchOpen: _searchOpen,
@@ -149,12 +154,24 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
               onOpenSearch: _openSearch,
               onCloseSearch: _closeSearch,
             ),
+            if (!_searchOpen) ...[
+              const SizedBox(height: AppSpacing.sm),
+              _MovementFilterRow(
+                active: _activeMovements,
+                onToggle: (m) => setState(() {
+                  if (!_activeMovements.remove(m)) _activeMovements.add(m);
+                }),
+              ),
+            ],
             const SizedBox(height: AppSpacing.sm),
             Expanded(
               child: exercisesAsync.when(
-                loading: () => const _ExerciseGridSkeleton(),
+                loading: () => mode == ViewMode.grid
+                    ? const _ExerciseGridSkeleton()
+                    : const _ExerciseListSkeleton(),
                 error: (_, _) => Center(
-                  child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall),
+                  child: Text(l.somethingWentWrong,
+                      style: AppTextStyles.bodySmall),
                 ),
                 data: (all) {
                   final items = _filter(all);
@@ -170,18 +187,9 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                       ),
                     );
                   }
-                  return GridView.builder(
-                    padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm,
-                        AppSpacing.lg,
-                        MediaQuery.paddingOf(context).bottom + AppSpacing.md + 60),
-                    gridDelegate: _gridDelegate,
-                    itemCount: items.length,
-                    itemBuilder: (_, i) => _ExerciseGridCard(
-                      exercise: items[i],
-                      onTap: () => _openEditor(items[i]),
-                      onWatch: () => _watch(items[i]),
-                    ),
-                  );
+                  return mode == ViewMode.grid
+                      ? _grid(items)
+                      : _list(items);
                 },
               ),
             ),
@@ -190,13 +198,138 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
       ),
     );
   }
+
+  Widget _grid(List<Exercise> items) {
+    final bottom = MediaQuery.paddingOf(context).bottom + AppSpacing.md + 60;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cross = constraints.maxWidth >= 900
+            ? 4
+            : constraints.maxWidth >= 600
+                ? 3
+                : 2;
+        return GridView.builder(
+          padding: EdgeInsets.fromLTRB(
+              AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, bottom),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cross,
+            crossAxisSpacing: AppSpacing.md,
+            mainAxisSpacing: AppSpacing.md,
+            childAspectRatio: 0.72,
+          ),
+          itemCount: items.length,
+          itemBuilder: (_, i) => _ExerciseGridCard(
+            exercise: items[i],
+            onTap: () => _openEditor(items[i]),
+            onWatch: () => _watch(items[i]),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _list(List<Exercise> items) {
+    final bottom = MediaQuery.paddingOf(context).bottom + AppSpacing.md + 60;
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, bottom),
+      itemCount: items.length,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, i) => _ExerciseListCard(
+        exercise: items[i],
+        onTap: () => _openEditor(items[i]),
+        onWatch: () => _watch(items[i]),
+      ),
+    );
+  }
+
+  void _toggleView(ViewMode mode) {
+    HapticFeedback.selectionClick();
+    ref.read(viewModeProvider('exercises').notifier).toggle();
+  }
+
+  Widget _viewToggleButton(ViewMode mode) {
+    final l = AppLocalizations.of(context);
+    final toGrid = mode == ViewMode.list;
+    return IconButton(
+      tooltip: toGrid ? l.viewAsGrid : l.viewAsList,
+      icon: Icon(toGrid ? Icons.grid_view_rounded : Icons.view_agenda_outlined,
+          color: AppColors.primary),
+      onPressed: () => _toggleView(mode),
+    );
+  }
+
+  Widget _viewToggleAction(ViewMode mode) {
+    final l = AppLocalizations.of(context);
+    final toGrid = mode == ViewMode.list;
+    return AppNavBarAction(
+      icon: toGrid ? Icons.grid_view_rounded : Icons.view_agenda_outlined,
+      onTap: () => _toggleView(mode),
+      tooltip: toGrid ? l.viewAsGrid : l.viewAsList,
+    );
+  }
 }
 
+/// A horizontally-scrolling multi-select row of movement filters.
+class _MovementFilterRow extends StatelessWidget {
+  const _MovementFilterRow({required this.active, required this.onToggle});
 
-/// One control row shared by the search and the category facets (the remi
-/// pattern): a search icon sits at the start of the pills row and expands across
-/// the whole row when tapped, collapsing the pills; a ✕ closes it. Below sits the
-/// second-level tag row for the chosen category.
+  final Set<Movement> active;
+  final ValueChanged<Movement> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return SizedBox(
+      height: 36,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        children: [
+          for (final m in Movement.values)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: _pill(
+                movementLabel(l, m),
+                selected: active.contains(m),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onToggle(m);
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pill(String label,
+      {required bool selected, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          border: Border.all(
+              color: selected ? AppColors.primary : AppColors.surfaceBorder),
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: selected ? AppColors.onPrimary : AppColors.textSecondary,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One control row shared by the search and the category facets: a search icon
+/// that expands across the row when tapped, with a second-level tag row.
 class _FacetedTagFilter extends StatelessWidget {
   const _FacetedTagFilter({
     required this.tags,
@@ -231,7 +364,6 @@ class _FacetedTagFilter extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
 
-    // Categories present in the library, in enum order.
     final present = [
       for (final c in TagCategory.values)
         if (tags.any((t) => t.category == c)) c,
@@ -243,9 +375,6 @@ class _FacetedTagFilter extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          // Left inset only — the pills scroll to the right edge (their trailing
-          // inset lives inside the scroll view, below) so the last chip isn't
-          // clipped against a dead gap.
           padding: const EdgeInsets.only(left: AppSpacing.lg),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
@@ -285,7 +414,6 @@ class _FacetedTagFilter extends StatelessWidget {
                   ),
           ),
         ),
-        // Tag row for the selected category (hidden while searching).
         if (!searchOpen && tagsInCategory.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),
           SingleChildScrollView(
@@ -404,16 +532,15 @@ class _FacetedTagFilter extends StatelessWidget {
   }
 }
 
-/// 2-column grid geometry: square-ish cards with room for a title + tags line.
-const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-  crossAxisCount: 2,
-  crossAxisSpacing: AppSpacing.md,
-  mainAxisSpacing: AppSpacing.md,
-  childAspectRatio: 0.72,
-);
+String _cardSubtitle(AppLocalizations l, Exercise e) {
+  if (e.movements.isNotEmpty) {
+    return e.movements.map((m) => movementLabel(l, m)).join(' · ');
+  }
+  if (e.tags.isNotEmpty) return e.tags.map((t) => t.label).join(' · ');
+  return '—';
+}
 
-/// A library card: cover thumbnail on top, title + tags below. A small play
-/// badge overlays the image when the exercise has a video.
+/// A grid card: cover thumbnail on top, title + subtitle below, play badge.
 class _ExerciseGridCard extends StatelessWidget {
   const _ExerciseGridCard({
     required this.exercise,
@@ -427,6 +554,7 @@ class _ExerciseGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -441,31 +569,30 @@ class _ExerciseGridCard extends StatelessWidget {
           children: [
             Expanded(
               child: ClipRRect(
-                // Inset by the 1px border so the clip sits inside it, not on it.
                 borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(AppRadius.lg - 1)),
                 child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  _ExerciseThumbnail(path: exercise.thumbnailStoragePath),
-                  if (exercise.hasVideo)
-                    Positioned(
-                      right: AppSpacing.sm,
-                      bottom: AppSpacing.sm,
-                      child: GestureDetector(
-                        onTap: onWatch,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.55),
-                            shape: BoxShape.circle,
+                  fit: StackFit.expand,
+                  children: [
+                    _ExerciseThumbnail(path: exercise.thumbnailStoragePath),
+                    if (exercise.hasVideo)
+                      Positioned(
+                        right: AppSpacing.sm,
+                        bottom: AppSpacing.sm,
+                        child: GestureDetector(
+                          onTap: onWatch,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.55),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.play_arrow_rounded,
+                                size: 20, color: Colors.white),
                           ),
-                          child: const Icon(Icons.play_arrow_rounded,
-                              size: 20, color: Colors.white),
                         ),
                       ),
-                    ),
-                ],
+                  ],
                 ),
               ),
             ),
@@ -483,9 +610,7 @@ class _ExerciseGridCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    exercise.tags.isEmpty
-                        ? '—'
-                        : exercise.tags.map((t) => t.label).join(' · '),
+                    _cardSubtitle(l, exercise),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.bodySmall
@@ -501,15 +626,94 @@ class _ExerciseGridCard extends StatelessWidget {
   }
 }
 
-/// The cover image for a card: the public thumbnail, or a neutral placeholder
-/// for legacy exercises saved before thumbnails were required.
+/// A list row: small thumbnail at left, title + subtitle, play badge at right.
+class _ExerciseListCard extends StatelessWidget {
+  const _ExerciseListCard({
+    required this.exercise,
+    required this.onTap,
+    required this.onWatch,
+  });
+
+  final Exercise exercise;
+  final VoidCallback onTap;
+  final VoidCallback onWatch;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: AppColors.surfaceBorder),
+          boxShadow: AppShadows.card,
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: SizedBox(
+                width: 60,
+                height: 60,
+                child: _ExerciseThumbnail(path: exercise.thumbnailStoragePath),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    exercise.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.body
+                        .copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _cardSubtitle(l, exercise),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bodySmall
+                        .copyWith(color: AppColors.textTertiary),
+                  ),
+                ],
+              ),
+            ),
+            if (exercise.hasVideo)
+              GestureDetector(
+                onTap: onWatch,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.play_arrow_rounded,
+                      size: 22, color: AppColors.primary),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The cover image for a card: the public thumbnail, or a neutral placeholder.
 class _ExerciseThumbnail extends StatelessWidget {
   const _ExerciseThumbnail({required this.path});
   final String? path;
 
   @override
   Widget build(BuildContext context) {
-    if (path == null || path!.trim().isEmpty) return const _ThumbnailPlaceholder();
+    if (path == null || path!.trim().isEmpty) {
+      return const _ThumbnailPlaceholder();
+    }
     return Image.network(
       ExerciseRepository.thumbnailPublicUrl(path!),
       fit: BoxFit.cover,
@@ -527,13 +731,12 @@ class _ThumbnailPlaceholder extends StatelessWidget {
     return Container(
       color: AppColors.surfaceLight,
       alignment: Alignment.center,
-      child: Icon(Icons.fitness_center,
-          size: 28, color: AppColors.textTertiary),
+      child: Icon(Icons.fitness_center, size: 28, color: AppColors.textTertiary),
     );
   }
 }
 
-/// Loading state matching the 2-column card grid.
+/// Loading state matching the card grid.
 class _ExerciseGridSkeleton extends StatelessWidget {
   const _ExerciseGridSkeleton();
 
@@ -542,7 +745,12 @@ class _ExerciseGridSkeleton extends StatelessWidget {
     return GridView.builder(
       padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg,
           MediaQuery.paddingOf(context).bottom + AppSpacing.md + 60),
-      gridDelegate: _gridDelegate,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: AppSpacing.md,
+        mainAxisSpacing: AppSpacing.md,
+        childAspectRatio: 0.72,
+      ),
       itemCount: 6,
       itemBuilder: (_, _) => Container(
         decoration: BoxDecoration(
@@ -570,6 +778,52 @@ class _ExerciseGridSkeleton extends StatelessWidget {
                     SkeletonBox(width: 110, height: 14),
                     SizedBox(height: 6),
                     SkeletonBox(width: 70, height: 11),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Loading state matching the list layout.
+class _ExerciseListSkeleton extends StatelessWidget {
+  const _ExerciseListSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg,
+          MediaQuery.paddingOf(context).bottom + AppSpacing.md + 60),
+      itemCount: 7,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, _) => Container(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: AppColors.surfaceBorder),
+          boxShadow: AppShadows.card,
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: Container(
+                  width: 60, height: 60, color: AppColors.surfaceLight),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: SkeletonLoader(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    SkeletonBox(width: 140, height: 14),
+                    SizedBox(height: 6),
+                    SkeletonBox(width: 90, height: 11),
                   ],
                 ),
               ),

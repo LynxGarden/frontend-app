@@ -7,10 +7,14 @@ import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/core/utils/app_exception.dart';
 import 'package:lynx_app/features/exercises/data/exercise_repository.dart';
-import 'package:lynx_app/features/exercises/presentation/exercise_video.dart';
+import 'package:lynx_app/features/exercises/data/models/metric_field.dart';
+import 'package:lynx_app/features/exercises/presentation/widgets/metric_form_renderer.dart';
+import 'package:lynx_app/features/programs/data/models/training_method.dart';
 import 'package:lynx_app/features/programs/presentation/exercise_picker_sheet.dart';
+import 'package:lynx_app/features/programs/presentation/method_labels.dart';
 import 'package:lynx_app/features/training/data/models/active_assignment.dart';
 import 'package:lynx_app/features/training/data/training_repository.dart';
+import 'package:lynx_app/features/training/presentation/exercise_detail_sheet.dart';
 import 'package:lynx_app/features/training/providers/training_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/models/app_user.dart';
@@ -126,6 +130,18 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
       target.clamp(0, lastIndex),
       duration: const Duration(milliseconds: 260),
       curve: Curves.easeOut,
+    );
+  }
+
+  void _openDetail(TrainingExercise ex) {
+    showExerciseDetailSheet(
+      context,
+      exerciseId: ex.exerciseId,
+      exerciseName: ex.exerciseName,
+      description: ex.description,
+      videoUrl: ex.videoUrl,
+      videoStoragePath: ex.videoStoragePath,
+      thumbnailStoragePath: ex.thumbnailStoragePath,
     );
   }
 
@@ -261,7 +277,10 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
                             : _ExerciseTop(
                                 key: ValueKey(exercises[currentEx].id),
                                 exercise: exercises[currentEx],
+                                siblings: exercises,
                                 onSwap: () => _swap(exercises[currentEx]),
+                                onOpenDetail: () =>
+                                    _openDetail(exercises[currentEx]),
                               ),
                       ),
                       // BOTTOM PAGER — driven by the card's drag handler above
@@ -361,49 +380,47 @@ class _RunnerSkeleton extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.lg - 1),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 4 / 3,
-                        child: Container(color: AppColors.skeletonBase),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            SkeletonBox(width: 60, height: 10),
-                            SizedBox(height: AppSpacing.sm),
-                            SkeletonBox(width: 150, height: 13),
-                            SizedBox(height: AppSpacing.md),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Row(
+                          children: [
                             SkeletonBox(
-                                width: double.infinity,
-                                height: 44,
-                                borderRadius: AppRadius.md),
-                            SizedBox(height: AppSpacing.md),
-                            SkeletonBox(width: 50, height: 10),
-                            SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                    child: SkeletonBox(
-                                        height: 48, borderRadius: AppRadius.md)),
-                                SizedBox(width: AppSpacing.sm),
-                                Expanded(
-                                    child: SkeletonBox(
-                                        height: 48, borderRadius: AppRadius.md)),
-                                SizedBox(width: AppSpacing.sm),
-                                SkeletonBox(
-                                    width: 88,
-                                    height: 48,
-                                    borderRadius: AppRadius.md),
-                              ],
+                                width: 60, height: 60, borderRadius: AppRadius.md),
+                            SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SkeletonBox(width: 150, height: 14),
+                                  SizedBox(height: 8),
+                                  SkeletonBox(width: 90, height: 11),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                        SizedBox(height: AppSpacing.md),
+                        SkeletonBox(
+                            width: double.infinity,
+                            height: 52,
+                            borderRadius: AppRadius.md),
+                        SizedBox(height: AppSpacing.md),
+                        SkeletonBox(width: 50, height: 10),
+                        SizedBox(height: 8),
+                        SkeletonBox(
+                            width: double.infinity,
+                            height: 48,
+                            borderRadius: AppRadius.md),
+                        SizedBox(height: AppSpacing.md),
+                        SkeletonBox(
+                            width: double.infinity,
+                            height: 48,
+                            borderRadius: AppRadius.md),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -618,93 +635,194 @@ class _SetSlot {
   num? weight;
   int? timeSeconds;
 
-  bool get isLogged => entryId != null;
+  /// Config-driven actuals for this set, keyed by metric-field key.
+  Map<String, dynamic> values = {};
 
-  static String trim(num v) =>
-      v == v.roundToDouble() ? v.toInt().toString() : v.toString();
+  bool get isLogged => entryId != null;
 }
 
-/// The **static top** of the card for one exercise — thumbnail/video hero, name +
-/// swap, target/notes, and LAST TIME. Stays put while swiping between the
-/// exercise's sets; only [_SetBottom] below it slides.
+/// The **static top** of the card for one exercise — compact thumbnail, title +
+/// subtitle, method badge, swap + detail affordances, notes, and LAST TIME.
+/// Stays put while swiping between the exercise's sets; only [_SetBottom] slides.
 class _ExerciseTop extends ConsumerWidget {
   const _ExerciseTop({
     super.key,
     required this.exercise,
+    required this.siblings,
     required this.onSwap,
+    required this.onOpenDetail,
   });
 
   final TrainingExercise exercise;
+  final List<TrainingExercise> siblings;
   final VoidCallback onSwap;
+  final VoidCallback onOpenDetail;
+
+  String? _methodBadge(AppLocalizations l) {
+    if (exercise.method == TrainingMethod.straight) return null;
+    final label = methodLabel(l, exercise.method);
+    if (exercise.isGrouped) {
+      final group = siblings
+          .where((e) => e.methodGroupId == exercise.methodGroupId)
+          .toList()
+        ..sort((a, b) => a.groupOrder.compareTo(b.groupOrder));
+      final pos = group.indexWhere((e) => e.id == exercise.id) + 1;
+      if (group.length > 1) return '$label · $pos/${group.length}';
+    }
+    return label;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final ex = exercise;
     final lastAsync = ref.watch(lastEntriesProvider(ex.exerciseId));
-    final hasVideo =
-        (ex.videoStoragePath != null && ex.videoStoragePath!.isNotEmpty) ||
-            (ex.videoUrl != null && ex.videoUrl!.isNotEmpty);
+    final badge = _methodBadge(l);
+    final interval = methodIsInterval(ex.method)
+        ? (ex.methodConfig['interval_seconds'] as num?)?.toInt()
+        : null;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Thumbnail with the swap action overlaid top-right (frees the header
-        // row so the card has more room and doesn't need to scroll).
-        Stack(
-          children: [
-            _ThumbnailHero(
-              path: ex.thumbnailStoragePath,
-              hasVideo: hasVideo,
-              onPlay: () => playExerciseVideo(context,
-                  storagePath: ex.videoStoragePath, url: ex.videoUrl),
-            ),
-            Positioned(
-              top: AppSpacing.sm,
-              right: AppSpacing.sm,
-              child: GestureDetector(
-                onTap: onSwap,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.45),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.swap_horiz,
-                      size: 20, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md, AppSpacing.md, AppSpacing.md, 0),
-          child: Column(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.md, AppSpacing.md, AppSpacing.md, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (ex.targetSummary.isNotEmpty)
-                _KeyValueLine(label: l.targetLabel, value: ex.targetSummary),
-              if (ex.setTypeNote != null && ex.setTypeNote!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(ex.setTypeNote!,
-                      style: AppTextStyles.bodySmall
-                          .copyWith(fontStyle: FontStyle.italic)),
+              _Thumb(path: ex.thumbnailStoragePath, onTap: onOpenDetail),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: onOpenDetail,
+                      behavior: HitTestBehavior.opaque,
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(ex.exerciseName,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.body.copyWith(
+                                    fontWeight: FontWeight.w700)),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.info_outline,
+                              size: 16, color: AppColors.textTertiary),
+                        ],
+                      ),
+                    ),
+                    if (ex.targetSummary.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(ex.targetSummary,
+                            style: AppTextStyles.bodySmall
+                                .copyWith(color: AppColors.textSecondary)),
+                      ),
+                    if (badge != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: _MethodBadge(label: badge),
+                      ),
+                  ],
                 ),
-              if (ex.coachNote != null && ex.coachNote!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text('${l.coachNoteLabel}: ${ex.coachNote!}',
-                      style: AppTextStyles.bodySmall
-                          .copyWith(color: AppColors.textSecondary)),
-                ),
-              const SizedBox(height: AppSpacing.md),
-              _LastTimeBlock(async: lastAsync),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              IconButton(
+                onPressed: onSwap,
+                icon: Icon(Icons.swap_horiz, color: AppColors.textSecondary),
+                tooltip: null,
+                visualDensity: VisualDensity.compact,
+              ),
             ],
           ),
-        ),
-      ],
+          if (interval != null)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: WorkoutTimer(targetSeconds: interval),
+            ),
+          if (ex.setTypeNote != null && ex.setTypeNote!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(ex.setTypeNote!,
+                  style: AppTextStyles.bodySmall
+                      .copyWith(fontStyle: FontStyle.italic)),
+            ),
+          if (ex.coachNote != null && ex.coachNote!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text('${l.coachNoteLabel}: ${ex.coachNote!}',
+                  style: AppTextStyles.bodySmall
+                      .copyWith(color: AppColors.textSecondary)),
+            ),
+          const SizedBox(height: AppSpacing.md),
+          _LastTimeBlock(async: lastAsync),
+        ],
+      ),
+    );
+  }
+}
+
+/// A compact rounded thumbnail (tap → exercise detail sheet).
+class _Thumb extends StatelessWidget {
+  const _Thumb({required this.path, required this.onTap});
+  final String? path;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget inner;
+    if (path != null && path!.trim().isNotEmpty) {
+      inner = Image.network(
+        ExerciseRepository.thumbnailPublicUrl(path!),
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) =>
+            progress == null ? child : const _ThumbPlaceholder(),
+        errorBuilder: (_, _, _) => const _ThumbPlaceholder(),
+      );
+    } else {
+      inner = const _ThumbPlaceholder();
+    }
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: SizedBox(width: 60, height: 60, child: inner),
+      ),
+    );
+  }
+}
+
+class _ThumbPlaceholder extends StatelessWidget {
+  const _ThumbPlaceholder();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.surfaceLight,
+      alignment: Alignment.center,
+      child: Icon(Icons.fitness_center, size: 24, color: AppColors.textTertiary),
+    );
+  }
+}
+
+class _MethodBadge extends StatelessWidget {
+  const _MethodBadge({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Text(label,
+          style: AppTextStyles.label.copyWith(
+              color: AppColors.primary, fontWeight: FontWeight.w700)),
     );
   }
 }
@@ -739,55 +857,75 @@ class _SetBottom extends ConsumerStatefulWidget {
 
 class _SetBottomState extends ConsumerState<_SetBottom>
     with AutomaticKeepAliveClientMixin {
-  final _reps = TextEditingController();
-  final _weight = TextEditingController();
-  final _time = TextEditingController();
+  late Map<String, dynamic> _values;
   bool _prefilled = false;
   bool _saving = false;
 
   @override
   bool get wantKeepAlive => true;
 
-  bool get _isTimed => widget.exercise.timeSeconds != null;
+  /// The schema driving the inputs. Config-driven when present; a reps/weight
+  /// (+time for timed exercises) fallback keeps legacy exercises loggable.
+  List<MetricField> get _schema {
+    final ex = widget.exercise;
+    if (ex.metricSchema.isNotEmpty) return ex.metricSchema;
+    if (ex.timeSeconds != null) return _timedFallbackSchema;
+    return const []; // renderer falls back to reps + weight
+  }
 
   @override
   void initState() {
     super.initState();
     // A logged set shows its stored values immediately.
-    final s = widget.slot;
-    if (s.isLogged) {
-      _reps.text = s.reps?.toString() ?? '';
-      _weight.text = s.weight != null ? _SetSlot.trim(s.weight!) : '';
-      _time.text = s.timeSeconds?.toString() ?? '';
-    }
-  }
-
-  @override
-  void dispose() {
-    _reps.dispose();
-    _weight.dispose();
-    _time.dispose();
-    super.dispose();
+    _values = Map<String, dynamic>.from(widget.slot.values);
   }
 
   /// Prefill an unlogged set from last-time's matching set (minimal taps).
   void _prefillFrom(List<LoggedEntry> last) {
     if (_prefilled) return;
     _prefilled = true;
-    if (widget.slot.isLogged || last.isEmpty) return;
+    if (widget.slot.isLogged || last.isEmpty || _values.isNotEmpty) return;
     final src =
         widget.setIndex < last.length ? last[widget.setIndex] : last.last;
-    if (src.reps != null) _reps.text = '${src.reps}';
-    if (src.weight != null) _weight.text = _SetSlot.trim(src.weight!);
-    if (src.timeSeconds != null) _time.text = '${src.timeSeconds}';
+    setState(() => _values = Map<String, dynamic>.from(_lastValuesOf(src)));
   }
+
+  /// A value-map view of a prior entry, keyed to match the current schema.
+  Map<String, dynamic> _lastValuesOf(LoggedEntry e) {
+    if (e.data.isNotEmpty) return e.data;
+    return {
+      'reps': e.reps,
+      'weight': e.weight,
+      'time': e.timeSeconds,
+    }..removeWhere((_, v) => v == null);
+  }
+
+  int? _asInt(dynamic v) =>
+      v is int ? v : (v is num ? v.toInt() : int.tryParse('$v'));
+  num? _asNum(dynamic v) =>
+      v is num ? v : num.tryParse('${v ?? ''}'.replaceAll(',', '.'));
 
   Future<void> _logCurrent() async {
     final l = AppLocalizations.of(context);
-    final reps = int.tryParse(_reps.text.trim());
-    final weight = double.tryParse(_weight.text.trim().replaceAll(',', '.'));
-    final time = int.tryParse(_time.text.trim());
-    if (reps == null && weight == null && time == null) return;
+    final data = Map<String, dynamic>.from(_values)
+      ..removeWhere((_, v) =>
+          v == null || (v is String && v.trim().isEmpty));
+    if (data.isEmpty) return;
+
+    // Derive legacy columns so "last time", review and progress keep working.
+    final reps = _asInt(data['reps']);
+    final weight = _asNum(data['weight']);
+    int? time;
+    final durationKey = _schema
+        .where((f) => f.type == MetricFieldType.duration)
+        .map((f) => f.key)
+        .cast<String?>()
+        .firstWhere((_) => true, orElse: () => null);
+    if (durationKey != null) {
+      time = _asInt(data[durationKey]);
+    } else {
+      time = _asInt(data['time'] ?? data['time_seconds']);
+    }
 
     final slot = widget.slot;
     final wasLogged = slot.isLogged;
@@ -800,6 +938,7 @@ class _SetBottomState extends ConsumerState<_SetBottom>
           reps: reps,
           weight: weight,
           timeSeconds: time,
+          data: data,
         );
       } else {
         slot.entryId = await TrainingRepository.logSet(
@@ -811,12 +950,14 @@ class _SetBottomState extends ConsumerState<_SetBottom>
           reps: reps,
           weight: weight,
           timeSeconds: time,
+          data: data,
         );
       }
       slot
         ..reps = reps
         ..weight = weight
-        ..timeSeconds = time;
+        ..timeSeconds = time
+        ..values = data;
       HapticFeedback.lightImpact();
       if (!mounted) return;
       setState(() => _saving = false);
@@ -838,60 +979,51 @@ class _SetBottomState extends ConsumerState<_SetBottom>
     final ex = widget.exercise;
     final lastAsync = ref.watch(lastEntriesProvider(ex.exerciseId));
     lastAsync.whenData(_prefillFrom);
+    final lastValues = lastAsync.valueOrNull != null &&
+            lastAsync.value!.isNotEmpty
+        ? _lastValuesOf(widget.setIndex < lastAsync.value!.length
+            ? lastAsync.value![widget.setIndex]
+            : lastAsync.value!.last)
+        : null;
 
-    // Only the set inputs live here — the exercise frame (thumbnail, target,
-    // last time) is the static [_ExerciseTop] above the pager. Not scrollable;
-    // anchored to the bottom of the available space (near the thumb).
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.md),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('${l.setN(widget.setIndex + 1)} / ${widget.setCount}',
               style: AppTextStyles.label
                   .copyWith(color: AppColors.textTertiary)),
-          const SizedBox(height: 4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: _NumField(controller: _reps, label: l.repsLabel),
+          const SizedBox(height: AppSpacing.sm),
+          MetricFormRenderer(
+            key: ValueKey('${widget.exercise.id}#${widget.setIndex}'),
+            schema: _schema,
+            values: _values,
+            lastValues: lastValues,
+            onChanged: (key, value) => _values[key] = value,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.md)),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _NumField(
-                    controller: _weight, label: l.weightLabel, decimal: true),
-              ),
-              if (_isTimed) ...[
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: _NumField(controller: _time, label: l.timeSecLabel),
-                ),
-              ],
-              const SizedBox(width: AppSpacing.sm),
-              SizedBox(
-                height: 48,
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.onPrimary,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.md)),
-                  ),
-                  onPressed: _saving ? null : _logCurrent,
-                  child: _saving
-                      ? SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: AppColors.onPrimary),
-                        )
-                      : Text(widget.slot.isLogged ? l.save : l.logSet),
-                ),
-              ),
-            ],
+              onPressed: _saving ? null : _logCurrent,
+              child: _saving
+                  ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: AppColors.onPrimary),
+                    )
+                  : Text(widget.slot.isLogged ? l.save : l.logSet),
+            ),
           ),
         ],
       ),
@@ -899,76 +1031,16 @@ class _SetBottomState extends ConsumerState<_SetBottom>
   }
 }
 
-/// The cover image at the top of an exercise card, with a play badge over it
-/// when the exercise has a video (tap → opens the video player sheet).
-class _ThumbnailHero extends StatelessWidget {
-  const _ThumbnailHero({
-    required this.path,
-    required this.hasVideo,
-    required this.onPlay,
-  });
-
-  final String? path;
-  final bool hasVideo;
-  final VoidCallback onPlay;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget image;
-    if (path != null && path!.trim().isNotEmpty) {
-      image = Image.network(
-        ExerciseRepository.thumbnailPublicUrl(path!),
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, progress) =>
-            progress == null ? child : const _HeroPlaceholder(),
-        errorBuilder: (_, _, _) => const _HeroPlaceholder(),
-      );
-    } else {
-      image = const _HeroPlaceholder();
-    }
-
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppRadius.lg - 1)),
-      child: AspectRatio(
-        aspectRatio: 4 / 3,
-        child: GestureDetector(
-          onTap: hasVideo ? onPlay : null,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              image,
-              if (hasVideo)
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.45),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.play_arrow_rounded,
-                        size: 36, color: Colors.white),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroPlaceholder extends StatelessWidget {
-  const _HeroPlaceholder();
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.surfaceLight,
-      alignment: Alignment.center,
-      child: Icon(Icons.fitness_center, size: 36, color: AppColors.textTertiary),
-    );
-  }
-}
+/// Fallback logging schema for a legacy timed exercise (no custom schema).
+const List<MetricField> _timedFallbackSchema = [
+  MetricField(key: 'reps', label: 'Reps', type: MetricFieldType.number),
+  MetricField(
+      key: 'weight',
+      label: 'Weight',
+      type: MetricFieldType.decimal,
+      unit: 'kg'),
+  MetricField(key: 'time', label: 'Time', type: MetricFieldType.duration),
+];
 
 // ─────────────────────────────────────────────────────────────────────────
 // Completion — the last page of the bottom pager (its top is empty, so this
@@ -1019,35 +1091,6 @@ class _CompletionBottom extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────
 // Shared bits.
 // ─────────────────────────────────────────────────────────────────────────
-
-class _KeyValueLine extends StatelessWidget {
-  const _KeyValueLine({required this.label, required this.value});
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 2),
-      child: RichText(
-        text: TextSpan(
-          style: AppTextStyles.bodySmall,
-          children: [
-            TextSpan(
-              text: '$label · ',
-              style: AppTextStyles.label.copyWith(color: AppColors.textTertiary),
-            ),
-            TextSpan(
-              text: value,
-              style: AppTextStyles.bodySmall
-                  .copyWith(fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _LastTimeBlock extends StatelessWidget {
   const _LastTimeBlock({required this.async});
@@ -1100,54 +1143,3 @@ class _LastTimeBlock extends StatelessWidget {
   }
 }
 
-class _NumField extends StatelessWidget {
-  const _NumField({
-    required this.controller,
-    required this.label,
-    this.decimal = false,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final bool decimal;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: AppTextStyles.label.copyWith(color: AppColors.textTertiary)),
-        const SizedBox(height: 4),
-        SizedBox(
-          height: 48,
-          child: TextField(
-            controller: controller,
-            keyboardType:
-                TextInputType.numberWithOptions(decimal: decimal, signed: false),
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700),
-            decoration: InputDecoration(
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
-              filled: true,
-              fillColor: AppColors.surfaceLight,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                borderSide: BorderSide(color: AppColors.surfaceBorder),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                borderSide: BorderSide(color: AppColors.surfaceBorder),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                borderSide: BorderSide(color: AppColors.primary),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

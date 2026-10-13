@@ -1801,6 +1801,1026 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not delete your account. Please try again.'**
   String get couldNotDeleteAccount;
+
+  /// No description provided for @navPrograms.
+  ///
+  /// In en, this message translates to:
+  /// **'Programs'**
+  String get navPrograms;
+
+  /// No description provided for @allExercises.
+  ///
+  /// In en, this message translates to:
+  /// **'All exercises'**
+  String get allExercises;
+
+  /// No description provided for @viewAsList.
+  ///
+  /// In en, this message translates to:
+  /// **'List view'**
+  String get viewAsList;
+
+  /// No description provided for @viewAsGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid view'**
+  String get viewAsGrid;
+
+  /// No description provided for @phasesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phases'**
+  String get phasesLabel;
+
+  /// No description provided for @addPhase.
+  ///
+  /// In en, this message translates to:
+  /// **'Add phase'**
+  String get addPhase;
+
+  /// No description provided for @renamePhase.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename phase'**
+  String get renamePhase;
+
+  /// No description provided for @phaseName.
+  ///
+  /// In en, this message translates to:
+  /// **'Phase name'**
+  String get phaseName;
+
+  /// No description provided for @phaseNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Phase 1'**
+  String get phaseNameHint;
+
+  /// No description provided for @phasesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No phases yet. Add your first phase.'**
+  String get phasesEmpty;
+
+  /// No description provided for @deletePhaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete phase?'**
+  String get deletePhaseTitle;
+
+  /// No description provided for @deletePhaseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the phase and its sessions. This cannot be undone.'**
+  String get deletePhaseBody;
+
+  /// No description provided for @phaseCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No phases} =1{1 phase} other{{count} phases}}'**
+  String phaseCount(int count);
+
+  /// No description provided for @editSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit session'**
+  String get editSession;
+
+  /// No description provided for @duplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get duplicate;
+
+  /// No description provided for @duplicateProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate program'**
+  String get duplicateProgram;
+
+  /// No description provided for @deleteSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete session?'**
+  String get deleteSessionTitle;
+
+  /// No description provided for @deleteSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the session and its exercises. This cannot be undone.'**
+  String get deleteSessionBody;
+
+  /// No description provided for @duplicatedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicated'**
+  String get duplicatedToast;
+
+  /// No description provided for @movement.
+  ///
+  /// In en, this message translates to:
+  /// **'Movement'**
+  String get movement;
+
+  /// No description provided for @movementRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at least one movement.'**
+  String get movementRequired;
+
+  /// No description provided for @movementStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get movementStrength;
+
+  /// No description provided for @movementHypertrophy.
+  ///
+  /// In en, this message translates to:
+  /// **'Hypertrophy'**
+  String get movementHypertrophy;
+
+  /// No description provided for @movementPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power'**
+  String get movementPower;
+
+  /// No description provided for @movementPlyometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Plyometric'**
+  String get movementPlyometric;
+
+  /// No description provided for @movementCardio.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardio'**
+  String get movementCardio;
+
+  /// No description provided for @movementMobility.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobility'**
+  String get movementMobility;
+
+  /// No description provided for @movementRehab.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehab'**
+  String get movementRehab;
+
+  /// No description provided for @movementWarmup.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm-up'**
+  String get movementWarmup;
+
+  /// No description provided for @loggingFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Logging fields'**
+  String get loggingFields;
+
+  /// No description provided for @loggingFieldsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What the client logs for this exercise.'**
+  String get loggingFieldsHint;
+
+  /// No description provided for @noLoggingFields.
+  ///
+  /// In en, this message translates to:
+  /// **'No custom fields — the client logs reps & weight.'**
+  String get noLoggingFields;
+
+  /// No description provided for @addField.
+  ///
+  /// In en, this message translates to:
+  /// **'Add field'**
+  String get addField;
+
+  /// No description provided for @fieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get fieldLabel;
+
+  /// No description provided for @fieldLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Weight, Pace, Incline'**
+  String get fieldLabelHint;
+
+  /// No description provided for @fieldType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get fieldType;
+
+  /// No description provided for @fieldUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get fieldUnit;
+
+  /// No description provided for @fieldUnitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. kg, km/h, %, cm'**
+  String get fieldUnitHint;
+
+  /// No description provided for @fieldOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get fieldOptions;
+
+  /// No description provided for @fieldOptionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated'**
+  String get fieldOptionsHint;
+
+  /// No description provided for @fieldIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Intensity unit'**
+  String get fieldIntensity;
+
+  /// No description provided for @metricTypeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Number'**
+  String get metricTypeNumber;
+
+  /// No description provided for @metricTypeDecimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Decimal'**
+  String get metricTypeDecimal;
+
+  /// No description provided for @metricTypeDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get metricTypeDuration;
+
+  /// No description provided for @metricTypeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get metricTypeText;
+
+  /// No description provided for @metricTypeEnum.
+  ///
+  /// In en, this message translates to:
+  /// **'Choice'**
+  String get metricTypeEnum;
+
+  /// No description provided for @intensityNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get intensityNone;
+
+  /// No description provided for @trainingMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get trainingMethod;
+
+  /// No description provided for @methodNeedsMultiple.
+  ///
+  /// In en, this message translates to:
+  /// **'This method needs 2 or more exercises.'**
+  String get methodNeedsMultiple;
+
+  /// No description provided for @addToGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add exercise to group'**
+  String get addToGroup;
+
+  /// No description provided for @methodStraight.
+  ///
+  /// In en, this message translates to:
+  /// **'Straight sets'**
+  String get methodStraight;
+
+  /// No description provided for @methodSuperset.
+  ///
+  /// In en, this message translates to:
+  /// **'Superset'**
+  String get methodSuperset;
+
+  /// No description provided for @methodDropset.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop set'**
+  String get methodDropset;
+
+  /// No description provided for @methodMechanicalDropset.
+  ///
+  /// In en, this message translates to:
+  /// **'Mechanical drop set'**
+  String get methodMechanicalDropset;
+
+  /// No description provided for @methodMyo.
+  ///
+  /// In en, this message translates to:
+  /// **'Myo reps'**
+  String get methodMyo;
+
+  /// No description provided for @methodMyoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Myo-match reps'**
+  String get methodMyoMatch;
+
+  /// No description provided for @methodEmom.
+  ///
+  /// In en, this message translates to:
+  /// **'EMOM'**
+  String get methodEmom;
+
+  /// No description provided for @methodE2mom.
+  ///
+  /// In en, this message translates to:
+  /// **'E2MOM'**
+  String get methodE2mom;
+
+  /// No description provided for @methodE3mom.
+  ///
+  /// In en, this message translates to:
+  /// **'E3MOM'**
+  String get methodE3mom;
+
+  /// No description provided for @methodRestPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest-pause'**
+  String get methodRestPause;
+
+  /// No description provided for @methodRamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Ramp'**
+  String get methodRamp;
+
+  /// No description provided for @methodBackOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Back-off'**
+  String get methodBackOff;
+
+  /// No description provided for @methodCluster.
+  ///
+  /// In en, this message translates to:
+  /// **'Cluster'**
+  String get methodCluster;
+
+  /// No description provided for @methodContrast.
+  ///
+  /// In en, this message translates to:
+  /// **'Contrast / PAP'**
+  String get methodContrast;
+
+  /// No description provided for @methodTempo.
+  ///
+  /// In en, this message translates to:
+  /// **'Tempo'**
+  String get methodTempo;
+
+  /// No description provided for @weekTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Week tag'**
+  String get weekTag;
+
+  /// No description provided for @weekTagHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach-only, e.g. Week 1'**
+  String get weekTagHint;
+
+  /// No description provided for @presRir.
+  ///
+  /// In en, this message translates to:
+  /// **'RIR'**
+  String get presRir;
+
+  /// No description provided for @intervalSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval (sec)'**
+  String get intervalSeconds;
+
+  /// No description provided for @exerciseDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise'**
+  String get exerciseDetails;
+
+  /// No description provided for @timer.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get timer;
+
+  /// No description provided for @timerStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get timerStart;
+
+  /// No description provided for @timerStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get timerStop;
+
+  /// No description provided for @timerReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get timerReset;
+
+  /// No description provided for @myNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'My notes'**
+  String get myNotes;
+
+  /// No description provided for @myNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Private notes for this exercise — visible only to you.'**
+  String get myNotesHint;
+
+  /// No description provided for @noteSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Note saved'**
+  String get noteSaved;
+
+  /// No description provided for @saveNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Save note'**
+  String get saveNote;
+
+  /// No description provided for @noDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No description.'**
+  String get noDescription;
+
+  /// No description provided for @aboutTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'About this training'**
+  String get aboutTraining;
+
+  /// No description provided for @progressTitle2.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get progressTitle2;
+
+  /// No description provided for @progressStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get progressStreak;
+
+  /// No description provided for @progressThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get progressThisWeek;
+
+  /// No description provided for @progressVisits.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No visits} =1{1 visit} other{{count} visits}}'**
+  String progressVisits(int count);
+
+  /// No description provided for @personalBests.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal bests'**
+  String get personalBests;
+
+  /// No description provided for @progressVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get progressVolume;
+
+  /// No description provided for @progressResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get progressResults;
+
+  /// No description provided for @weeklyVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly volume'**
+  String get weeklyVolume;
+
+  /// No description provided for @bestWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Best weight'**
+  String get bestWeight;
+
+  /// No description provided for @bestReps.
+  ///
+  /// In en, this message translates to:
+  /// **'Best reps'**
+  String get bestReps;
+
+  /// No description provided for @bestVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Best set volume'**
+  String get bestVolume;
+
+  /// No description provided for @noProgressYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet — log a few sessions to see your progress.'**
+  String get noProgressYet;
+
+  /// No description provided for @progressNoExercises.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged yet. Your tracked exercises will appear here.'**
+  String get progressNoExercises;
+
+  /// No description provided for @progressPickExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an exercise'**
+  String get progressPickExercise;
+
+  /// No description provided for @navCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get navCalendar;
+
+  /// No description provided for @calendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarTitle;
+
+  /// No description provided for @calendarBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get calendarBook;
+
+  /// No description provided for @calendarActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get calendarActivity;
+
+  /// No description provided for @calendarHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get calendarHistory;
+
+  /// No description provided for @bookTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Book training'**
+  String get bookTraining;
+
+  /// No description provided for @book.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get book;
+
+  /// No description provided for @cancelBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel booking'**
+  String get cancelBooking;
+
+  /// No description provided for @bookedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Booked'**
+  String get bookedLabel;
+
+  /// No description provided for @slotFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get slotFull;
+
+  /// No description provided for @placesLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Full} =1{1 place left} other{{count} places left}}'**
+  String placesLeft(int count);
+
+  /// No description provided for @yourBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Your booking'**
+  String get yourBooking;
+
+  /// No description provided for @noBookingThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'No booking this week.'**
+  String get noBookingThisWeek;
+
+  /// No description provided for @coachLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach'**
+  String get coachLabel;
+
+  /// No description provided for @bookingConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re booked!'**
+  String get bookingConfirmed;
+
+  /// No description provided for @bookingCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking cancelled'**
+  String get bookingCancelled;
+
+  /// No description provided for @bookConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book this slot?'**
+  String get bookConfirmTitle;
+
+  /// No description provided for @bookConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can book one training per day and cancel up to 2 hours before.'**
+  String get bookConfirmBody;
+
+  /// No description provided for @finishedTrainings.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished trainings'**
+  String get finishedTrainings;
+
+  /// No description provided for @noFinishedTrainings.
+  ///
+  /// In en, this message translates to:
+  /// **'No finished trainings yet.'**
+  String get noFinishedTrainings;
+
+  /// No description provided for @healthLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Health logs'**
+  String get healthLogs;
+
+  /// No description provided for @addLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add log'**
+  String get addLog;
+
+  /// No description provided for @logSleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep'**
+  String get logSleep;
+
+  /// No description provided for @logMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal'**
+  String get logMeal;
+
+  /// No description provided for @logActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get logActivity;
+
+  /// No description provided for @logWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get logWeight;
+
+  /// No description provided for @logWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get logWater;
+
+  /// No description provided for @logValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get logValue;
+
+  /// No description provided for @logNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get logNotes;
+
+  /// No description provided for @logSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get logSaved;
+
+  /// No description provided for @noLogsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged yet.'**
+  String get noLogsYet;
+
+  /// No description provided for @importFromHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Health'**
+  String get importFromHealth;
+
+  /// No description provided for @importFromStrava.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Strava'**
+  String get importFromStrava;
+
+  /// No description provided for @connectStrava.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Strava'**
+  String get connectStrava;
+
+  /// No description provided for @imported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nothing to import} =1{Imported 1 entry} other{Imported {count} entries}}'**
+  String imported(int count);
+
+  /// No description provided for @importUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Import isn\'t available on this device yet.'**
+  String get importUnavailable;
+
+  /// No description provided for @reminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get reminders;
+
+  /// No description provided for @addReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reminder'**
+  String get addReminder;
+
+  /// No description provided for @reminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get reminderTitle;
+
+  /// No description provided for @reminderTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get reminderTime;
+
+  /// No description provided for @reminderMeasureWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Measure weight'**
+  String get reminderMeasureWeight;
+
+  /// No description provided for @reminderDrinkWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Drink water'**
+  String get reminderDrinkWater;
+
+  /// No description provided for @noReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminders yet.'**
+  String get noReminders;
+
+  /// No description provided for @addToCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to calendar'**
+  String get addToCalendar;
+
+  /// No description provided for @addedToCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your calendar'**
+  String get addedToCalendar;
+
+  /// No description provided for @resetPhase.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset phase'**
+  String get resetPhase;
+
+  /// No description provided for @resetPhaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset this phase?'**
+  String get resetPhaseTitle;
+
+  /// No description provided for @resetPhaseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This clears completion for every session in the phase so the client restarts it.'**
+  String get resetPhaseBody;
+
+  /// No description provided for @phaseReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Phase reset'**
+  String get phaseReset;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @noNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet.'**
+  String get noNotifications;
+
+  /// No description provided for @markAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get markAllRead;
+
+  /// No description provided for @unreadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No unread} =1{1 unread} other{{count} unread}}'**
+  String unreadCount(int count);
+
+  /// No description provided for @rateDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'How hard was it?'**
+  String get rateDifficulty;
+
+  /// No description provided for @difficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty'**
+  String get difficulty;
+
+  /// No description provided for @difficultyVeryEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Very easy'**
+  String get difficultyVeryEasy;
+
+  /// No description provided for @difficultyEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get difficultyEasy;
+
+  /// No description provided for @difficultyModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get difficultyModerate;
+
+  /// No description provided for @difficultyHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get difficultyHard;
+
+  /// No description provided for @difficultyMax.
+  ///
+  /// In en, this message translates to:
+  /// **'All-out'**
+  String get difficultyMax;
+
+  /// No description provided for @ratingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating saved'**
+  String get ratingSaved;
+
+  /// No description provided for @addComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment'**
+  String get addComment;
+
+  /// No description provided for @commentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a comment…'**
+  String get commentHint;
+
+  /// No description provided for @comments.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get comments;
+
+  /// No description provided for @noComments.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet.'**
+  String get noComments;
+
+  /// No description provided for @commentPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment posted'**
+  String get commentPosted;
+
+  /// No description provided for @likeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get likeAction;
+
+  /// No description provided for @likedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Liked'**
+  String get likedLabel;
+
+  /// No description provided for @personalBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal best'**
+  String get personalBest;
+
+  /// No description provided for @noPersonalBest.
+  ///
+  /// In en, this message translates to:
+  /// **'No personal best yet.'**
+  String get noPersonalBest;
+
+  /// No description provided for @billingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing'**
+  String get billingTitle;
+
+  /// No description provided for @billing.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing'**
+  String get billing;
+
+  /// No description provided for @noInvoices.
+  ///
+  /// In en, this message translates to:
+  /// **'No invoices yet.'**
+  String get noInvoices;
+
+  /// No description provided for @invoicePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get invoicePaid;
+
+  /// No description provided for @invoicePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get invoicePending;
+
+  /// No description provided for @paidOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid {date}'**
+  String paidOn(String date);
 }
 
 class _AppLocalizationsDelegate

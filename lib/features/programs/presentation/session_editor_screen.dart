@@ -7,11 +7,15 @@ import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/core/utils/app_exception.dart';
+import 'package:lynx_app/core/utils/uuid.dart';
+import 'package:lynx_app/features/exercises/data/models/exercise.dart';
 import 'package:lynx_app/features/programs/data/models/session_exercise.dart';
+import 'package:lynx_app/features/programs/data/models/training_method.dart';
 import 'package:lynx_app/features/programs/data/models/training_session.dart';
 import 'package:lynx_app/features/programs/data/program_repository.dart';
 import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/features/programs/presentation/exercise_picker_sheet.dart';
+import 'package:lynx_app/features/programs/presentation/method_labels.dart';
 import 'package:lynx_app/features/programs/presentation/prescription_editor_sheet.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
@@ -20,7 +24,7 @@ import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/reorder_proxy.dart';
 import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
-/// Edits one session: its ordered exercises + prescriptions.
+/// Edits one session: its ordered exercises + prescriptions + training methods.
 class SessionEditorScreen extends ConsumerStatefulWidget {
   const SessionEditorScreen({
     super.key,
@@ -40,8 +44,6 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
   /// `ref.listen` in build.
   TrainingSession? _session;
 
-  /// Scroll-driven frost/shrink for the floating nav bar (mirrors
-  /// [FrostedNavScaffold]): 0 at the top, ramps to 1 over the first 60px.
   double _collapse = 0;
 
   bool _onScroll(ScrollNotification n) {
@@ -71,18 +73,132 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
     }
   }
 
+  /// Re-stamps a prescription with a method group + order (fields are public).
+  PrescriptionInput _withGroup(PrescriptionInput p, String groupId, int order) =>
+      PrescriptionInput(
+        sets: p.sets,
+        reps: p.reps,
+        weight: p.weight,
+        loadIntensity: p.loadIntensity,
+        rpe: p.rpe,
+        rir: p.rir,
+        timeSeconds: p.timeSeconds,
+        tempo: p.tempo,
+        restSeconds: p.restSeconds,
+        setTypeNote: p.setTypeNote,
+        coachNote: p.coachNote,
+        method: p.method,
+        methodGroupId: groupId,
+        groupOrder: order,
+        methodConfig: p.methodConfig,
+        weekLabel: p.weekLabel,
+      );
+
   Future<void> _addExercise() async {
     final exercise = await showExercisePicker(context);
     if (exercise == null || !mounted) return;
-    final prescription = await showPrescriptionEditor(context, exerciseName: exercise.name);
+    final prescription =
+        await showPrescriptionEditor(context, exerciseName: exercise.name);
     if (prescription == null || !mounted) return;
+    if (methodRequiresGroup(prescription.method)) {
+      await _addAsGroup(exercise, prescription);
+    } else {
+      await _guard(() => ProgramRepository.addSessionExercise(
+            tenantId: _tenantId,
+            sessionId: widget.sessionId,
+            exerciseId: exercise.id,
+            orderIndex: _session?.exercises.length ?? 0,
+            prescription: prescription,
+          ));
+    }
+  }
+
+  /// Builds a method group (2+ exercises sharing one group id). Adds the first,
+  /// then keeps offering to add more until the coach cancels the picker.
+  Future<void> _addAsGroup(Exercise first, PrescriptionInput p) async {
+    final groupId = uuidV4();
+    var order = _session?.exercises.length ?? 0;
+    var groupOrder = 0;
+    var added = 0;
+
     await _guard(() => ProgramRepository.addSessionExercise(
           tenantId: _tenantId,
           sessionId: widget.sessionId,
-          exerciseId: exercise.id,
-          orderIndex: _session?.exercises.length ?? 0,
-          prescription: prescription,
+          exerciseId: first.id,
+          orderIndex: order,
+          prescription: _withGroup(p, groupId, groupOrder),
         ));
+    order++;
+    groupOrder++;
+    added++;
+
+    while (true) {
+      if (!mounted) return;
+      final ex = await showExercisePicker(context);
+      if (ex == null || !mounted) break;
+      final pp = await showPrescriptionEditor(
+        context,
+        exerciseName: ex.name,
+        lockMethod: p.method,
+        groupId: groupId,
+        groupOrder: groupOrder,
+      );
+      if (pp == null || !mounted) break;
+      final capturedOrder = order;
+      await _guard(() => ProgramRepository.addSessionExercise(
+            tenantId: _tenantId,
+            sessionId: widget.sessionId,
+            exerciseId: ex.id,
+            orderIndex: capturedOrder,
+            prescription: pp,
+          ));
+      order++;
+      groupOrder++;
+      added++;
+    }
+
+    if (!mounted) return;
+    if (added < 2) {
+      AppToast.show(context,
+          title: AppLocalizations.of(context).methodNeedsMultiple, blur: false);
+    }
+  }
+
+  /// Adds one more exercise into an existing group, re-sequencing so it sits
+  /// right after the group's current last member.
+  Future<void> _addToGroup(SessionExercise lastMember) async {
+    final ex = await showExercisePicker(context);
+    if (ex == null || !mounted) return;
+    final current = _session?.exercises ?? const [];
+    final groupMembers =
+        current.where((e) => e.methodGroupId == lastMember.methodGroupId);
+    final nextGroupOrder = groupMembers.isEmpty
+        ? 0
+        : groupMembers.map((e) => e.groupOrder).reduce((a, b) => a > b ? a : b) +
+            1;
+    final pp = await showPrescriptionEditor(
+      context,
+      exerciseName: ex.name,
+      lockMethod: lastMember.method,
+      groupId: lastMember.methodGroupId,
+      groupOrder: nextGroupOrder,
+    );
+    if (pp == null || !mounted) return;
+
+    await _guard(() async {
+      final newId = await ProgramRepository.addSessionExercise(
+        tenantId: _tenantId,
+        sessionId: widget.sessionId,
+        exerciseId: ex.id,
+        orderIndex: current.length,
+        prescription: pp,
+      );
+      final ids = current.map((e) => e.id).toList();
+      final lastIdx = ids.indexOf(lastMember.id);
+      ids.insert(lastIdx + 1, newId);
+      await ProgramRepository.setExerciseOrder(
+          tenantId: _tenantId, orderedIds: ids);
+    });
   }
 
   Future<void> _editExercise(SessionExercise se) async {
@@ -116,6 +232,7 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
             id: _session!.id,
             label: _session!.label,
             orderIndex: _session!.orderIndex,
+            phaseId: _session!.phaseId,
             exercises: list,
           ));
     await _guard(() => ProgramRepository.setExerciseOrder(
@@ -127,16 +244,12 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    // Keep the local (optimistically-reorderable) copy in sync with the provider.
     ref.listen(sessionEditorProvider(_key), (prev, next) {
       next.whenData((s) {
         if (mounted) setState(() => _session = s);
       });
     });
     final async = ref.watch(sessionEditorProvider(_key));
-    // Fall back to the provider's current value: `ref.listen` only fires on
-    // *changes*, so it misses a value already resolved before this screen
-    // mounted — which otherwise shows the error state over a real session.
     final session = _session ?? async.valueOrNull;
     final loading = session == null && async.isLoading;
     final topInset = AppNavBar.estimatedHeight(context);
@@ -157,43 +270,60 @@ class _SessionEditorScreenState extends ConsumerState<SessionEditorScreen> {
             child: NotificationListener<ScrollNotification>(
               onNotification: _onScroll,
               child: loading
-                ? SessionEditorSkeleton(topInset: topInset)
-                : session == null
-                    ? Padding(
-                        padding: EdgeInsets.only(top: topInset),
-                        child: Center(
-                            child: Text(l.somethingWentWrong,
-                                style: AppTextStyles.bodySmall)),
-                      )
-                    : session.exercises.isEmpty
-                        ? Padding(
-                            padding: EdgeInsets.only(
-                                top: topInset, left: AppSpacing.xl, right: AppSpacing.xl),
-                            child: Center(
-                                child: Text(l.sessionExercisesEmpty,
-                                    textAlign: TextAlign.center,
-                                    style: AppTextStyles.bodySmall)),
-                          )
-                        : SafeArea(
-                            top: false,
-                            bottom: false,
-                            child: ReorderableListView.builder(
-                              padding: EdgeInsets.fromLTRB(
-                                  AppSpacing.lg, topInset + AppSpacing.sm, AppSpacing.lg, 96),
-                              itemCount: session.exercises.length,
-                              proxyDecorator: roundedReorderProxy,
-                              onReorderItem: _reorder,
-                              itemBuilder: (context, i) {
-                                final se = session.exercises[i];
-                                return _ExerciseCard(
-                                  key: ValueKey(se.id),
-                                  se: se,
-                                  onEdit: () => _editExercise(se),
-                                  onRemove: () => _removeExercise(se),
-                                );
-                              },
+                  ? SessionEditorSkeleton(topInset: topInset)
+                  : session == null
+                      ? Padding(
+                          padding: EdgeInsets.only(top: topInset),
+                          child: Center(
+                              child: Text(l.somethingWentWrong,
+                                  style: AppTextStyles.bodySmall)),
+                        )
+                      : session.exercises.isEmpty
+                          ? Padding(
+                              padding: EdgeInsets.only(
+                                  top: topInset,
+                                  left: AppSpacing.xl,
+                                  right: AppSpacing.xl),
+                              child: Center(
+                                  child: Text(l.sessionExercisesEmpty,
+                                      textAlign: TextAlign.center,
+                                      style: AppTextStyles.bodySmall)),
+                            )
+                          : SafeArea(
+                              top: false,
+                              bottom: false,
+                              child: ReorderableListView.builder(
+                                padding: EdgeInsets.fromLTRB(AppSpacing.lg,
+                                    topInset + AppSpacing.sm, AppSpacing.lg, 96),
+                                itemCount: session.exercises.length,
+                                proxyDecorator: roundedReorderProxy,
+                                onReorderItem: _reorder,
+                                itemBuilder: (context, i) {
+                                  final list = session.exercises;
+                                  final se = list[i];
+                                  final gid = se.methodGroupId;
+                                  final inGroup = gid != null && gid.isNotEmpty;
+                                  final prevGid =
+                                      i > 0 ? list[i - 1].methodGroupId : null;
+                                  final nextGid = i < list.length - 1
+                                      ? list[i + 1].methodGroupId
+                                      : null;
+                                  final isFirst = inGroup && gid != prevGid;
+                                  final isLast = inGroup && gid != nextGid;
+                                  return _ExerciseCard(
+                                    key: ValueKey(se.id),
+                                    se: se,
+                                    inGroup: inGroup,
+                                    isFirstInGroup: isFirst,
+                                    isLastInGroup: isLast,
+                                    onEdit: () => _editExercise(se),
+                                    onRemove: () => _removeExercise(se),
+                                    onAddToGroup:
+                                        isLast ? () => _addToGroup(se) : null,
+                                  );
+                                },
+                              ),
                             ),
-                          ),
             ),
           ),
           Positioned(
@@ -217,51 +347,152 @@ class _ExerciseCard extends StatelessWidget {
   const _ExerciseCard({
     super.key,
     required this.se,
+    required this.inGroup,
+    required this.isFirstInGroup,
+    required this.isLastInGroup,
     required this.onEdit,
     required this.onRemove,
+    this.onAddToGroup,
   });
 
   final SessionExercise se;
+  final bool inGroup;
+  final bool isFirstInGroup;
+  final bool isLastInGroup;
   final VoidCallback onEdit;
   final VoidCallback onRemove;
+  final VoidCallback? onAddToGroup;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    // Method badge: shown once for a group (on its first member), or on a
+    // single exercise whose method isn't "straight".
+    final showMethodBadge =
+        isFirstInGroup || (!inGroup && se.method != TrainingMethod.straight);
+
+    final card = Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.surfaceBorder),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (showMethodBadge || (se.weekLabel ?? '').isNotEmpty) ...[
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
+                    children: [
+                      if (showMethodBadge)
+                        _Pill(
+                          text: methodLabel(l, se.method),
+                          color: AppColors.primary,
+                        ),
+                      if ((se.weekLabel ?? '').isNotEmpty)
+                        _Pill(
+                          text: se.weekLabel!,
+                          color: AppColors.textTertiary,
+                          subtle: true,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                ],
+                Text(se.exerciseName,
+                    style: AppTextStyles.body
+                        .copyWith(fontWeight: FontWeight.w600)),
+                if (se.prescriptionSummary.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(se.prescriptionSummary, style: AppTextStyles.bodySmall),
+                ],
+                if (onAddToGroup != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  InkWell(
+                    onTap: onAddToGroup,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add, size: 16, color: AppColors.primary),
+                          const SizedBox(width: 4),
+                          Text(l.addToGroup,
+                              style: AppTextStyles.bodySmall
+                                  .copyWith(color: AppColors.primary)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.edit_outlined, color: AppColors.primary),
+            onPressed: onEdit,
+          ),
+          IconButton(
+            icon: Icon(Icons.close, color: AppColors.textTertiary),
+            tooltip: l.remove,
+            onPressed: onRemove,
+          ),
+        ],
+      ),
+    );
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.surfaceBorder),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      padding: EdgeInsets.only(
+          bottom: inGroup && !isLastInGroup ? 2 : AppSpacing.sm),
+      child: inGroup
+          ? IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(se.exerciseName,
-                      style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
-                  if (se.prescriptionSummary.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(se.prescriptionSummary, style: AppTextStyles.bodySmall),
-                  ],
+                  Container(
+                    width: 3,
+                    margin: const EdgeInsets.only(right: AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                  ),
+                  Expanded(child: card),
                 ],
               ),
-            ),
-            IconButton(
-              icon: Icon(Icons.edit_outlined, color: AppColors.primary),
-              onPressed: onEdit,
-            ),
-            IconButton(
-              icon: Icon(Icons.close, color: AppColors.textTertiary),
-              tooltip: l.remove,
-              onPressed: onRemove,
-            ),
-          ],
+            )
+          : card,
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  const _Pill({required this.text, required this.color, this.subtle = false});
+  final String text;
+  final Color color;
+  final bool subtle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: subtle
+            ? AppColors.surfaceLight
+            : color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Text(
+        text,
+        style: AppTextStyles.bodySmall.copyWith(
+          color: subtle ? AppColors.textSecondary : color,
+          fontWeight: FontWeight.w600,
+          fontSize: 11,
         ),
       ),
     );

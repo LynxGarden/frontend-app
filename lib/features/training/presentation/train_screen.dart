@@ -74,11 +74,41 @@ class _TrainScreenState extends ConsumerState<TrainScreen> {
                     itemCount: assignment.sessions.length + 1,
                     itemBuilder: (context, i) {
                       if (i == 0) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: Text(assignment.name,
-                              style: AppTextStyles.heading3
-                                  .copyWith(color: AppColors.textSecondary)),
+                        final desc = assignment.description?.trim() ?? '';
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(bottom: AppSpacing.md),
+                              child: Text(assignment.name,
+                                  style: AppTextStyles.heading3
+                                      .copyWith(color: AppColors.textSecondary)),
+                            ),
+                            if (desc.isNotEmpty)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(bottom: AppSpacing.md),
+                                child: AppCard(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(l.aboutTraining.toUpperCase(),
+                                          style: AppTextStyles.label.copyWith(
+                                              color: AppColors.textTertiary,
+                                              letterSpacing: 0.4)),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      Text(desc,
+                                          style: AppTextStyles.bodySmall
+                                              .copyWith(
+                                                  color:
+                                                      AppColors.textSecondary)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
                         );
                       }
                       final session = assignment.sessions[i - 1];

@@ -1,7 +1,10 @@
 import 'package:lynx_app/features/exercises/data/models/exercise_tag.dart';
+import 'package:lynx_app/features/exercises/data/models/metric_field.dart';
+import 'package:lynx_app/features/exercises/data/models/movement.dart';
 
 /// A library exercise: name, optional video (link-based in v1) + description,
-/// and faceted tags. Owned by a coach within a tenant.
+/// faceted tags, a required movement classification and a config-driven logging
+/// schema. Owned by a coach within a tenant.
 class Exercise {
   const Exercise({
     required this.id,
@@ -12,6 +15,8 @@ class Exercise {
     this.videoStoragePath,
     this.thumbnailStoragePath,
     this.tags = const [],
+    this.movements = const [],
+    this.metricSchema = const [],
   });
 
   final String id;
@@ -25,6 +30,12 @@ class Exercise {
   final String? thumbnailStoragePath;
   final List<ExerciseTag> tags;
 
+  /// Required (≥1) movement classification. Coach-visible; drives the filter.
+  final List<Movement> movements;
+
+  /// Config-driven logging fields. Empty → runner falls back to reps/weight.
+  final List<MetricField> metricSchema;
+
   bool get hasHostedVideo =>
       videoStoragePath != null && videoStoragePath!.trim().isNotEmpty;
   bool get hasLinkVideo => videoUrl != null && videoUrl!.trim().isNotEmpty;
@@ -35,7 +46,8 @@ class Exercise {
 
   /// Parses a row selected with the embedded tags shape:
   /// `id, owner_id, name, description, video_url, video_storage_path,
-  ///  thumbnail_storage_path, exercise_tags(tags(id, category, label))`
+  ///  thumbnail_storage_path, movements, metric_schema,
+  ///  exercise_tags(tags(id, category, label))`
   factory Exercise.fromJson(Map<String, dynamic> json) {
     final tagJoins = (json['exercise_tags'] as List?) ?? const [];
     final tags = <ExerciseTag>[];
@@ -54,6 +66,8 @@ class Exercise {
       videoStoragePath: json['video_storage_path'] as String?,
       thumbnailStoragePath: json['thumbnail_storage_path'] as String?,
       tags: tags,
+      movements: movementsFromDb(json['movements']),
+      metricSchema: MetricField.listFromDb(json['metric_schema']),
     );
   }
 }

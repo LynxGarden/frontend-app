@@ -919,4 +919,569 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get couldNotDeleteAccount =>
       'Could not delete your account. Please try again.';
+
+  @override
+  String get navPrograms => 'Programs';
+
+  @override
+  String get allExercises => 'All exercises';
+
+  @override
+  String get viewAsList => 'List view';
+
+  @override
+  String get viewAsGrid => 'Grid view';
+
+  @override
+  String get phasesLabel => 'Phases';
+
+  @override
+  String get addPhase => 'Add phase';
+
+  @override
+  String get renamePhase => 'Rename phase';
+
+  @override
+  String get phaseName => 'Phase name';
+
+  @override
+  String get phaseNameHint => 'e.g. Phase 1';
+
+  @override
+  String get phasesEmpty => 'No phases yet. Add your first phase.';
+
+  @override
+  String get deletePhaseTitle => 'Delete phase?';
+
+  @override
+  String get deletePhaseBody =>
+      'This removes the phase and its sessions. This cannot be undone.';
+
+  @override
+  String phaseCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count phases',
+      one: '1 phase',
+      zero: 'No phases',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get editSession => 'Edit session';
+
+  @override
+  String get duplicate => 'Duplicate';
+
+  @override
+  String get duplicateProgram => 'Duplicate program';
+
+  @override
+  String get deleteSessionTitle => 'Delete session?';
+
+  @override
+  String get deleteSessionBody =>
+      'This removes the session and its exercises. This cannot be undone.';
+
+  @override
+  String get duplicatedToast => 'Duplicated';
+
+  @override
+  String get movement => 'Movement';
+
+  @override
+  String get movementRequired => 'Pick at least one movement.';
+
+  @override
+  String get movementStrength => 'Strength';
+
+  @override
+  String get movementHypertrophy => 'Hypertrophy';
+
+  @override
+  String get movementPower => 'Power';
+
+  @override
+  String get movementPlyometric => 'Plyometric';
+
+  @override
+  String get movementCardio => 'Cardio';
+
+  @override
+  String get movementMobility => 'Mobility';
+
+  @override
+  String get movementRehab => 'Rehab';
+
+  @override
+  String get movementWarmup => 'Warm-up';
+
+  @override
+  String get loggingFields => 'Logging fields';
+
+  @override
+  String get loggingFieldsHint => 'What the client logs for this exercise.';
+
+  @override
+  String get noLoggingFields =>
+      'No custom fields — the client logs reps & weight.';
+
+  @override
+  String get addField => 'Add field';
+
+  @override
+  String get fieldLabel => 'Label';
+
+  @override
+  String get fieldLabelHint => 'e.g. Weight, Pace, Incline';
+
+  @override
+  String get fieldType => 'Type';
+
+  @override
+  String get fieldUnit => 'Unit';
+
+  @override
+  String get fieldUnitHint => 'e.g. kg, km/h, %, cm';
+
+  @override
+  String get fieldOptions => 'Options';
+
+  @override
+  String get fieldOptionsHint => 'Comma-separated';
+
+  @override
+  String get fieldIntensity => 'Intensity unit';
+
+  @override
+  String get metricTypeNumber => 'Number';
+
+  @override
+  String get metricTypeDecimal => 'Decimal';
+
+  @override
+  String get metricTypeDuration => 'Duration';
+
+  @override
+  String get metricTypeText => 'Text';
+
+  @override
+  String get metricTypeEnum => 'Choice';
+
+  @override
+  String get intensityNone => 'None';
+
+  @override
+  String get trainingMethod => 'Method';
+
+  @override
+  String get methodNeedsMultiple => 'This method needs 2 or more exercises.';
+
+  @override
+  String get addToGroup => 'Add exercise to group';
+
+  @override
+  String get methodStraight => 'Straight sets';
+
+  @override
+  String get methodSuperset => 'Superset';
+
+  @override
+  String get methodDropset => 'Drop set';
+
+  @override
+  String get methodMechanicalDropset => 'Mechanical drop set';
+
+  @override
+  String get methodMyo => 'Myo reps';
+
+  @override
+  String get methodMyoMatch => 'Myo-match reps';
+
+  @override
+  String get methodEmom => 'EMOM';
+
+  @override
+  String get methodE2mom => 'E2MOM';
+
+  @override
+  String get methodE3mom => 'E3MOM';
+
+  @override
+  String get methodRestPause => 'Rest-pause';
+
+  @override
+  String get methodRamp => 'Ramp';
+
+  @override
+  String get methodBackOff => 'Back-off';
+
+  @override
+  String get methodCluster => 'Cluster';
+
+  @override
+  String get methodContrast => 'Contrast / PAP';
+
+  @override
+  String get methodTempo => 'Tempo';
+
+  @override
+  String get weekTag => 'Week tag';
+
+  @override
+  String get weekTagHint => 'Coach-only, e.g. Week 1';
+
+  @override
+  String get presRir => 'RIR';
+
+  @override
+  String get intervalSeconds => 'Interval (sec)';
+
+  @override
+  String get exerciseDetails => 'Exercise';
+
+  @override
+  String get timer => 'Timer';
+
+  @override
+  String get timerStart => 'Start';
+
+  @override
+  String get timerStop => 'Stop';
+
+  @override
+  String get timerReset => 'Reset';
+
+  @override
+  String get myNotes => 'My notes';
+
+  @override
+  String get myNotesHint =>
+      'Private notes for this exercise — visible only to you.';
+
+  @override
+  String get noteSaved => 'Note saved';
+
+  @override
+  String get saveNote => 'Save note';
+
+  @override
+  String get noDescription => 'No description.';
+
+  @override
+  String get aboutTraining => 'About this training';
+
+  @override
+  String get progressTitle2 => 'Progress';
+
+  @override
+  String get progressStreak => 'Streak';
+
+  @override
+  String get progressThisWeek => 'This week';
+
+  @override
+  String progressVisits(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count visits',
+      one: '1 visit',
+      zero: 'No visits',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get personalBests => 'Personal bests';
+
+  @override
+  String get progressVolume => 'Volume';
+
+  @override
+  String get progressResults => 'Results';
+
+  @override
+  String get weeklyVolume => 'Weekly volume';
+
+  @override
+  String get bestWeight => 'Best weight';
+
+  @override
+  String get bestReps => 'Best reps';
+
+  @override
+  String get bestVolume => 'Best set volume';
+
+  @override
+  String get noProgressYet =>
+      'No data yet — log a few sessions to see your progress.';
+
+  @override
+  String get progressNoExercises =>
+      'Nothing logged yet. Your tracked exercises will appear here.';
+
+  @override
+  String get progressPickExercise => 'Pick an exercise';
+
+  @override
+  String get navCalendar => 'Calendar';
+
+  @override
+  String get calendarTitle => 'Calendar';
+
+  @override
+  String get calendarBook => 'Book';
+
+  @override
+  String get calendarActivity => 'Activity';
+
+  @override
+  String get calendarHistory => 'History';
+
+  @override
+  String get bookTraining => 'Book training';
+
+  @override
+  String get book => 'Book';
+
+  @override
+  String get cancelBooking => 'Cancel booking';
+
+  @override
+  String get bookedLabel => 'Booked';
+
+  @override
+  String get slotFull => 'Full';
+
+  @override
+  String placesLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count places left',
+      one: '1 place left',
+      zero: 'Full',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get yourBooking => 'Your booking';
+
+  @override
+  String get noBookingThisWeek => 'No booking this week.';
+
+  @override
+  String get coachLabel => 'Coach';
+
+  @override
+  String get bookingConfirmed => 'You\'re booked!';
+
+  @override
+  String get bookingCancelled => 'Booking cancelled';
+
+  @override
+  String get bookConfirmTitle => 'Book this slot?';
+
+  @override
+  String get bookConfirmBody =>
+      'You can book one training per day and cancel up to 2 hours before.';
+
+  @override
+  String get finishedTrainings => 'Finished trainings';
+
+  @override
+  String get noFinishedTrainings => 'No finished trainings yet.';
+
+  @override
+  String get healthLogs => 'Health logs';
+
+  @override
+  String get addLog => 'Add log';
+
+  @override
+  String get logSleep => 'Sleep';
+
+  @override
+  String get logMeal => 'Meal';
+
+  @override
+  String get logActivity => 'Activity';
+
+  @override
+  String get logWeight => 'Weight';
+
+  @override
+  String get logWater => 'Water';
+
+  @override
+  String get logValue => 'Value';
+
+  @override
+  String get logNotes => 'Notes';
+
+  @override
+  String get logSaved => 'Saved';
+
+  @override
+  String get noLogsYet => 'Nothing logged yet.';
+
+  @override
+  String get importFromHealth => 'Import from Health';
+
+  @override
+  String get importFromStrava => 'Import from Strava';
+
+  @override
+  String get connectStrava => 'Connect Strava';
+
+  @override
+  String imported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Imported $count entries',
+      one: 'Imported 1 entry',
+      zero: 'Nothing to import',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importUnavailable => 'Import isn\'t available on this device yet.';
+
+  @override
+  String get reminders => 'Reminders';
+
+  @override
+  String get addReminder => 'Add reminder';
+
+  @override
+  String get reminderTitle => 'Title';
+
+  @override
+  String get reminderTime => 'Time';
+
+  @override
+  String get reminderMeasureWeight => 'Measure weight';
+
+  @override
+  String get reminderDrinkWater => 'Drink water';
+
+  @override
+  String get noReminders => 'No reminders yet.';
+
+  @override
+  String get addToCalendar => 'Add to calendar';
+
+  @override
+  String get addedToCalendar => 'Added to your calendar';
+
+  @override
+  String get resetPhase => 'Reset phase';
+
+  @override
+  String get resetPhaseTitle => 'Reset this phase?';
+
+  @override
+  String get resetPhaseBody =>
+      'This clears completion for every session in the phase so the client restarts it.';
+
+  @override
+  String get phaseReset => 'Phase reset';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get noNotifications => 'No notifications yet.';
+
+  @override
+  String get markAllRead => 'Mark all read';
+
+  @override
+  String unreadCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unread',
+      one: '1 unread',
+      zero: 'No unread',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rateDifficulty => 'How hard was it?';
+
+  @override
+  String get difficulty => 'Difficulty';
+
+  @override
+  String get difficultyVeryEasy => 'Very easy';
+
+  @override
+  String get difficultyEasy => 'Easy';
+
+  @override
+  String get difficultyModerate => 'Moderate';
+
+  @override
+  String get difficultyHard => 'Hard';
+
+  @override
+  String get difficultyMax => 'All-out';
+
+  @override
+  String get ratingSaved => 'Rating saved';
+
+  @override
+  String get addComment => 'Add a comment';
+
+  @override
+  String get commentHint => 'Write a comment…';
+
+  @override
+  String get comments => 'Comments';
+
+  @override
+  String get noComments => 'No comments yet.';
+
+  @override
+  String get commentPosted => 'Comment posted';
+
+  @override
+  String get likeAction => 'Like';
+
+  @override
+  String get likedLabel => 'Liked';
+
+  @override
+  String get personalBest => 'Personal best';
+
+  @override
+  String get noPersonalBest => 'No personal best yet.';
+
+  @override
+  String get billingTitle => 'Billing';
+
+  @override
+  String get billing => 'Billing';
+
+  @override
+  String get noInvoices => 'No invoices yet.';
+
+  @override
+  String get invoicePaid => 'Paid';
+
+  @override
+  String get invoicePending => 'Pending';
+
+  @override
+  String paidOn(String date) {
+    return 'Paid $date';
+  }
 }

@@ -1,6 +1,7 @@
-import 'package:lynx_app/features/programs/data/models/training_session.dart';
+import 'package:lynx_app/features/programs/data/models/phase.dart';
 
-/// A reusable program template — an ordered menu of sessions.
+/// A reusable program template — an ordered list of phases, each an ordered
+/// menu of sessions (Program → Phase → Session → SessionExercise).
 class Program {
   const Program({
     required this.id,
@@ -8,7 +9,7 @@ class Program {
     required this.name,
     this.description,
     this.isTemplate = true,
-    this.sessions = const [],
+    this.phases = const [],
   });
 
   final String id;
@@ -16,15 +17,17 @@ class Program {
   final String name;
   final String? description;
   final bool isTemplate;
-  final List<TrainingSession> sessions;
+  final List<Phase> phases;
 
-  int get sessionCount => sessions.length;
+  int get phaseCount => phases.length;
+  int get sessionCount =>
+      phases.fold(0, (sum, p) => sum + p.sessions.length);
 
-  /// Shallow parse (list rows) — no nested sessions.
+  /// Shallow parse (list rows) — counts via `phases(sessions(id))`.
   factory Program.fromJson(Map<String, dynamic> json) {
-    final rawSessions = (json['sessions'] as List?) ?? const [];
-    final sessions = rawSessions
-        .map((s) => TrainingSession.fromJson(Map<String, dynamic>.from(s as Map)))
+    final rawPhases = (json['phases'] as List?) ?? const [];
+    final phases = rawPhases
+        .map((p) => Phase.fromJson(Map<String, dynamic>.from(p as Map)))
         .toList()
       ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
     return Program(
@@ -33,7 +36,7 @@ class Program {
       name: json['name'] as String,
       description: json['description'] as String?,
       isTemplate: (json['is_template'] as bool?) ?? true,
-      sessions: sessions,
+      phases: phases,
     );
   }
 }

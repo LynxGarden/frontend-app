@@ -8,6 +8,9 @@ import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/core/utils/app_exception.dart';
 import 'package:lynx_app/features/settings/data/account_repository.dart';
+import 'package:lynx_app/features/settings/presentation/billing_screen.dart';
+import 'package:lynx_app/features/notifications/presentation/notifications_screen.dart';
+import 'package:lynx_app/features/notifications/providers/notifications_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/data/session_service.dart';
 import 'package:lynx_app/shared/models/app_user.dart';
@@ -230,6 +233,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final localeCode = ref.watch(localeProvider)?.languageCode ??
         Localizations.localeOf(context).languageCode;
     final themeMode = ref.watch(themeModeProvider);
+    final unread = ref.watch(unreadNotificationsCountProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -285,6 +289,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         title: l.appearance,
                         value: _themeLabel(l, themeMode),
                         onTap: _pickTheme,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Notifications & Billing ──────────────────────
+                  _Section(
+                    header: l.notificationsTitle,
+                    rows: [
+                      _Row.nav(
+                        icon: Icons.notifications_outlined,
+                        title: l.notificationsTitle,
+                        value: unread > 0 ? '$unread' : null,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const NotificationsScreen()),
+                        ),
+                      ),
+                      _Row.nav(
+                        icon: Icons.receipt_long_outlined,
+                        title: l.billing,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const BillingScreen()),
+                        ),
                       ),
                     ],
                   ),

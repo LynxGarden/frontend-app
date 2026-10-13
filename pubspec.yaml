@@ -26,6 +26,20 @@ dependencies:
   # Fonts & UI
   google_fonts: ^6.2.1
   cached_network_image: ^3.3.1
+  # Charts — progress graphs (volume / PB trends).
+  fl_chart: ^0.69.2
+  # Calendar UI (month/week booking grid).
+  table_calendar: ^3.1.2
+  # Native health import (Apple Health / Google Fit).
+  health: ^13.3.1
+  # Device calendar sync (Apple/Google calendars).
+  device_calendar: ^4.3.3
+  # Local reminders (weight/water) + timezone resolution.
+  flutter_local_notifications: ^18.0.1
+  flutter_timezone: ^3.0.1
+  timezone: ^0.9.4
+  # Strava OAuth + API.
+  http: ^1.2.2
   # Native iOS tab bar (SF Symbols via a UIKit platform view). Android falls
   # back to a custom Material pill bar — see lib/shared/widgets/main_shell.dart.
   cupertino_native: ^0.1.1

@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/core/utils/app_exception.dart';
+import 'package:lynx_app/features/exercises/presentation/exercise_library_screen.dart';
 import 'package:lynx_app/features/programs/data/models/program.dart';
 import 'package:lynx_app/features/programs/data/program_repository.dart';
 import 'package:lynx_app/features/programs/presentation/program_editor_screen.dart';
 import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
-import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
+import 'package:lynx_app/shared/providers/view_mode_provider.dart';
+import 'package:lynx_app/shared/widgets/app_action_sheet.dart';
+import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/reorder_proxy.dart';
 import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
-/// The coach's program template library.
+enum _ProgramAction { duplicate, delete }
+
+/// The coach's program template library — the top-level "Programs" tab.
 class ProgramListScreen extends ConsumerStatefulWidget {
   const ProgramListScreen({super.key});
 
@@ -37,6 +43,13 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
       MaterialPageRoute(builder: (_) => ProgramEditorScreen(programId: programId)),
     );
     ref.invalidate(programTemplatesProvider);
+  }
+
+  void _openAllExercises() {
+    HapticFeedback.lightImpact();
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ExerciseLibraryScreen(pushed: true)),
+    );
   }
 
   Future<void> _reorder(int oldIndex, int newIndex) async {
@@ -89,6 +102,70 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
     }
   }
 
+  Future<void> _openActions(Program program) async {
+    final l = AppLocalizations.of(context);
+    HapticFeedback.selectionClick();
+    final action = await showActionSheet<_ProgramAction>(
+      context,
+      title: program.name,
+      actions: [
+        AppSheetAction(
+            value: _ProgramAction.duplicate,
+            label: l.duplicate,
+            icon: Icons.copy_outlined),
+        AppSheetAction(
+            value: _ProgramAction.delete,
+            label: l.delete,
+            icon: Icons.delete_outline,
+            destructive: true),
+      ],
+    );
+    if (!mounted || action == null) return;
+    switch (action) {
+      case _ProgramAction.duplicate:
+        await _duplicate(program.id);
+      case _ProgramAction.delete:
+        await _delete(program.id);
+    }
+  }
+
+  Future<void> _duplicate(String programId) async {
+    final l = AppLocalizations.of(context);
+    try {
+      await ProgramRepository.duplicateProgram(programId: programId);
+      ref.invalidate(programTemplatesProvider);
+      if (mounted) AppToast.show(context, title: l.duplicatedToast, blur: false);
+    } on AppException catch (e) {
+      if (mounted) AppToast.show(context, title: e.message, blur: false);
+    }
+  }
+
+  Future<void> _delete(String programId) async {
+    final l = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(l.deleteProgramTitle, style: AppTextStyles.heading3),
+        content: Text(l.deleteProgramBody, style: AppTextStyles.bodySmall),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l.delete, style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ProgramRepository.deleteProgram(tenantId: _tenantId, programId: programId);
+      ref.invalidate(programTemplatesProvider);
+    } on AppException catch (e) {
+      if (mounted) AppToast.show(context, title: e.message, blur: false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -99,15 +176,34 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
       });
     });
     final programsAsync = ref.watch(programTemplatesProvider);
+    final mode = ref.watch(viewModeProvider('programs'));
     // Prefer the optimistic local copy (for drag-reorder), but fall back to the
-    // provider's current value: `ref.listen` only fires on *changes*, so it
-    // misses a value that was already resolved before this screen mounted —
-    // which otherwise renders the empty state over real data.
+    // provider's current value: `ref.listen` only fires on *changes*.
     final programs = _programs ?? programsAsync.valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(l.programsTitle, style: AppTextStyles.heading3)),
+      appBar: AppBar(
+        title: Text(l.programsTitle, style: AppTextStyles.heading3),
+        actions: [
+          IconButton(
+            tooltip: l.allExercises,
+            icon: const Icon(Icons.fitness_center_outlined),
+            onPressed: _openAllExercises,
+          ),
+          IconButton(
+            tooltip: mode == ViewMode.grid ? l.viewAsList : l.viewAsGrid,
+            icon: Icon(mode == ViewMode.grid
+                ? Icons.view_list_outlined
+                : Icons.grid_view_outlined),
+            onPressed: () {
+              HapticFeedback.selectionClick();
+              ref.read(viewModeProvider('programs').notifier).toggle();
+            },
+          ),
+          const SizedBox(width: AppSpacing.xs),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab_programs',
         backgroundColor: AppColors.primary,
@@ -118,45 +214,83 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
       ),
       body: SafeArea(
         bottom: false,
-        child: programs == null && programsAsync.isLoading
-            ? const ProgramSkeletonList()
-            : programs == null && programsAsync.hasError
-                ? Center(
-                    child: Text(l.somethingWentWrong,
-                        style: AppTextStyles.bodySmall))
-                : (programs == null || programs.isEmpty)
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.xl),
-                          child: Text(l.programsEmpty,
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.bodySmall),
-                        ),
-                      )
-                    : ReorderableListView.builder(
-                        padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 96),
-                        itemCount: programs.length,
-                        proxyDecorator: roundedReorderProxy,
-                        onReorderItem: _reorder,
-                        itemBuilder: (_, i) => Padding(
-                          key: ValueKey(programs[i].id),
-                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                          child: _ProgramCard(
-                            program: programs[i],
-                            onTap: () => _openEditor(programs[i].id),
-                          ),
-                        ),
-                      ),
+        child: _body(l, programs, programsAsync, mode),
+      ),
+    );
+  }
+
+  Widget _body(
+    AppLocalizations l,
+    List<Program>? programs,
+    AsyncValue<List<Program>> programsAsync,
+    ViewMode mode,
+  ) {
+    if (programs == null && programsAsync.isLoading) {
+      return const ProgramSkeletonList();
+    }
+    if (programs == null && programsAsync.hasError) {
+      return Center(
+          child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall));
+    }
+    if (programs == null || programs.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Text(l.programsEmpty,
+              textAlign: TextAlign.center, style: AppTextStyles.bodySmall),
+        ),
+      );
+    }
+
+    if (mode == ViewMode.grid) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final crossAxisCount = constraints.maxWidth > 640 ? 3 : 2;
+          return GridView.builder(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 96),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: AppSpacing.sm,
+              mainAxisSpacing: AppSpacing.sm,
+              childAspectRatio: 1.35,
+            ),
+            itemCount: programs.length,
+            itemBuilder: (_, i) => _ProgramGridCard(
+              program: programs[i],
+              onTap: () => _openEditor(programs[i].id),
+              onMore: () => _openActions(programs[i]),
+            ),
+          );
+        },
+      );
+    }
+
+    return ReorderableListView.builder(
+      padding:
+          const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 96),
+      itemCount: programs.length,
+      proxyDecorator: roundedReorderProxy,
+      onReorderItem: _reorder,
+      itemBuilder: (_, i) => Padding(
+        key: ValueKey(programs[i].id),
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+        child: _ProgramCard(
+          program: programs[i],
+          onTap: () => _openEditor(programs[i].id),
+          onMore: () => _openActions(programs[i]),
+        ),
       ),
     );
   }
 }
 
 class _ProgramCard extends StatelessWidget {
-  const _ProgramCard({required this.program, required this.onTap});
+  const _ProgramCard(
+      {required this.program, required this.onTap, required this.onMore});
   final Program program;
   final VoidCallback onTap;
+  final VoidCallback onMore;
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +303,62 @@ class _ProgramCard extends StatelessWidget {
             style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
         subtitle: Text(l.sessionCount(program.sessionCount),
             style: AppTextStyles.bodySmall),
-        trailing: Icon(Icons.chevron_right, color: AppColors.textTertiary),
+        trailing: IconButton(
+          icon: Icon(Icons.more_horiz, color: AppColors.textTertiary),
+          onPressed: onMore,
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgramGridCard extends StatelessWidget {
+  const _ProgramGridCard(
+      {required this.program, required this.onTap, required this.onMore});
+  final Program program;
+  final VoidCallback onTap;
+  final VoidCallback onMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Icon(Icons.dashboard_outlined,
+                    color: AppColors.primary.withValues(alpha: 0.8)),
+              ),
+              InkWell(
+                onTap: onMore,
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xs),
+                  child: Icon(Icons.more_horiz, color: AppColors.textTertiary),
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Text(
+            program.name,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            '${l.sessionCount(program.sessionCount)} · ${l.phaseCount(program.phaseCount)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textTertiary),
+          ),
+        ],
       ),
     );
   }

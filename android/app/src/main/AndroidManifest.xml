@@ -2,6 +2,19 @@
     <!-- Required for Supabase / network access (release manifests don't inherit
          the debug/profile INTERNET permission). -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Local reminders (weight/water). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Device calendar sync (bookings/reminders). -->
+    <uses-permission android:name="android.permission.READ_CALENDAR"/>
+    <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
+    <!-- Health Connect (import sleep/activity/weight/water). -->
+    <uses-permission android:name="android.permission.health.READ_STEPS"/>
+    <uses-permission android:name="android.permission.health.READ_SLEEP"/>
+    <uses-permission android:name="android.permission.health.READ_WEIGHT"/>
+    <uses-permission android:name="android.permission.health.READ_HYDRATION"/>
+    <uses-permission android:name="android.permission.health.READ_EXERCISE"/>
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
@@ -55,5 +68,7 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Health Connect (health plugin): see installed Health Connect app. -->
+        <package android:name="com.google.android.apps.healthdata"/>
     </queries>
 </manifest>

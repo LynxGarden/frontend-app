@@ -36,6 +36,10 @@ typedef SessionEditorKey = ({String programId, String sessionId});
 final sessionEditorProvider =
     FutureProvider.family<TrainingSession?, SessionEditorKey>((ref, key) async {
   final program = await ref.watch(programProvider(key.programId).future);
-  final matches = program.sessions.where((s) => s.id == key.sessionId).toList();
-  return matches.isEmpty ? null : matches.first;
+  for (final phase in program.phases) {
+    for (final s in phase.sessions) {
+      if (s.id == key.sessionId) return s;
+    }
+  }
+  return null;
 });

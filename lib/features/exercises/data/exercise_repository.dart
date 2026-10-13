@@ -7,6 +7,8 @@ import 'package:lynx_app/core/supabase/supabase_client.dart';
 import 'package:lynx_app/core/utils/app_exception.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise_tag.dart';
+import 'package:lynx_app/features/exercises/data/models/metric_field.dart';
+import 'package:lynx_app/features/exercises/data/models/movement.dart';
 
 /// Tenant-scoped data access for the coach exercise library. Every query is
 /// scoped to `tenant_id` (belt-and-braces on top of RLS); writes stamp it.
@@ -18,7 +20,8 @@ class ExerciseRepository {
 
   static const _select =
       'id, owner_id, name, description, video_url, video_storage_path, '
-      'thumbnail_storage_path, exercise_tags(tags(id, category, label))';
+      'thumbnail_storage_path, movements, metric_schema, '
+      'exercise_tags(tags(id, category, label))';
 
   /// A coach's own exercises, alphabetical.
   static Future<List<Exercise>> listForOwner({
@@ -97,6 +100,8 @@ class ExerciseRepository {
     String? videoStoragePath,
     String? thumbnailStoragePath,
     List<String> tagIds = const [],
+    List<Movement> movements = const [],
+    List<MetricField> metricSchema = const [],
   }) async {
     try {
       final row = await SupabaseClientWrapper.db('exercises')
@@ -109,6 +114,8 @@ class ExerciseRepository {
             'video_url': _nullIfBlank(videoUrl),
             'video_storage_path': _nullIfBlank(videoStoragePath),
             'thumbnail_storage_path': _nullIfBlank(thumbnailStoragePath),
+            'movements': movements.map(movementToDb).toList(),
+            'metric_schema': MetricField.listToJson(metricSchema),
           })
           .select('id')
           .single();
@@ -130,6 +137,8 @@ class ExerciseRepository {
     String? videoStoragePath,
     String? thumbnailStoragePath,
     List<String> tagIds = const [],
+    List<Movement> movements = const [],
+    List<MetricField> metricSchema = const [],
   }) async {
     try {
       await SupabaseClientWrapper.db('exercises')
@@ -139,6 +148,8 @@ class ExerciseRepository {
             'video_url': _nullIfBlank(videoUrl),
             'video_storage_path': _nullIfBlank(videoStoragePath),
             'thumbnail_storage_path': _nullIfBlank(thumbnailStoragePath),
+            'movements': movements.map(movementToDb).toList(),
+            'metric_schema': MetricField.listToJson(metricSchema),
           })
           .eq('id', exerciseId)
           .eq('tenant_id', tenantId);

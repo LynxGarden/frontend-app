@@ -12,7 +12,11 @@ import 'package:lynx_app/core/utils/app_exception.dart';
 import 'package:lynx_app/features/exercises/data/exercise_repository.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise.dart';
 import 'package:lynx_app/features/exercises/data/models/exercise_tag.dart';
+import 'package:lynx_app/features/exercises/data/models/metric_field.dart';
+import 'package:lynx_app/features/exercises/data/models/movement.dart';
+import 'package:lynx_app/features/exercises/presentation/movement_labels.dart';
 import 'package:lynx_app/features/exercises/presentation/tag_labels.dart';
+import 'package:lynx_app/features/exercises/presentation/widgets/metric_schema_editor.dart';
 import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
@@ -41,6 +45,9 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
   late final TextEditingController _description;
   late final TextEditingController _videoUrl;
   final Set<String> _selectedTagIds = {};
+  final Set<Movement> _movements = {};
+  List<MetricField> _metricSchema = [];
+  bool _movementTouched = false;
   bool _saving = false;
   bool _uploading = false;
   bool _uploadingThumb = false;
@@ -67,6 +74,8 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
     _videoStoragePath = e?.videoStoragePath;
     _thumbnailStoragePath = e?.thumbnailStoragePath;
     _selectedTagIds.addAll(e?.tags.map((t) => t.id) ?? const []);
+    _movements.addAll(e?.movements ?? const []);
+    _metricSchema = List.of(e?.metricSchema ?? const []);
   }
 
   Future<void> _pickAndUploadThumbnail() async {
@@ -136,6 +145,12 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
           title: AppLocalizations.of(context).thumbnailRequired, blur: false);
       return;
     }
+    if (_movements.isEmpty) {
+      setState(() => _movementTouched = true);
+      AppToast.show(context,
+          title: AppLocalizations.of(context).movementRequired, blur: false);
+      return;
+    }
     final user = ref.read(currentUserProvider).valueOrNull;
     if (user == null) return;
 
@@ -151,6 +166,8 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
           videoStoragePath: _videoStoragePath,
           thumbnailStoragePath: _thumbnailStoragePath,
           tagIds: _selectedTagIds.toList(),
+          movements: _movements.toList(),
+          metricSchema: _metricSchema,
         );
       } else {
         await ExerciseRepository.create(
@@ -162,6 +179,8 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
           videoStoragePath: _videoStoragePath,
           thumbnailStoragePath: _thumbnailStoragePath,
           tagIds: _selectedTagIds.toList(),
+          movements: _movements.toList(),
+          metricSchema: _metricSchema,
         );
       }
       if (!mounted) return;
@@ -299,6 +318,31 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? l.nameRequired : null,
               ),
+              const SizedBox(height: AppSpacing.lg),
+              // Movement classification — required, multi-select (coach-only).
+              Text(l.movement, style: AppTextStyles.label),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final m in Movement.values)
+                    AppChip(
+                      label: movementLabel(l, m),
+                      selected: _movements.contains(m),
+                      onTap: () => setState(() {
+                        if (!_movements.remove(m)) _movements.add(m);
+                        _movementTouched = true;
+                      }),
+                    ),
+                ],
+              ),
+              if (_movementTouched && _movements.isEmpty) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(l.movementRequired,
+                    style: AppTextStyles.bodySmall
+                        .copyWith(color: AppColors.error)),
+              ],
               const SizedBox(height: AppSpacing.md),
               AppTextField(
                 label: l.exerciseVideoUrl,
@@ -353,6 +397,19 @@ class _ExerciseEditorScreenState extends ConsumerState<ExerciseEditorScreen> {
                 controller: _description,
                 hintText: '',
                 maxLines: 4,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // Config-driven logging fields for this exercise.
+              Text(l.loggingFields, style: AppTextStyles.label),
+              const SizedBox(height: AppSpacing.xs),
+              Text(l.loggingFieldsHint,
+                  style: AppTextStyles.bodySmall
+                      .copyWith(color: AppColors.textTertiary)),
+              const SizedBox(height: AppSpacing.sm),
+              MetricSchemaEditor(
+                initial: _metricSchema,
+                onChanged: (v) => _metricSchema = v,
               ),
               const SizedBox(height: AppSpacing.lg),
 

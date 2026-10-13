@@ -85,5 +85,13 @@
 	<string>Lynx needs camera access so coaches can record exercise demo videos.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Lynx needs microphone access to record audio in exercise demo videos.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Lynx can import your sleep, activity, weight and water data to show your progress.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Lynx can save training-related health data you log in the app.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Lynx can add your booked trainings and reminders to your calendar.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Lynx can add your booked trainings and reminders to your calendar.</string>
 </dict>
 </plist>

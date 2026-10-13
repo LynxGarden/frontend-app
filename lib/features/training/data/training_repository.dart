@@ -17,13 +17,14 @@ class TrainingRepository {
     try {
       final row = await SupabaseClientWrapper.db('assignments')
           .select(
-            'id, name, '
+            'id, name, description, '
             'assignment_sessions(id, label, order_index, last_completed_at, '
             'assignment_exercises(id, exercise_id, swapped_from_exercise_id, '
-            'exercise_name, video_url, video_storage_path, thumbnail_storage_path, '
-            'order_index, sets, reps, weight, '
-            'load_intensity, rpe, time_seconds, tempo, rest_seconds, '
-            'set_type_note, coach_note))',
+            'exercise_name, description, video_url, video_storage_path, thumbnail_storage_path, '
+            'metric_schema, order_index, sets, reps, weight, '
+            'load_intensity, rpe, rir, time_seconds, tempo, rest_seconds, '
+            'set_type_note, coach_note, method, method_group_id, group_order, '
+            'method_config))',
           )
           .eq('tenant_id', tenantId)
           .eq('person_id', personId)
@@ -48,7 +49,7 @@ class TrainingRepository {
   }) async {
     try {
       final rows = await SupabaseClientWrapper.db('logged_entries')
-          .select('id, logged_at, set_index, reps, weight, time_seconds')
+          .select('id, logged_at, set_index, reps, weight, time_seconds, data')
           .eq('person_id', personId)
           .eq('exercise_id', exerciseId)
           .order('logged_at', ascending: false)
@@ -84,6 +85,7 @@ class TrainingRepository {
     int? reps,
     num? weight,
     int? timeSeconds,
+    Map<String, dynamic>? data,
   }) async {
     try {
       final row = await SupabaseClientWrapper.db('logged_entries')
@@ -96,6 +98,7 @@ class TrainingRepository {
             'reps': reps,
             'weight': weight,
             'time_seconds': timeSeconds,
+            'data': ?data,
             'logged_by': personId,
           })
           .select('id')
@@ -114,6 +117,7 @@ class TrainingRepository {
     int? reps,
     num? weight,
     int? timeSeconds,
+    Map<String, dynamic>? data,
   }) async {
     try {
       await SupabaseClientWrapper.db('logged_entries')
@@ -121,6 +125,7 @@ class TrainingRepository {
             'reps': reps,
             'weight': weight,
             'time_seconds': timeSeconds,
+            'data': ?data,
           })
           .eq('id', entryId)
           .eq('tenant_id', tenantId);

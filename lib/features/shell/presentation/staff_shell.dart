@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'package:lynx_app/features/clients/presentation/clients_list_screen.dart';
 import 'package:lynx_app/features/clients/providers/clients_provider.dart';
-import 'package:lynx_app/features/exercises/presentation/exercise_library_screen.dart';
-import 'package:lynx_app/features/exercises/providers/exercises_provider.dart';
 import 'package:lynx_app/features/groups/presentation/groups_list_screen.dart';
 import 'package:lynx_app/features/groups/providers/groups_provider.dart';
+import 'package:lynx_app/features/programs/presentation/program_list_screen.dart';
+import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/features/review/presentation/review_screen.dart';
 import 'package:lynx_app/features/review/providers/review_provider.dart';
 import 'package:lynx_app/features/settings/presentation/settings_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/main_shell.dart';
 
-/// Tabs staff (owner/coach/physio) see: Clients · Library · Groups · Review · Settings.
+/// Tabs staff (owner/coach/physio) see: Clients · Programs · Groups · Review · Settings.
 class StaffShell extends StatelessWidget {
   const StaffShell({super.key});
 
@@ -29,11 +29,11 @@ class StaffShell extends StatelessWidget {
           refreshProviders: [clientsProvider],
         ),
         ShellTab(
-          label: l.navLibrary,
-          sfSymbol: 'square.stack',
-          materialIcon: Icons.layers_outlined,
-          screen: const ExerciseLibraryScreen(),
-          refreshProviders: [exercisesProvider, exerciseTagsProvider],
+          label: l.navPrograms,
+          sfSymbol: 'square.stack.3d.up',
+          materialIcon: Icons.dashboard_outlined,
+          screen: const ProgramListScreen(),
+          refreshProviders: [programTemplatesProvider],
         ),
         ShellTab(
           label: l.navGroups,

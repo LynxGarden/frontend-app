@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:lynx_app/features/calendar/presentation/calendar_screen.dart';
+import 'package:lynx_app/features/calendar/providers/calendar_providers.dart';
 import 'package:lynx_app/features/chat/presentation/chat_list_screen.dart';
 import 'package:lynx_app/features/chat/providers/chat_providers.dart';
+import 'package:lynx_app/features/progress/presentation/progress_screen.dart';
+import 'package:lynx_app/features/progress/providers/progress_provider.dart';
 import 'package:lynx_app/features/settings/presentation/settings_screen.dart';
 import 'package:lynx_app/features/training/presentation/train_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
-import 'package:lynx_app/shared/widgets/feature_placeholder.dart';
 import 'package:lynx_app/shared/widgets/main_shell.dart';
 
 /// Tabs a client sees: Train · Progress · Chat · Settings. The Chat tab carries
@@ -31,10 +34,19 @@ class ClientShell extends ConsumerWidget {
           label: l.navProgress,
           sfSymbol: 'chart.line.uptrend.xyaxis',
           materialIcon: Icons.trending_up,
-          screen: FeaturePlaceholder(
-            title: l.progressTitle,
-            icon: Icons.trending_up,
-          ),
+          screen: const ProgressScreen(),
+          refreshProviders: [progressSummaryProvider, trackedExercisesProvider],
+        ),
+        ShellTab(
+          label: l.navCalendar,
+          sfSymbol: 'calendar',
+          materialIcon: Icons.calendar_today,
+          screen: const CalendarScreen(),
+          refreshProviders: [
+            tenantBookingsProvider,
+            healthLogsProvider(null),
+            remindersProvider,
+          ],
         ),
         ShellTab(
           label: l.navChat,

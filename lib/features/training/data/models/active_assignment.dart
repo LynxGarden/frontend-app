@@ -1,6 +1,9 @@
 // Read models for the client daily loop (CP4). These read the per-client
 // `assignment_*` instance rows (snapshots) — never the templates.
 
+import 'package:lynx_app/features/exercises/data/models/metric_field.dart';
+import 'package:lynx_app/features/programs/data/models/training_method.dart';
+
 /// One exercise inside a session of the client's active assignment. Carries the
 /// snapshot prescription (the target) plus the snapshot name/video so the loop
 /// reads only assignment rows. `exerciseId` keys the "last time" history.
@@ -10,6 +13,7 @@ class TrainingExercise {
     required this.exerciseId,
     required this.orderIndex,
     required this.exerciseName,
+    this.description,
     this.videoUrl,
     this.videoStoragePath,
     this.thumbnailStoragePath,
@@ -19,11 +23,17 @@ class TrainingExercise {
     this.weight,
     this.loadIntensity,
     this.rpe,
+    this.rir,
     this.timeSeconds,
     this.tempo,
     this.restSeconds,
     this.setTypeNote,
     this.coachNote,
+    this.metricSchema = const [],
+    this.method = TrainingMethod.straight,
+    this.methodGroupId,
+    this.groupOrder = 0,
+    this.methodConfig = const {},
   });
 
   /// The `assignment_exercises.id` — the row logged against / swapped.
@@ -31,6 +41,7 @@ class TrainingExercise {
   final String exerciseId;
   final int orderIndex;
   final String exerciseName;
+  final String? description;
   final String? videoUrl;
   final String? videoStoragePath;
   /// Path in the public `exercise-thumbnails` bucket (snapshotted at assign
@@ -43,11 +54,23 @@ class TrainingExercise {
   final String? weight;
   final String? loadIntensity;
   final String? rpe;
+  final String? rir;
   final int? timeSeconds;
   final String? tempo;
   final int? restSeconds;
   final String? setTypeNote;
   final String? coachNote;
+
+  /// Config-driven logging fields (snapshotted). Empty → legacy reps/weight.
+  final List<MetricField> metricSchema;
+
+  /// Structured training method + grouping (snapshotted).
+  final TrainingMethod method;
+  final String? methodGroupId;
+  final int groupOrder;
+  final Map<String, dynamic> methodConfig;
+
+  bool get isGrouped => methodGroupId != null && methodGroupId!.isNotEmpty;
 
   /// The prescribed target, condensed to one line (e.g. `3×8-10 · 60kg · RPE 8`).
   String get targetSummary {
@@ -67,11 +90,13 @@ class TrainingExercise {
   }
 
   factory TrainingExercise.fromJson(Map<String, dynamic> json) {
+    final rawConfig = json['method_config'];
     return TrainingExercise(
       id: json['id'] as String,
       exerciseId: json['exercise_id'] as String,
       orderIndex: (json['order_index'] as int?) ?? 0,
       exerciseName: (json['exercise_name'] as String?) ?? '',
+      description: json['description'] as String?,
       videoUrl: json['video_url'] as String?,
       videoStoragePath: json['video_storage_path'] as String?,
       thumbnailStoragePath: json['thumbnail_storage_path'] as String?,
@@ -81,11 +106,18 @@ class TrainingExercise {
       weight: json['weight'] as String?,
       loadIntensity: json['load_intensity'] as String?,
       rpe: json['rpe'] as String?,
+      rir: json['rir'] as String?,
       timeSeconds: json['time_seconds'] as int?,
       tempo: json['tempo'] as String?,
       restSeconds: json['rest_seconds'] as int?,
       setTypeNote: json['set_type_note'] as String?,
       coachNote: json['coach_note'] as String?,
+      metricSchema: MetricField.listFromDb(json['metric_schema']),
+      method: methodFromDb((json['method'] as String?) ?? 'straight'),
+      methodGroupId: json['method_group_id'] as String?,
+      groupOrder: (json['group_order'] as int?) ?? 0,
+      methodConfig:
+          rawConfig is Map ? Map<String, dynamic>.from(rawConfig) : const {},
     );
   }
 }
@@ -137,10 +169,12 @@ class ActiveAssignment {
     required this.id,
     required this.name,
     required this.sessions,
+    this.description,
   });
 
   final String id;
   final String name;
+  final String? description;
   final List<TrainingAssignmentSession> sessions;
 
   factory ActiveAssignment.fromJson(Map<String, dynamic> json) {
@@ -153,6 +187,7 @@ class ActiveAssignment {
     return ActiveAssignment(
       id: json['id'] as String,
       name: (json['name'] as String?) ?? '',
+      description: json['description'] as String?,
       sessions: sessions,
     );
   }
@@ -167,6 +202,7 @@ class LoggedEntry {
     this.reps,
     this.weight,
     this.timeSeconds,
+    this.data = const {},
   });
 
   final String id;
@@ -175,6 +211,9 @@ class LoggedEntry {
   final int? reps;
   final num? weight;
   final int? timeSeconds;
+
+  /// Config-driven actuals keyed by metric-field key (mirrors the schema).
+  final Map<String, dynamic> data;
 
   /// One-line summary of this set (e.g. `8 × 60` or `45s`).
   String get summary {
@@ -192,6 +231,7 @@ class LoggedEntry {
       v == v.roundToDouble() ? v.toInt().toString() : v.toString();
 
   factory LoggedEntry.fromJson(Map<String, dynamic> json) {
+    final rawData = json['data'];
     return LoggedEntry(
       id: json['id'] as String,
       loggedAt: DateTime.parse(json['logged_at'] as String),
@@ -199,6 +239,7 @@ class LoggedEntry {
       reps: json['reps'] as int?,
       weight: json['weight'] as num?,
       timeSeconds: json['time_seconds'] as int?,
+      data: rawData is Map ? Map<String, dynamic>.from(rawData) : const {},
     );
   }
 }
