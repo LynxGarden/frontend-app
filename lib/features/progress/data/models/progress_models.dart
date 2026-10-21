@@ -44,13 +44,20 @@ class ExerciseProgress {
   const ExerciseProgress({
     required this.bestWeight,
     required this.bestReps,
-    required this.bestSetVolume,
+    required this.bestSeries,
+    required this.bestVolume,
     required this.weekly,
   });
 
   final double? bestWeight;
   final int? bestReps;
-  final double? bestSetVolume; // best single-set reps × weight
+
+  /// Most sets (series) logged for this exercise in a single session.
+  final int? bestSeries;
+
+  /// Best single-session volume — Σ (reps × weight) across that session's sets
+  /// (i.e. weight × series × reps for uniform sets).
+  final double? bestVolume;
   final List<WeeklyPoint> weekly; // chronological
 
   bool get isEmpty => weekly.isEmpty && bestWeight == null && bestReps == null;
@@ -58,7 +65,8 @@ class ExerciseProgress {
   static const empty = ExerciseProgress(
     bestWeight: null,
     bestReps: null,
-    bestSetVolume: null,
+    bestSeries: null,
+    bestVolume: null,
     weekly: [],
   );
 }

@@ -84,12 +84,24 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
     }
   }
 
-  Future<void> _saveDetails() => _guard(() => ProgramRepository.updateProgram(
+  Future<void> _saveDetails() async {
+    final l = AppLocalizations.of(context);
+    try {
+      await ProgramRepository.updateProgram(
         tenantId: _tenantId,
         programId: widget.programId,
         name: _name.text,
         description: _description.text,
-      ));
+      );
+      await _reload();
+      if (mounted) {
+        HapticFeedback.lightImpact();
+        AppToast.show(context, title: l.programSaved);
+      }
+    } on AppException catch (e) {
+      if (mounted) AppToast.show(context, title: e.message);
+    }
+  }
 
   // --- phases ---------------------------------------------------------------
   Future<void> _addPhase() async {
@@ -226,8 +238,8 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
 
   Future<void> _openSession(TrainingSession s) async {
     await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) =>
-          SessionEditorScreen(programId: widget.programId, sessionId: s.id),
+      builder: (_) => SessionEditorScreen(
+          programId: widget.programId, sessionId: s.id, sessionLabel: s.label),
     ));
     _reload();
   }

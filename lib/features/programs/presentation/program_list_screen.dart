@@ -13,11 +13,11 @@ import 'package:lynx_app/features/programs/presentation/program_editor_screen.da
 import 'package:lynx_app/features/programs/providers/programs_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
-import 'package:lynx_app/shared/providers/view_mode_provider.dart';
 import 'package:lynx_app/shared/widgets/app_action_sheet.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
+import 'package:lynx_app/shared/widgets/main_shell.dart';
 import 'package:lynx_app/shared/widgets/reorder_proxy.dart';
 import 'package:lynx_app/shared/widgets/skeleton_list.dart';
 
@@ -176,7 +176,6 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
       });
     });
     final programsAsync = ref.watch(programTemplatesProvider);
-    final mode = ref.watch(viewModeProvider('programs'));
     // Prefer the optimistic local copy (for drag-reorder), but fall back to the
     // provider's current value: `ref.listen` only fires on *changes*.
     final programs = _programs ?? programsAsync.valueOrNull;
@@ -191,30 +190,23 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
             icon: const Icon(Icons.fitness_center_outlined),
             onPressed: _openAllExercises,
           ),
-          IconButton(
-            tooltip: mode == ViewMode.grid ? l.viewAsList : l.viewAsGrid,
-            icon: Icon(mode == ViewMode.grid
-                ? Icons.view_list_outlined
-                : Icons.grid_view_outlined),
-            onPressed: () {
-              HapticFeedback.selectionClick();
-              ref.read(viewModeProvider('programs').notifier).toggle();
-            },
-          ),
           const SizedBox(width: AppSpacing.xs),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab_programs',
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        onPressed: () => _create(context, ref),
-        icon: const Icon(Icons.add),
-        label: Text(l.newProgram),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: AppBottomBar.fabBottomInset(context)),
+        child: FloatingActionButton.extended(
+          heroTag: 'fab_programs',
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          onPressed: () => _create(context, ref),
+          icon: const Icon(Icons.add),
+          label: Text(l.newProgram),
+        ),
       ),
       body: SafeArea(
         bottom: false,
-        child: _body(l, programs, programsAsync, mode),
+        child: _body(l, programs, programsAsync),
       ),
     );
   }
@@ -223,7 +215,6 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
     AppLocalizations l,
     List<Program>? programs,
     AsyncValue<List<Program>> programsAsync,
-    ViewMode mode,
   ) {
     if (programs == null && programsAsync.isLoading) {
       return const ProgramSkeletonList();
@@ -239,30 +230,6 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
           child: Text(l.programsEmpty,
               textAlign: TextAlign.center, style: AppTextStyles.bodySmall),
         ),
-      );
-    }
-
-    if (mode == ViewMode.grid) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final crossAxisCount = constraints.maxWidth > 640 ? 3 : 2;
-          return GridView.builder(
-            padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 96),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: AppSpacing.sm,
-              mainAxisSpacing: AppSpacing.sm,
-              childAspectRatio: 1.35,
-            ),
-            itemCount: programs.length,
-            itemBuilder: (_, i) => _ProgramGridCard(
-              program: programs[i],
-              onTap: () => _openEditor(programs[i].id),
-              onMore: () => _openActions(programs[i]),
-            ),
-          );
-        },
       );
     }
 
@@ -312,54 +279,3 @@ class _ProgramCard extends StatelessWidget {
   }
 }
 
-class _ProgramGridCard extends StatelessWidget {
-  const _ProgramGridCard(
-      {required this.program, required this.onTap, required this.onMore});
-  final Program program;
-  final VoidCallback onTap;
-  final VoidCallback onMore;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Icon(Icons.dashboard_outlined,
-                    color: AppColors.primary.withValues(alpha: 0.8)),
-              ),
-              InkWell(
-                onTap: onMore,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xs),
-                  child: Icon(Icons.more_horiz, color: AppColors.textTertiary),
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            program.name,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            '${l.sessionCount(program.sessionCount)} · ${l.phaseCount(program.phaseCount)}',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textTertiary),
-          ),
-        ],
-      ),
-    );
-  }
-}

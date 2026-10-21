@@ -4,6 +4,10 @@
 ///
 /// DB: `session_exercises.method` / `assignment_exercises.method` (text, checked).
 enum TrainingMethod {
+  /// No structured method — the prescription is driven entirely by the
+  /// exercise's own metric schema (pace, duration, incline…). The strength grid
+  /// is hidden; only the schema fields + coach note are shown.
+  none,
   straight,
   superset,
   dropset,
@@ -23,6 +27,8 @@ enum TrainingMethod {
 
 TrainingMethod methodFromDb(String value) {
   switch (value) {
+    case 'none':
+      return TrainingMethod.none;
     case 'superset':
       return TrainingMethod.superset;
     case 'dropset':
@@ -59,6 +65,8 @@ TrainingMethod methodFromDb(String value) {
 
 String methodToDb(TrainingMethod m) {
   switch (m) {
+    case TrainingMethod.none:
+      return 'none';
     case TrainingMethod.straight:
       return 'straight';
     case TrainingMethod.superset:
@@ -132,6 +140,7 @@ class MethodDefaults {
 
 MethodDefaults methodDefaults(TrainingMethod m) {
   switch (m) {
+    case TrainingMethod.none:
     case TrainingMethod.straight:
     case TrainingMethod.superset:
       return const MethodDefaults();

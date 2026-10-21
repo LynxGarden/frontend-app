@@ -113,6 +113,7 @@ class ReviewRepository {
         final exId = e['exercise_id'] as String?;
         final all = exId == null ? const <LoggedEntry>[] : (logsByExercise[exId] ?? const []);
         return ExerciseActuals(
+          assignmentExerciseId: e['id'] as String,
           exerciseId: exId ?? '',
           exerciseName: (e['exercise_name'] as String?) ?? '',
           entries: _mostRecentOccasion(all),

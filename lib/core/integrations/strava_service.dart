@@ -122,8 +122,14 @@ class StravaService {
           loggedAt: start != null ? DateTime.tryParse(start) : null,
         ));
       }
-      await HealthRepository.addMany(
-          tenantId: tenantId, personId: personId, inputs: inputs);
+      // Replace the window so re-syncing never duplicates activities.
+      await HealthRepository.replaceImported(
+        tenantId: tenantId,
+        personId: personId,
+        source: HealthLogSource.strava,
+        from: DateTime.now().subtract(Duration(days: days)),
+        inputs: inputs,
+      );
       return inputs.length;
     } catch (e) {
       debugPrint('[strava] import failed: $e');

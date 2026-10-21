@@ -4,9 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:lynx_app/core/integrations/device_calendar_service.dart';
-import 'package:lynx_app/core/integrations/health_sync_service.dart';
 import 'package:lynx_app/core/integrations/local_notifications_service.dart';
-import 'package:lynx_app/core/integrations/strava_service.dart';
 import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
@@ -431,31 +429,11 @@ class _ActivitySliver extends ConsumerWidget {
 
     return SliverList.list(
       children: [
-        // Import + add actions.
-        Row(
-          children: [
-            Expanded(
-              child: _ActionChip(
-                icon: Icons.add,
-                label: l.addLog,
-                onTap: () => _addLog(context, ref),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _ActionChip(
-                icon: Icons.favorite_border,
-                label: l.importFromHealth,
-                onTap: () => _importHealth(context, ref),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
+        // Manual add — Apple Health / Strava syncing lives on the Home screen.
         _ActionChip(
-          icon: Icons.directions_run,
-          label: l.importFromStrava,
-          onTap: () => _importStrava(context, ref),
+          icon: Icons.add,
+          label: l.addLog,
+          onTap: () => _addLog(context, ref),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(l.healthLogs,
@@ -512,41 +490,6 @@ class _ActivitySliver extends ConsumerWidget {
       if (context.mounted) AppToast.show(context, title: l.logSaved);
     } on AppException catch (e) {
       if (context.mounted) AppToast.show(context, title: e.message);
-    }
-  }
-
-  Future<void> _importHealth(BuildContext context, WidgetRef ref) async {
-    final l = AppLocalizations.of(context);
-    final user = ref.read(currentUserProvider).valueOrNull;
-    if (user == null) return;
-    final count = await HealthSyncService.importAndSave(
-        tenantId: user.tenantId, personId: user.personId);
-    ref.invalidate(healthLogsProvider(null));
-    if (context.mounted) {
-      AppToast.show(context,
-          title: count > 0 ? l.imported(count) : l.importUnavailable);
-    }
-  }
-
-  Future<void> _importStrava(BuildContext context, WidgetRef ref) async {
-    final l = AppLocalizations.of(context);
-    final user = ref.read(currentUserProvider).valueOrNull;
-    if (user == null) return;
-    if (!StravaService.isConfigured) {
-      AppToast.show(context, title: l.importUnavailable);
-      return;
-    }
-    final connected = await StravaService.isConnected;
-    if (!connected) {
-      await StravaService.connect();
-      return; // OAuth redirect completes the link out-of-band.
-    }
-    final count = await StravaService.importAndSave(
-        tenantId: user.tenantId, personId: user.personId);
-    ref.invalidate(healthLogsProvider(null));
-    if (context.mounted) {
-      AppToast.show(context,
-          title: count > 0 ? l.imported(count) : l.importUnavailable);
     }
   }
 

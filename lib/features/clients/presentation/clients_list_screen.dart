@@ -11,6 +11,7 @@ import 'package:lynx_app/features/clients/presentation/add_client_screen.dart';
 import 'package:lynx_app/features/clients/presentation/client_detail_screen.dart';
 import 'package:lynx_app/features/chat/providers/chat_providers.dart';
 import 'package:lynx_app/features/clients/providers/clients_provider.dart';
+import 'package:lynx_app/features/notifications/presentation/notification_bell.dart';
 import 'package:lynx_app/shared/widgets/unread_badge.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/models/app_user.dart';
@@ -108,7 +109,10 @@ class _ClientsListScreenState extends ConsumerState<ClientsListScreen> {
         controller: _scroll,
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          SliverCollapsingHeader(title: l.clientsTitle, controller: _scroll),
+          SliverCollapsingHeader(
+              title: l.clientsTitle,
+              controller: _scroll,
+              action: const NotificationBell()),
           if (clients == null && clientsAsync.isLoading)
             const SliverSkeletonCards()
           else if (clients == null && clientsAsync.hasError)

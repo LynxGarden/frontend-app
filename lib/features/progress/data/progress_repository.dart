@@ -115,9 +115,12 @@ class ProgressRepository {
 
       double? bestWeight;
       int? bestReps;
-      double? bestSetVolume;
       final volByWeek = <DateTime, double>{};
       final topWeightByWeek = <DateTime, double>{};
+      // Per-session (per training day) aggregates, for the session-level PBs:
+      // series = set count that day, volume = Σ (reps × weight) that day.
+      final volByDay = <DateTime, double>{};
+      final setsByDay = <DateTime, int>{};
 
       for (final r in rows as List) {
         final m = r as Map;
@@ -125,6 +128,7 @@ class ProgressRepository {
         final weight = (m['weight'] as num?)?.toDouble();
         final at = DateTime.parse(m['logged_at'] as String).toLocal();
         final wk = weekStart(at);
+        final day = DateTime(at.year, at.month, at.day);
 
         if (weight != null) {
           if (bestWeight == null || weight > bestWeight) bestWeight = weight;
@@ -136,11 +140,19 @@ class ProgressRepository {
         }
         if (reps != null && weight != null) {
           final setVol = reps * weight;
-          if (bestSetVolume == null || setVol > bestSetVolume) {
-            bestSetVolume = setVol;
-          }
           volByWeek[wk] = (volByWeek[wk] ?? 0) + setVol;
+          volByDay[day] = (volByDay[day] ?? 0) + setVol;
+          setsByDay[day] = (setsByDay[day] ?? 0) + 1;
         }
+      }
+
+      double? bestVolume;
+      for (final v in volByDay.values) {
+        if (bestVolume == null || v > bestVolume) bestVolume = v;
+      }
+      int? bestSeries;
+      for (final s in setsByDay.values) {
+        if (bestSeries == null || s > bestSeries) bestSeries = s;
       }
 
       final weeks = {...volByWeek.keys, ...topWeightByWeek.keys}.toList()
@@ -159,7 +171,8 @@ class ProgressRepository {
       return ExerciseProgress(
         bestWeight: bestWeight,
         bestReps: bestReps,
-        bestSetVolume: bestSetVolume,
+        bestSeries: bestSeries,
+        bestVolume: bestVolume,
         weekly: trimmed,
       );
     } catch (e) {

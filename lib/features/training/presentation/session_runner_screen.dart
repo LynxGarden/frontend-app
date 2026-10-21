@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +24,7 @@ import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_button.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/frosted_nav_scaffold.dart';
+import 'package:lynx_app/shared/widgets/keyboard_dismisser.dart';
 import 'package:lynx_app/shared/widgets/skeleton_loader.dart';
 
 /// The gym-facing session runner: a full-width **carousel** the client swipes
@@ -56,13 +59,47 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
   /// rebuilds (and provider refetches) so logged state / dots survive.
   final Map<String, List<_SetSlot>> _slots = {};
 
+  /// Save hooks registered by the live set pages (keyed `exerciseId#setIndex`):
+  /// swiping away from a page flushes its unsaved inputs.
+  final Map<String, Future<void> Function()> _savers = {};
+
+  /// The screen-level rest countdown, surfaced top-right in the nav bar and
+  /// started from a set card's "Start timer" button.
+  Timer? _restTimer;
+  int _restRemaining = 0;
+
   RunnerKey get _key =>
       (assignmentId: widget.assignmentId, sessionId: widget.sessionId);
 
   @override
   void dispose() {
+    _restTimer?.cancel();
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _startRest(int seconds) {
+    _restTimer?.cancel();
+    HapticFeedback.lightImpact();
+    setState(() => _restRemaining = seconds);
+    _restTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
+      if (_restRemaining <= 1) {
+        t.cancel();
+        HapticFeedback.heavyImpact();
+        setState(() => _restRemaining = 0);
+      } else {
+        setState(() => _restRemaining--);
+      }
+    });
+  }
+
+  void _cancelRest() {
+    _restTimer?.cancel();
+    setState(() => _restRemaining = 0);
   }
 
   /// Make sure every current exercise has a slot list (creates them the first
@@ -162,11 +199,15 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
     }
   }
 
-  Future<void> _complete(TrainingAssignmentSession session) async {
+  Future<void> _complete(TrainingAssignmentSession session, int rating) async {
     final l = AppLocalizations.of(context);
     setState(() => _completing = true);
     try {
-      await TrainingRepository.completeSession(session.id);
+      // Flush any set inputs that were typed but never explicitly logged.
+      for (final save in List.of(_savers.values)) {
+        await save();
+      }
+      await TrainingRepository.completeSession(session.id, rating: rating);
       ref.invalidate(activeAssignmentProvider);
       HapticFeedback.heavyImpact();
       if (mounted) {
@@ -188,17 +229,23 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
     final async = ref.watch(sessionRunnerProvider(_key));
     final session = async.valueOrNull;
 
-    return FrostedNavScaffold(
-      title: session?.label ?? '…',
-      builder: (context, topInset) => async.when(
-        loading: () => _RunnerSkeleton(topInset: topInset),
-        error: (_, _) => Center(
-            child: Text(l.somethingWentWrong, style: AppTextStyles.bodySmall)),
-        data: (session) => (session == null || user == null)
-            ? Center(
-                child: Text(l.somethingWentWrong,
-                    style: AppTextStyles.bodySmall))
-            : _buildBody(session, user, topInset),
+    return KeyboardDismisser(
+      child: FrostedNavScaffold(
+        title: session?.label ?? '…',
+        trailing: _restRemaining > 0
+            ? _RestTimerPill(remaining: _restRemaining, onTap: _cancelRest)
+            : null,
+        builder: (context, topInset) => async.when(
+          loading: () => _RunnerSkeleton(topInset: topInset),
+          error: (_, _) => Center(
+              child:
+                  Text(l.somethingWentWrong, style: AppTextStyles.bodySmall)),
+          data: (session) => (session == null || user == null)
+              ? Center(
+                  child: Text(l.somethingWentWrong,
+                      style: AppTextStyles.bodySmall))
+              : _buildBody(session, user, topInset),
+        ),
       ),
     );
   }
@@ -255,6 +302,8 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
             // The whole card captures horizontal drags and drives the bottom
             // pager — so swiping anywhere (incl. the thumbnail/top) moves sets.
             child: GestureDetector(
+              onHorizontalDragStart: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
               onHorizontalDragUpdate: _onCardDragUpdate,
               onHorizontalDragEnd: (d) => _onCardDragEnd(d, pages.length),
               child: Container(
@@ -291,6 +340,14 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
                           physics: const NeverScrollableScrollPhysics(),
                           onPageChanged: (i) {
                             HapticFeedback.selectionClick();
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            // Swiping away from a set saves what was typed.
+                            final prev = _page;
+                            if (prev != i && prev < pages.length) {
+                              final prevEx = exercises[pages[prev].ex];
+                              _savers['${prevEx.id}#${pages[prev].set}']
+                                  ?.call();
+                            }
                             setState(() => _page = i);
                           },
                           itemCount: pages.length + 1,
@@ -298,12 +355,14 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
                           if (i >= pages.length) {
                             return _CompletionBottom(
                               completing: _completing,
-                              onComplete: () => _complete(session),
+                              onComplete: (rating) =>
+                                  _complete(session, rating),
                             );
                           }
                           final pr = pages[i];
                           final ex = exercises[pr.ex];
                           final slots = _slots[ex.id]!;
+                          final saverKey = '${ex.id}#${pr.set}';
                           return _SetBottom(
                             key: ValueKey('${ex.id}#${pr.set}'),
                             exercise: ex,
@@ -313,6 +372,14 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
                             tenantId: user.tenantId,
                             personId: user.personId,
                             onSlotChanged: () => setState(() {}), // refresh dots
+                            onStartRest: _startRest,
+                            registerSaver: (fn) {
+                              if (fn == null) {
+                                _savers.remove(saverKey);
+                              } else {
+                                _savers[saverKey] = fn;
+                              }
+                            },
                             onLogged: () {
                               if (_page < pages.length) _goToPage(_page + 1);
                             },
@@ -659,7 +726,10 @@ class _ExerciseTop extends ConsumerWidget {
   final VoidCallback onOpenDetail;
 
   String? _methodBadge(AppLocalizations l) {
-    if (exercise.method == TrainingMethod.straight) return null;
+    if (exercise.method == TrainingMethod.straight ||
+        exercise.method == TrainingMethod.none) {
+      return null;
+    }
     final label = methodLabel(l, exercise.method);
     if (exercise.isGrouped) {
       final group = siblings
@@ -688,6 +758,35 @@ class _ExerciseTop extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Method indicator — a full-width banner at the top of the card so
+          // the client always knows which method they're training.
+          if (badge != null) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm + 2, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.bolt_rounded, size: 14, color: AppColors.primary),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(badge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.label.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -721,11 +820,6 @@ class _ExerciseTop extends ConsumerWidget {
                         child: Text(ex.targetSummary,
                             style: AppTextStyles.bodySmall
                                 .copyWith(color: AppColors.textSecondary)),
-                      ),
-                    if (badge != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: _MethodBadge(label: badge),
                       ),
                   ],
                 ),
@@ -808,21 +902,41 @@ class _ThumbPlaceholder extends StatelessWidget {
   }
 }
 
-class _MethodBadge extends StatelessWidget {
-  const _MethodBadge({required this.label});
-  final String label;
+/// The top-right rest countdown pill (in the nav bar). Tap to cancel.
+class _RestTimerPill extends StatelessWidget {
+  const _RestTimerPill({required this.remaining, required this.onTap});
+  final int remaining;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
+    final m = remaining ~/ 60;
+    final s = remaining % 60;
+    final label = m > 0 ? '$m:${s.toString().padLeft(2, '0')}' : '${s}s';
+    final urgent = remaining <= 5;
+    final color = urgent ? AppColors.error : AppColors.primary;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.timer_outlined, size: 15, color: color),
+            const SizedBox(width: 4),
+            Text(label,
+                style: AppTextStyles.bodySmall.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()])),
+          ],
+        ),
       ),
-      child: Text(label,
-          style: AppTextStyles.label.copyWith(
-              color: AppColors.primary, fontWeight: FontWeight.w700)),
     );
   }
 }
@@ -839,6 +953,8 @@ class _SetBottom extends ConsumerStatefulWidget {
     required this.tenantId,
     required this.personId,
     required this.onSlotChanged,
+    required this.onStartRest,
+    required this.registerSaver,
     required this.onLogged,
   });
 
@@ -849,6 +965,10 @@ class _SetBottom extends ConsumerStatefulWidget {
   final String tenantId;
   final String personId;
   final VoidCallback onSlotChanged; // refresh parent dots
+  final ValueChanged<int> onStartRest; // start the screen-level rest timer
+  /// Registers (fn) / unregisters (null) this page's save-if-dirty hook with
+  /// the runner, so swiping away persists what was typed.
+  final void Function(Future<void> Function()? fn) registerSaver;
   final VoidCallback onLogged; // advance to next page after a fresh log
 
   @override
@@ -878,6 +998,13 @@ class _SetBottomState extends ConsumerState<_SetBottom>
     super.initState();
     // A logged set shows its stored values immediately.
     _values = Map<String, dynamic>.from(widget.slot.values);
+    widget.registerSaver(_saveIfDirty);
+  }
+
+  @override
+  void dispose() {
+    widget.registerSaver(null);
+    super.dispose();
   }
 
   /// Prefill an unlogged set from last-time's matching set (minimal taps).
@@ -905,11 +1032,32 @@ class _SetBottomState extends ConsumerState<_SetBottom>
   num? _asNum(dynamic v) =>
       v is num ? v : num.tryParse('${v ?? ''}'.replaceAll(',', '.'));
 
-  Future<void> _logCurrent() async {
+  Map<String, dynamic> get _cleanValues => Map<String, dynamic>.from(_values)
+    ..removeWhere((_, v) => v == null || (v is String && v.trim().isEmpty));
+
+  /// Whether [a] and [b] hold the same values (string-compared, so 60 == "60").
+  static bool _sameData(Map<String, dynamic> a, Map<String, dynamic> b) {
+    if (a.length != b.length) return false;
+    for (final e in a.entries) {
+      if (!b.containsKey(e.key) || '${b[e.key]}' != '${e.value}') return false;
+    }
+    return true;
+  }
+
+  /// Called by the runner when the user swipes away from this set (or finishes
+  /// the session): persists typed-but-unlogged input, silently.
+  Future<void> _saveIfDirty() async {
+    if (_saving) return;
+    final data = _cleanValues;
+    if (data.isEmpty) return;
+    if (widget.slot.isLogged && _sameData(data, widget.slot.values)) return;
+    await _logCurrent(silent: true);
+  }
+
+  Future<void> _logCurrent({bool silent = false}) async {
     final l = AppLocalizations.of(context);
-    final data = Map<String, dynamic>.from(_values)
-      ..removeWhere((_, v) =>
-          v == null || (v is String && v.trim().isEmpty));
+    if (!silent) FocusManager.instance.primaryFocus?.unfocus();
+    final data = _cleanValues;
     if (data.isEmpty) return;
 
     // Derive legacy columns so "last time", review and progress keep working.
@@ -958,16 +1106,18 @@ class _SetBottomState extends ConsumerState<_SetBottom>
         ..weight = weight
         ..timeSeconds = time
         ..values = data;
-      HapticFeedback.lightImpact();
       if (!mounted) return;
       setState(() => _saving = false);
       widget.onSlotChanged();
-      AppToast.show(context, title: l.setLoggedToast, blur: false);
-      if (!wasLogged) widget.onLogged(); // advance only on a fresh log
+      if (!silent) {
+        HapticFeedback.lightImpact();
+        AppToast.show(context, title: l.setLoggedToast, blur: false);
+        if (!wasLogged) widget.onLogged(); // advance only on a fresh log
+      }
     } on AppException catch (e) {
       if (mounted) {
         setState(() => _saving = false);
-        AppToast.show(context, title: e.message, blur: false);
+        if (!silent) AppToast.show(context, title: e.message, blur: false);
       }
     }
   }
@@ -1003,6 +1153,13 @@ class _SetBottomState extends ConsumerState<_SetBottom>
             lastValues: lastValues,
             onChanged: (key, value) => _values[key] = value,
           ),
+          if (ex.restSeconds != null && ex.restSeconds! > 0) ...[
+            const SizedBox(height: AppSpacing.md),
+            _RestRow(
+              seconds: ex.restSeconds!,
+              onStart: () => widget.onStartRest(ex.restSeconds!),
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
           SizedBox(
             width: double.infinity,
@@ -1042,31 +1199,94 @@ const List<MetricField> _timedFallbackSchema = [
   MetricField(key: 'time', label: 'Time', type: MetricFieldType.duration),
 ];
 
+/// "Rest: 120 s · [Start timer]" — shown on a set card when the prescription
+/// has a pause. Starting it surfaces the countdown top-right in the nav bar.
+class _RestRow extends StatelessWidget {
+  const _RestRow({required this.seconds, required this.onStart});
+  final int seconds;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm + 2, vertical: AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.timer_outlined, size: 16, color: AppColors.textSecondary),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(l.restNSeconds(seconds),
+                style: AppTextStyles.bodySmall
+                    .copyWith(fontWeight: FontWeight.w600)),
+          ),
+          TextButton(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              onStart();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              visualDensity: VisualDensity.compact,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            ),
+            child: Text(l.startTimer,
+                style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.primary, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // Completion — the last page of the bottom pager (its top is empty, so this
 // content centers in the whole card).
 // ─────────────────────────────────────────────────────────────────────────
 
-class _CompletionBottom extends StatelessWidget {
+class _CompletionBottom extends StatefulWidget {
   const _CompletionBottom({
     required this.completing,
     required this.onComplete,
   });
 
   final bool completing;
-  final VoidCallback onComplete;
+  final ValueChanged<int> onComplete; // 1–10 session difficulty
+
+  @override
+  State<_CompletionBottom> createState() => _CompletionBottomState();
+}
+
+class _CompletionBottomState extends State<_CompletionBottom> {
+  int _rating = 5;
+
+  static String _emojiFor(int r) {
+    if (r <= 2) return '😄';
+    if (r <= 4) return '🙂';
+    if (r <= 6) return '😐';
+    if (r <= 8) return '😣';
+    return '🥵';
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final t = (_rating - 1) / 9.0;
+    final accent =
+        Color.lerp(AppColors.success, AppColors.error, t) ?? AppColors.primary;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle_outline, size: 56, color: AppColors.primary),
-            const SizedBox(height: AppSpacing.md),
             Text(l.finishSessionTitle,
                 style: AppTextStyles.heading3, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.xs),
@@ -1075,11 +1295,61 @@ class _CompletionBottom extends StatelessWidget {
                     .copyWith(color: AppColors.textSecondary),
                 textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.lg),
+            // 1–10 difficulty: smiley + slider.
+            Text(l.sessionDifficultyTitle,
+                style: AppTextStyles.body
+                    .copyWith(fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center),
+            const SizedBox(height: AppSpacing.sm),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 150),
+              child: Text(_emojiFor(_rating),
+                  key: ValueKey(_emojiFor(_rating)),
+                  style: const TextStyle(fontSize: 44)),
+            ),
+            Text('$_rating / 10',
+                style: AppTextStyles.bodySmall.copyWith(
+                    color: accent, fontWeight: FontWeight.w700)),
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: accent,
+                thumbColor: accent,
+                inactiveTrackColor: accent.withValues(alpha: 0.2),
+                overlayColor: accent.withValues(alpha: 0.12),
+              ),
+              child: Slider(
+                value: _rating.toDouble(),
+                min: 1,
+                max: 10,
+                divisions: 9,
+                onChanged: (v) {
+                  final r = v.round();
+                  if (r != _rating) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _rating = r);
+                  }
+                },
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(l.sessionDifficultyEasy,
+                    style: AppTextStyles.label
+                        .copyWith(color: AppColors.textTertiary)),
+                Text(l.sessionDifficultyHard,
+                    style: AppTextStyles.label
+                        .copyWith(color: AppColors.textTertiary)),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
             AppButton(
               label: l.markComplete,
               isExpanded: true,
-              isLoading: completing,
-              onPressed: completing ? null : onComplete,
+              isLoading: widget.completing,
+              onPressed: widget.completing
+                  ? null
+                  : () => widget.onComplete(_rating),
             ),
           ],
         ),

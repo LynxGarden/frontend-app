@@ -30,6 +30,7 @@ class TrainingExercise {
     this.setTypeNote,
     this.coachNote,
     this.metricSchema = const [],
+    this.targetMetrics = const {},
     this.method = TrainingMethod.straight,
     this.methodGroupId,
     this.groupOrder = 0,
@@ -64,6 +65,10 @@ class TrainingExercise {
   /// Config-driven logging fields (snapshotted). Empty → legacy reps/weight.
   final List<MetricField> metricSchema;
 
+  /// Per-metric prescribed targets keyed by metric-field key (snapshotted).
+  /// Only used when [method] is [TrainingMethod.none].
+  final Map<String, String> targetMetrics;
+
   /// Structured training method + grouping (snapshotted).
   final TrainingMethod method;
   final String? methodGroupId;
@@ -72,19 +77,51 @@ class TrainingExercise {
 
   bool get isGrouped => methodGroupId != null && methodGroupId!.isNotEmpty;
 
-  /// The prescribed target, condensed to one line (e.g. `3×8-10 · 60kg · RPE 8`).
+  /// The prescribed target, condensed to one line
+  /// (e.g. `3×8-10 · 60kg @ RPE 8 · Tempo: 3-1-0-1`).
   String get targetSummary {
-    final parts = <String>[];
-    if (sets != null) {
-      parts.add('$sets×${reps ?? '—'}');
-    } else if (reps != null) {
-      parts.add(reps!);
+    // Schema-driven exercise (no method): read the custom targets in the
+    // exercise's field order (e.g. "5:00 · 30:00").
+    if (method == TrainingMethod.none) {
+      final parts = <String>[];
+      for (final f in metricSchema) {
+        final v = targetMetrics[f.key];
+        if (v != null && v.trim().isNotEmpty) {
+          final unit =
+              (f.unit != null && f.unit!.trim().isNotEmpty) ? ' ${f.unit!.trim()}' : '';
+          parts.add('${v.trim()}$unit');
+        }
+      }
+      if (parts.isEmpty) {
+        parts.addAll(targetMetrics.values
+            .where((v) => v.trim().isNotEmpty)
+            .map((v) => v.trim()));
+      }
+      return parts.join(' · ');
     }
-    if (weight != null && weight!.isNotEmpty) parts.add(weight!);
-    if (loadIntensity != null && loadIntensity!.isNotEmpty) parts.add(loadIntensity!);
-    if (timeSeconds != null) parts.add('${timeSeconds}s');
-    if (rpe != null && rpe!.isNotEmpty) parts.add('RPE $rpe');
-    if (tempo != null && tempo!.isNotEmpty) parts.add(tempo!);
+
+    final volume = <String>[];
+    if (sets != null) {
+      volume.add('$sets×${reps ?? '—'}');
+    } else if (reps != null) {
+      volume.add(reps!);
+    }
+    if (weight != null && weight!.isNotEmpty) volume.add(weight!);
+    if (loadIntensity != null && loadIntensity!.isNotEmpty) volume.add(loadIntensity!);
+    if (timeSeconds != null) volume.add('${timeSeconds}s');
+
+    final intensity = <String>[];
+    if (rpe != null && rpe!.isNotEmpty) intensity.add('RPE $rpe');
+    if (rir != null && rir!.isNotEmpty) intensity.add('RIR $rir');
+
+    var head = volume.join(' · ');
+    if (intensity.isNotEmpty) {
+      final intensityStr = intensity.join(' · ');
+      head = head.isEmpty ? intensityStr : '$head @ $intensityStr';
+    }
+
+    final parts = <String>[if (head.isNotEmpty) head];
+    if (tempo != null && tempo!.isNotEmpty) parts.add('Tempo: ${tempo!}');
     if (restSeconds != null) parts.add('rest ${restSeconds}s');
     return parts.join(' · ');
   }
@@ -113,6 +150,10 @@ class TrainingExercise {
       setTypeNote: json['set_type_note'] as String?,
       coachNote: json['coach_note'] as String?,
       metricSchema: MetricField.listFromDb(json['metric_schema']),
+      targetMetrics: json['target_metrics'] is Map
+          ? (json['target_metrics'] as Map)
+              .map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''))
+          : const {},
       method: methodFromDb((json['method'] as String?) ?? 'straight'),
       methodGroupId: json['method_group_id'] as String?,
       groupOrder: (json['group_order'] as int?) ?? 0,

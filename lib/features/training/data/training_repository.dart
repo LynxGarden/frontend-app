@@ -24,7 +24,7 @@ class TrainingRepository {
             'metric_schema, order_index, sets, reps, weight, '
             'load_intensity, rpe, rir, time_seconds, tempo, rest_seconds, '
             'set_type_note, coach_note, method, method_group_id, group_order, '
-            'method_config))',
+            'method_config, target_metrics))',
           )
           .eq('tenant_id', tenantId)
           .eq('person_id', personId)
@@ -136,8 +136,27 @@ class TrainingRepository {
 
   /// Marks a session complete (stamps `last_completed_at`). Definer RPC —
   /// the client owns the assignment but can't write `assignment_sessions`.
-  static Future<void> completeSession(String assignmentSessionId) async {
+  /// [rating] is the client's 1–10 session difficulty; falls back to the
+  /// rating-less call if the backend RPC doesn't accept it yet.
+  static Future<void> completeSession(
+    String assignmentSessionId, {
+    int? rating,
+  }) async {
     try {
+      if (rating != null) {
+        try {
+          await SupabaseClientWrapper.rpc<void>(
+            'complete_session',
+            params: {
+              'p_assignment_session': assignmentSessionId,
+              'p_rating': rating,
+            },
+          );
+          return;
+        } catch (_) {
+          // Older backend without p_rating — complete without the rating.
+        }
+      }
       await SupabaseClientWrapper.rpc<void>(
         'complete_session',
         params: {'p_assignment_session': assignmentSessionId},

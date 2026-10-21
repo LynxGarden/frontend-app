@@ -91,6 +91,32 @@ class HealthRepository {
     }
   }
 
+  /// Replaces every previously imported row from [source] since [from] with
+  /// [inputs], so a re-sync is idempotent instead of duplicating the window.
+  /// Manual logs (source = manual) are never touched.
+  static Future<void> replaceImported({
+    required String tenantId,
+    required String personId,
+    required HealthLogSource source,
+    required DateTime from,
+    required List<HealthLogInput> inputs,
+  }) async {
+    try {
+      await SupabaseClientWrapper.db('health_logs')
+          .delete()
+          .eq('tenant_id', tenantId)
+          .eq('person_id', personId)
+          .eq('source', healthLogSourceToDb(source))
+          .gte('logged_at', from.toUtc().toIso8601String());
+      if (inputs.isNotEmpty) {
+        await SupabaseClientWrapper.db('health_logs')
+            .insert(inputs.map((i) => i.toColumns(tenantId, personId)).toList());
+      }
+    } catch (e) {
+      throw AppException('Could not import your health data.', cause: e);
+    }
+  }
+
   static Future<void> delete({
     required String tenantId,
     required String id,

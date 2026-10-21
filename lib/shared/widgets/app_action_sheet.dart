@@ -41,25 +41,17 @@ Future<T?> showActionSheet<T>(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceBorder,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-              ),
-            ),
             if (title != null) ...[
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Text(
                   title,
-                  style: AppTextStyles.bodySmall
-                      .copyWith(color: AppColors.textTertiary),
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.heading3,
                 ),
               ),
+              const SizedBox(height: AppSpacing.sm),
             ],
             const SizedBox(height: AppSpacing.xs),
             for (final action in actions)

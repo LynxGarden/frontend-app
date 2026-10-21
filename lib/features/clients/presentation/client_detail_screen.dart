@@ -7,6 +7,7 @@ import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
 import 'package:lynx_app/core/utils/app_exception.dart';
 import 'package:lynx_app/features/clients/data/assignment_repository.dart';
+import 'package:lynx_app/features/clients/data/models/client_assignment.dart';
 import 'package:lynx_app/features/clients/data/client_repository.dart';
 import 'package:lynx_app/features/clients/data/models/health_flag.dart';
 import 'package:lynx_app/features/clients/presentation/health_flag_labels.dart';
@@ -116,6 +117,24 @@ class ClientDetailScreen extends ConsumerWidget {
       ref.invalidate(clientAssignmentsProvider(personId));
       if (context.mounted) {
         AppToast.show(context, title: chosen.name, subtitle: l.assignmentsTitle, blur: false);
+      }
+    } on AppException catch (e) {
+      if (context.mounted) AppToast.show(context, title: e.message, blur: false);
+    }
+  }
+
+  /// Push new template phases/sessions into an existing assignment so the client
+  /// sees the coach's latest edits (additive — existing sessions are untouched).
+  Future<void> _pushLatest(
+      BuildContext context, WidgetRef ref, ClientAssignment a) async {
+    final l = AppLocalizations.of(context);
+    HapticFeedback.lightImpact();
+    try {
+      final added = await AssignmentRepository.resyncAssignment(a.id);
+      ref.invalidate(clientAssignmentsProvider(personId));
+      if (context.mounted) {
+        AppToast.show(context,
+            title: added > 0 ? l.assignmentSynced(added) : l.assignmentUpToDate);
       }
     } on AppException catch (e) {
       if (context.mounted) AppToast.show(context, title: e.message, blur: false);
@@ -413,6 +432,11 @@ class ClientDetailScreen extends ConsumerWidget {
                                   style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
                               subtitle: Text(l.sessionCount(a.sessionCount),
                                   style: AppTextStyles.bodySmall),
+                              trailing: IconButton(
+                                icon: Icon(Icons.sync, color: AppColors.primary),
+                                tooltip: l.pushLatest,
+                                onPressed: () => _pushLatest(context, ref, a),
+                              ),
                             ),
                           ),
                       ],

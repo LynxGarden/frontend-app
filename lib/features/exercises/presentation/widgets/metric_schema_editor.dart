@@ -159,7 +159,6 @@ class _FieldRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final bits = <String>[_metricTypeLabel(l, field.type)];
-    if (field.enumKind != null) bits.add(field.enumKind!.toUpperCase());
     if (field.unit != null && field.unit!.trim().isNotEmpty) {
       bits.add(field.unit!.trim());
     }
@@ -241,7 +240,9 @@ class _FieldEditorSheetState extends State<_FieldEditorSheet> {
   late final TextEditingController _options = TextEditingController(
       text: (widget.initial?.options ?? const []).join(', '));
   late MetricFieldType _type = widget.initial?.type ?? MetricFieldType.number;
-  late String? _enumKind = widget.initial?.enumKind;
+  // Kept (read-only) so an existing field's RM/RPE/RIR tag survives edits even
+  // though the intensity chooser UI was removed.
+  late final String? _enumKind = widget.initial?.enumKind;
 
   @override
   void dispose() {
@@ -290,17 +291,6 @@ class _FieldEditorSheetState extends State<_FieldEditorSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceBorder,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
           AppTextField(
             label: l.fieldLabel,
             controller: _label,
@@ -327,22 +317,6 @@ class _FieldEditorSheetState extends State<_FieldEditorSheet> {
               label: l.fieldUnit,
               controller: _unit,
               hintText: l.fieldUnitHint,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(l.fieldIntensity, style: AppTextStyles.label),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                _choice(l.intensityNone,
-                    selected: _enumKind == null,
-                    onTap: () => setState(() => _enumKind = null)),
-                for (final k in const ['rm', 'rpe', 'rir'])
-                  _choice(k.toUpperCase(),
-                      selected: _enumKind == k,
-                      onTap: () => setState(() => _enumKind = k)),
-              ],
             ),
           ],
           if (showOptions) ...[

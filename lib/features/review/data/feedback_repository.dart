@@ -183,6 +183,24 @@ class FeedbackRepository {
     }
   }
 
+  // --- session rating -------------------------------------------------------
+
+  /// The client's 1–10 difficulty rating from the session's most recent
+  /// completion. Null = never rated — or an older backend without the
+  /// `last_rating` column yet, which is tolerated silently (the rating is
+  /// decorative, so review must never fail on it).
+  static Future<int?> sessionRating(String assignmentSessionId) async {
+    try {
+      final row = await SupabaseClientWrapper.db('assignment_sessions')
+          .select('last_rating')
+          .eq('id', assignmentSessionId)
+          .maybeSingle();
+      return (row?['last_rating'] as num?)?.toInt();
+    } catch (_) {
+      return null;
+    }
+  }
+
   // --- personal bests -------------------------------------------------------
   static Future<PersonalBest> personalBestFor({
     required String personId,
@@ -190,13 +208,15 @@ class FeedbackRepository {
   }) async {
     try {
       final rows = await SupabaseClientWrapper.db('logged_entries')
-          .select('reps, weight')
+          .select('reps, weight, logged_at')
           .eq('person_id', personId)
           .eq('exercise_id', exerciseId)
           .limit(2000);
       num? bestWeight;
       int? bestReps;
-      num? bestVolume;
+      // Volume counts every set: sum of reps × weight across all sets logged
+      // on the same day, best day wins.
+      final volByDay = <String, num>{};
       for (final r in rows as List) {
         final m = r as Map;
         final reps = m['reps'] as int?;
@@ -207,10 +227,17 @@ class FeedbackRepository {
         if (reps != null && (bestReps == null || reps > bestReps)) {
           bestReps = reps;
         }
-        if (reps != null && weight != null) {
-          final vol = reps * weight;
-          if (bestVolume == null || vol > bestVolume) bestVolume = vol;
+        if (reps != null && weight != null && m['logged_at'] != null) {
+          final day = DateTime.parse(m['logged_at'] as String)
+              .toLocal()
+              .toIso8601String()
+              .substring(0, 10);
+          volByDay[day] = (volByDay[day] ?? 0) + reps * weight;
         }
+      }
+      num? bestVolume;
+      for (final v in volByDay.values) {
+        if (bestVolume == null || v > bestVolume) bestVolume = v;
       }
       return PersonalBest(
           bestWeight: bestWeight, bestReps: bestReps, bestVolume: bestVolume);

@@ -14,9 +14,12 @@ import 'package:lynx_app/features/review/presentation/client_review_screen.dart'
 import 'package:lynx_app/features/review/presentation/review_screen.dart';
 import 'package:lynx_app/features/review/providers/review_provider.dart';
 import 'package:lynx_app/features/settings/presentation/settings_screen.dart';
+import 'package:lynx_app/features/home/presentation/client_home_screen.dart';
+import 'package:lynx_app/features/home/providers/home_providers.dart';
+import 'package:lynx_app/features/progress/data/models/progress_models.dart';
+import 'package:lynx_app/features/progress/providers/progress_provider.dart';
 import 'package:lynx_app/features/training/data/models/active_assignment.dart';
 import 'package:lynx_app/features/training/presentation/session_runner_screen.dart';
-import 'package:lynx_app/features/training/presentation/train_screen.dart';
 import 'package:lynx_app/features/training/providers/training_provider.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/skeleton_list.dart';
@@ -55,14 +58,19 @@ void main() {
         tester, const ResetPasswordScreen(email: 'coach@lynx.si'), device: device);
   });
 
-  forEachDevice('TrainScreen renders without overflow', (tester, device) async {
+  forEachDevice('ClientHomeScreen renders without overflow', (tester, device) async {
     await pumpScreen(
       tester,
-      const TrainScreen(),
+      const ClientHomeScreen(),
       device: device,
       overrides: [
         activeAssignmentProvider
             .overrideWith((ref) => Stream.value(activeAssignmentFixture())),
+        progressSummaryProvider.overrideWith((ref) async => ProgressSummary(
+            visitsThisWeek: 2, weekStreak: 3, hasAnyData: true)),
+        stepsWeekProvider.overrideWith((ref) async => const []),
+        caloriesTodayProvider.overrideWith((ref) async => null),
+        heartRateTodayProvider.overrideWith((ref) async => const []),
       ],
     );
   });

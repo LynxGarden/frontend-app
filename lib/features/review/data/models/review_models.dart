@@ -45,11 +45,15 @@ class CompletedSession {
 /// One exercise in a reviewed session plus the client's most recent logged sets.
 class ExerciseActuals {
   const ExerciseActuals({
+    required this.assignmentExerciseId,
     required this.exerciseId,
     required this.exerciseName,
     required this.entries,
   });
 
+  /// The `assignment_exercises.id` — keys coach feedback (likes/comments) and
+  /// the client's difficulty rating.
+  final String assignmentExerciseId;
   final String exerciseId;
   final String exerciseName;
   final List<LoggedEntry> entries;

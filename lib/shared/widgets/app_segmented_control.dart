@@ -76,14 +76,23 @@ class AppSegmentedControl<T> extends StatelessWidget {
                           HapticFeedback.selectionClick();
                           onChanged(seg.value);
                         },
-                        child: Center(
-                          child: Text(
-                            seg.label,
-                            style: AppTextStyles.button.copyWith(
-                              fontSize: 14,
-                              color: seg.value == selected
-                                  ? AppColors.onPrimary
-                                  : AppColors.textSecondary,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                seg.label,
+                                maxLines: 1,
+                                softWrap: false,
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.button.copyWith(
+                                  fontSize: 14,
+                                  color: seg.value == selected
+                                      ? AppColors.onPrimary
+                                      : AppColors.textSecondary,
+                                ),
+                              ),
                             ),
                           ),
                         ),

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:lynx_app/core/theme/app_colors.dart';
 import 'package:lynx_app/core/theme/app_spacing.dart';
 import 'package:lynx_app/core/theme/app_text_styles.dart';
+import 'package:lynx_app/features/exercises/data/models/metric_field.dart';
 import 'package:lynx_app/features/programs/data/models/session_exercise.dart';
 import 'package:lynx_app/features/programs/data/models/training_method.dart';
 import 'package:lynx_app/features/programs/data/program_repository.dart';
@@ -21,6 +22,7 @@ import 'package:lynx_app/shared/widgets/app_text_field.dart';
 Future<PrescriptionInput?> showPrescriptionEditor(
   BuildContext context, {
   required String exerciseName,
+  List<MetricField> metricSchema = const [],
   SessionExercise? initial,
   TrainingMethod? lockMethod,
   String? groupId,
@@ -35,6 +37,7 @@ Future<PrescriptionInput?> showPrescriptionEditor(
     ),
     builder: (_) => _PrescriptionEditor(
       exerciseName: exerciseName,
+      metricSchema: metricSchema,
       initial: initial,
       lockMethod: lockMethod,
       groupId: groupId,
@@ -46,12 +49,14 @@ Future<PrescriptionInput?> showPrescriptionEditor(
 class _PrescriptionEditor extends StatefulWidget {
   const _PrescriptionEditor({
     required this.exerciseName,
+    this.metricSchema = const [],
     this.initial,
     this.lockMethod,
     this.groupId,
     this.groupOrder = 0,
   });
   final String exerciseName;
+  final List<MetricField> metricSchema;
   final SessionExercise? initial;
   final TrainingMethod? lockMethod;
   final String? groupId;
@@ -75,6 +80,10 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
   late final TextEditingController _coachNote;
   late final TextEditingController _week;
 
+  /// Dynamic controllers for the exercise's own metric fields (method = none),
+  /// keyed by metric-field key.
+  final Map<String, TextEditingController> _metric = {};
+
   late TrainingMethod _method;
 
   @override
@@ -82,6 +91,10 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
     super.initState();
     final p = widget.initial;
     _method = widget.lockMethod ?? p?.method ?? TrainingMethod.straight;
+    for (final f in widget.metricSchema) {
+      _metric[f.key] =
+          TextEditingController(text: p?.targetMetrics[f.key] ?? '');
+    }
     _sets = TextEditingController(text: p?.sets?.toString() ?? '');
     _reps = TextEditingController(text: p?.reps ?? '');
     _weight = TextEditingController(text: p?.weight ?? '');
@@ -107,6 +120,9 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
       _sets, _reps, _weight, _load, _rpe, _rir, _time, _tempo, _rest,
       _interval, _coachNote, _week,
     ]) {
+      c.dispose();
+    }
+    for (final c in _metric.values) {
       c.dispose();
     }
     super.dispose();
@@ -143,25 +159,43 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
     return config;
   }
 
-  PrescriptionInput _build() => PrescriptionInput(
-        sets: _intOrNull(_sets),
-        reps: _reps.text,
-        weight: _weight.text,
-        loadIntensity: _load.text,
-        rpe: _rpe.text,
-        rir: _rir.text,
-        timeSeconds: _intOrNull(_time),
-        tempo: _tempo.text,
-        restSeconds: _intOrNull(_rest),
-        coachNote: _coachNote.text,
-        method: _method,
-        methodGroupId: widget.groupId ?? widget.initial?.methodGroupId,
-        groupOrder: widget.groupId != null
-            ? widget.groupOrder
-            : (widget.initial?.groupOrder ?? 0),
-        methodConfig: _buildConfig(),
-        weekLabel: _week.text,
-      );
+  /// Collect the schema-field targets (trimmed, blanks dropped). Empty unless
+  /// method = none.
+  Map<String, String> _buildTargets() {
+    if (_method != TrainingMethod.none) return const {};
+    final out = <String, String>{};
+    _metric.forEach((key, c) {
+      final v = c.text.trim();
+      if (v.isNotEmpty) out[key] = v;
+    });
+    return out;
+  }
+
+  PrescriptionInput _build() {
+    final isNone = _method == TrainingMethod.none;
+    return PrescriptionInput(
+      // For a schema-driven exercise the strength grid is irrelevant — persist
+      // only the custom targets + coach note.
+      sets: isNone ? null : _intOrNull(_sets),
+      reps: isNone ? null : _reps.text,
+      weight: isNone ? null : _weight.text,
+      loadIntensity: isNone ? null : _load.text,
+      rpe: isNone ? null : _rpe.text,
+      rir: isNone ? null : _rir.text,
+      timeSeconds: isNone ? null : _intOrNull(_time),
+      tempo: isNone ? null : _tempo.text,
+      restSeconds: isNone ? null : _intOrNull(_rest),
+      coachNote: _coachNote.text,
+      method: _method,
+      methodGroupId: widget.groupId ?? widget.initial?.methodGroupId,
+      groupOrder: widget.groupId != null
+          ? widget.groupOrder
+          : (widget.initial?.groupOrder ?? 0),
+      methodConfig: isNone ? const {} : _buildConfig(),
+      weekLabel: _week.text,
+      targetMetrics: _buildTargets(),
+    );
+  }
 
   Future<void> _pickMethod() async {
     final picked = await showModalBottomSheet<TrainingMethod>(
@@ -182,15 +216,6 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: AppSpacing.sm),
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceBorder,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
-                ),
                 const SizedBox(height: AppSpacing.sm),
                 Padding(
                   padding:
@@ -267,7 +292,8 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
             Text(widget.exerciseName, style: AppTextStyles.heading3),
             Text(l.prescription, style: AppTextStyles.label),
             const SizedBox(height: AppSpacing.md),
-            // Method picker (hidden when locked to a group's method).
+            // Method picker (static header when the method was chosen upfront
+            // or comes from the group being extended).
             if (widget.lockMethod == null) ...[
               _MethodField(
                 label: l.trainingMethod,
@@ -275,40 +301,33 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
                 onTap: _pickMethod,
               ),
               const SizedBox(height: AppSpacing.sm),
-            ],
-            if (methodIsInterval(_method)) ...[
-              _num(_interval, l.intervalSeconds),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(methodLabel(l, _method),
+                        style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 2),
+                    Text(methodDescription(l, _method),
+                        style: AppTextStyles.bodySmall
+                            .copyWith(color: AppColors.textSecondary)),
+                  ],
+                ),
+              ),
               const SizedBox(height: AppSpacing.sm),
             ],
-            Row(children: [
-              Expanded(child: _num(_sets, l.presSets)),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: _text(_reps, l.presReps)),
-            ]),
-            const SizedBox(height: AppSpacing.sm),
-            Row(children: [
-              Expanded(child: _text(_weight, l.presWeight)),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: _text(_load, l.presLoad)),
-            ]),
-            const SizedBox(height: AppSpacing.sm),
-            Row(children: [
-              Expanded(child: _text(_rpe, l.presRpe)),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: _text(_rir, l.presRir)),
-            ]),
-            const SizedBox(height: AppSpacing.sm),
-            Row(children: [
-              Expanded(child: _text(_tempo, l.presTempo)),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: _num(_rest, l.presRest)),
-            ]),
-            const SizedBox(height: AppSpacing.sm),
-            Row(children: [
-              Expanded(child: _num(_time, l.presTime)),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: _text(_week, l.weekTag, hint: l.weekTagHint)),
-            ]),
+            if (_method == TrainingMethod.none)
+              ..._schemaFields(l)
+            else
+              ..._strengthGrid(l),
             const SizedBox(height: AppSpacing.sm),
             _text(_coachNote, l.presCoachNote),
             const SizedBox(height: AppSpacing.lg),
@@ -320,6 +339,89 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
           ],
         ),
       ),
+    );
+  }
+
+  /// The fixed strength prescription grid (shown for every method except none).
+  List<Widget> _strengthGrid(AppLocalizations l) => [
+        if (methodIsInterval(_method)) ...[
+          _num(_interval, l.intervalSeconds),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        Row(children: [
+          Expanded(child: _num(_sets, l.presSets)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: _text(_reps, l.presReps)),
+        ]),
+        const SizedBox(height: AppSpacing.sm),
+        Row(children: [
+          Expanded(child: _text(_weight, l.presWeight)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: _text(_load, l.presLoad)),
+        ]),
+        const SizedBox(height: AppSpacing.sm),
+        Row(children: [
+          Expanded(child: _text(_rpe, l.presRpe)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: _text(_rir, l.presRir)),
+        ]),
+        const SizedBox(height: AppSpacing.sm),
+        Row(children: [
+          Expanded(child: _text(_tempo, l.presTempo)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: _num(_rest, l.presRest)),
+        ]),
+        const SizedBox(height: AppSpacing.sm),
+        Row(children: [
+          Expanded(child: _num(_time, l.presTime)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: _text(_week, l.weekTag, hint: l.weekTagHint)),
+        ]),
+      ];
+
+  /// The exercise's own metric fields (shown when method = none), laid out two
+  /// per row, followed by the universal week-tag annotation.
+  List<Widget> _schemaFields(AppLocalizations l) {
+    final fields = widget.metricSchema;
+    final rows = <Widget>[];
+    if (fields.isEmpty) {
+      rows.add(Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        child: Text(l.noMetricFields,
+            style: AppTextStyles.bodySmall
+                .copyWith(color: AppColors.textTertiary)),
+      ));
+    }
+    for (var i = 0; i < fields.length; i += 2) {
+      final left = fields[i];
+      final right = i + 1 < fields.length ? fields[i + 1] : null;
+      rows.add(Row(children: [
+        Expanded(child: _metricField(left)),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(child: right == null ? const SizedBox() : _metricField(right)),
+      ]));
+      if (i + 2 < fields.length) rows.add(const SizedBox(height: AppSpacing.sm));
+    }
+    rows.add(const SizedBox(height: AppSpacing.sm));
+    rows.add(_text(_week, l.weekTag, hint: l.weekTagHint));
+    return rows;
+  }
+
+  /// One input for an exercise metric field — label carries the unit, keyboard
+  /// matches the field type.
+  Widget _metricField(MetricField f) {
+    final label = (f.unit != null && f.unit!.trim().isNotEmpty)
+        ? '${f.label} (${f.unit!.trim()})'
+        : f.label;
+    final numeric = f.type == MetricFieldType.number ||
+        f.type == MetricFieldType.decimal;
+    return AppTextField(
+      label: label,
+      controller: _metric[f.key]!,
+      hintText: '',
+      keyboardType: numeric
+          ? const TextInputType.numberWithOptions(decimal: true)
+          : TextInputType.text,
     );
   }
 

@@ -366,6 +366,9 @@ class AppLocalizationsSl extends AppLocalizations {
   String get editProgram => 'Uredi program';
 
   @override
+  String get programSaved => 'Program shranjen';
+
+  @override
   String get programName => 'Ime programa';
 
   @override
@@ -426,6 +429,10 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get prescription => 'Predpis';
+
+  @override
+  String get noMetricFields =>
+      'Ta vaja nima lastnih polj. Dodaj jih v vaji ali zgoraj izberi metodo.';
 
   @override
   String get presSets => 'Serije';
@@ -495,6 +502,25 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get noAssignments => 'Še ni dodeljenih programov.';
+
+  @override
+  String get pushLatest => 'Posodobi';
+
+  @override
+  String assignmentSynced(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Dodanih $count treningov',
+      few: 'Dodani $count treningi',
+      two: 'Dodana $count treninga',
+      one: 'Dodan 1 trening',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assignmentUpToDate => 'Že posodobljeno';
 
   @override
   String get inviteToApp => 'Povabi v aplikacijo';
@@ -1094,6 +1120,9 @@ class AppLocalizationsSl extends AppLocalizations {
   String get addToGroup => 'Dodaj vajo v skupino';
 
   @override
+  String get methodNone => 'Brez metode';
+
+  @override
   String get methodStraight => 'Običajne serije';
 
   @override
@@ -1137,6 +1166,139 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get methodTempo => 'Tempo';
+
+  @override
+  String get methodDescNone => 'Prosto beleženje po poljih vaje';
+
+  @override
+  String get methodDescStraight => 'Klasične serije s polnim odmorom med njimi';
+
+  @override
+  String get methodDescSuperset => '2+ vaji zaporedoma, brez pavze vmes';
+
+  @override
+  String get methodDescDropset =>
+      '3–4 serije iste vaje z zmanjševanjem uteži, brez vmesne pavze (10RM → AMRAP @ 90 % → AMRAP @ 75 %)';
+
+  @override
+  String get methodDescMechanicalDropset =>
+      '3–4 različne vaje za isto mišico, od najtežje do najlažje, brez pavze';
+
+  @override
+  String get methodDescMyo =>
+      '1 serija predutrujanja 10–15 ponovitev, nato 4 × 3–5 ponovitev s 15 s pavze — vse z isto kilažo';
+
+  @override
+  String get methodDescMyoMatch =>
+      '3 serije z istim številom ponovitev, s kratkimi 10 s pavzami znotraj serije; 120 s med serijami';
+
+  @override
+  String get methodDescEmom =>
+      'Začetek serije na vsako polno minuto — ponovitve narekujejo pavzo';
+
+  @override
+  String get methodDescE2mom => 'Začetek serije na vsaki 2 minuti';
+
+  @override
+  String get methodDescE3mom => 'Začetek serije na vsake 3 minute';
+
+  @override
+  String get methodDescRestPause =>
+      '1 × 3–10RM, 2–3 min pavze, nato 4 × AMRAP @ 80 % z 20 s pavze';
+
+  @override
+  String get methodDescRamp =>
+      '2 vaji za isto mišično skupino, stopnjevanje RPE 4 → 6-7 → 8+';
+
+  @override
+  String get methodDescBackOff =>
+      '1 težka serija (3–5 ponovitev), nato 3–4 serije @ 80–85 % (5–8 ponovitev), 2–3 min pavze';
+
+  @override
+  String get methodDescCluster =>
+      'Ena serija, razbita na manjše, npr. 3 ponovitve, 20 s pavze, nato 2 ponovitvi';
+
+  @override
+  String get methodDescContrast =>
+      'Težka serija za moč in takoj eksplozivna vaja, brez pavze';
+
+  @override
+  String get methodDescTempo =>
+      'Delo s kontroliranim tempom — nastavi tempo (npr. 3-1-0-1)';
+
+  @override
+  String get chooseMethodFirst =>
+      'Najprej izberi metodo treniranja, nato vajo.';
+
+  @override
+  String restNSeconds(int n) {
+    return 'Pavza: $n s';
+  }
+
+  @override
+  String get startTimer => 'Zaženi odmor';
+
+  @override
+  String get sessionDifficultyTitle => 'Kako naporen je bil trening?';
+
+  @override
+  String get sessionDifficultyEasy => 'Lahko';
+
+  @override
+  String get sessionDifficultyHard => 'Maksimalno';
+
+  @override
+  String get navHome => 'Domov';
+
+  @override
+  String get homeTitle => 'Domov';
+
+  @override
+  String get nextSession => 'Naslednji trening';
+
+  @override
+  String get startSession => 'Začni trening';
+
+  @override
+  String get homeSessions => 'Treningi';
+
+  @override
+  String get healthSection => 'Zdravje in aktivnost';
+
+  @override
+  String get seeMore => 'Več';
+
+  @override
+  String get stepsToday => 'Koraki danes';
+
+  @override
+  String get caloriesToday => 'Aktivne kcal';
+
+  @override
+  String get stepsLast7Days => 'Koraki — zadnjih 7 dni';
+
+  @override
+  String get heartRateToday => 'Srčni utrip — danes';
+
+  @override
+  String get noHealthData =>
+      'Ni še podatkov o zdravju. Sinhroniziraj Apple Health ali Stravo za prikaz korakov, utripa in kalorij.';
+
+  @override
+  String get noHeartRateData => 'Danes še ni podatkov o srčnem utripu.';
+
+  @override
+  String get allSessionsDone =>
+      'Vsi treningi opravljeni — ponovi kateregakoli!';
+
+  @override
+  String get stepsLabel => 'Koraki';
+
+  @override
+  String get caloriesLabel => 'Kalorije';
+
+  @override
+  String get sessionRatingLabel => 'Napornost treninga';
 
   @override
   String get weekTag => 'Oznaka tedna';
@@ -1224,7 +1386,10 @@ class AppLocalizationsSl extends AppLocalizations {
   String get bestReps => 'Največ ponovitev';
 
   @override
-  String get bestVolume => 'Najboljši volumen serije';
+  String get bestSeries => 'Največ serij';
+
+  @override
+  String get bestVolume => 'Najboljši volumen';
 
   @override
   String get noProgressYet =>

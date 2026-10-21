@@ -367,6 +367,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editProgram => 'Edit program';
 
   @override
+  String get programSaved => 'Program saved';
+
+  @override
   String get programName => 'Program name';
 
   @override
@@ -423,6 +426,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prescription => 'Prescription';
+
+  @override
+  String get noMetricFields =>
+      'This exercise has no custom fields. Add some in the exercise, or pick a method above.';
 
   @override
   String get presSets => 'Sets';
@@ -492,6 +499,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAssignments => 'No programs assigned yet.';
+
+  @override
+  String get pushLatest => 'Push latest';
+
+  @override
+  String assignmentSynced(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count sessions',
+      one: 'Added 1 session',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assignmentUpToDate => 'Already up to date';
 
   @override
   String get inviteToApp => 'Invite to app';
@@ -1083,6 +1107,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToGroup => 'Add exercise to group';
 
   @override
+  String get methodNone => 'No method';
+
+  @override
   String get methodStraight => 'Straight sets';
 
   @override
@@ -1126,6 +1153,139 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get methodTempo => 'Tempo';
+
+  @override
+  String get methodDescNone => 'Free logging using the exercise\'s own fields';
+
+  @override
+  String get methodDescStraight => 'Classic sets with full rest between them';
+
+  @override
+  String get methodDescSuperset =>
+      '2+ exercises back to back, no rest between them';
+
+  @override
+  String get methodDescDropset =>
+      '3–4 sets of the same exercise, lowering the weight, no rest (10RM → AMRAP @ 90% → AMRAP @ 75%)';
+
+  @override
+  String get methodDescMechanicalDropset =>
+      '3–4 different exercises for the same muscle, hardest to easiest, no rest';
+
+  @override
+  String get methodDescMyo =>
+      '1 pre-fatigue set of 10–15 reps, then 4 × 3–5 reps with 15 s rests — all at the same weight';
+
+  @override
+  String get methodDescMyoMatch =>
+      '3 sets matching the same rep count, with short 10 s intra-set pauses; 120 s between sets';
+
+  @override
+  String get methodDescEmom =>
+      'Start a set every full minute — the reps dictate the rest';
+
+  @override
+  String get methodDescE2mom => 'Start a set every 2 minutes';
+
+  @override
+  String get methodDescE3mom => 'Start a set every 3 minutes';
+
+  @override
+  String get methodDescRestPause =>
+      '1 × 3–10RM, 2–3 min rest, then 4 × AMRAP @ 80% with 20 s rests';
+
+  @override
+  String get methodDescRamp =>
+      '2 exercises for the same muscle group, ramping RPE 4 → 6-7 → 8+';
+
+  @override
+  String get methodDescBackOff =>
+      '1 heavy set (3–5 reps), then 3–4 sets @ 80–85% (5–8 reps), 2–3 min rest';
+
+  @override
+  String get methodDescCluster =>
+      'One set broken into mini-clusters, e.g. 3 reps, 20 s pause, then 2 reps';
+
+  @override
+  String get methodDescContrast =>
+      'Heavy strength set straight into an explosive exercise, no rest';
+
+  @override
+  String get methodDescTempo =>
+      'Controlled tempo work — set the tempo (e.g. 3-1-0-1)';
+
+  @override
+  String get chooseMethodFirst =>
+      'Pick the training method, then choose the exercise.';
+
+  @override
+  String restNSeconds(int n) {
+    return 'Rest: $n s';
+  }
+
+  @override
+  String get startTimer => 'Start timer';
+
+  @override
+  String get sessionDifficultyTitle => 'How hard was this session?';
+
+  @override
+  String get sessionDifficultyEasy => 'Easy';
+
+  @override
+  String get sessionDifficultyHard => 'Max effort';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get homeTitle => 'Home';
+
+  @override
+  String get nextSession => 'Next session';
+
+  @override
+  String get startSession => 'Start session';
+
+  @override
+  String get homeSessions => 'Sessions';
+
+  @override
+  String get healthSection => 'Health & activity';
+
+  @override
+  String get seeMore => 'See more';
+
+  @override
+  String get stepsToday => 'Steps today';
+
+  @override
+  String get caloriesToday => 'Active kcal';
+
+  @override
+  String get stepsLast7Days => 'Steps — last 7 days';
+
+  @override
+  String get heartRateToday => 'Heart rate — today';
+
+  @override
+  String get noHealthData =>
+      'No health data yet. Sync Apple Health or Strava to see your steps, heart rate and calories.';
+
+  @override
+  String get noHeartRateData => 'No heart-rate data today.';
+
+  @override
+  String get allSessionsDone => 'All sessions done — train any of them again!';
+
+  @override
+  String get stepsLabel => 'Steps';
+
+  @override
+  String get caloriesLabel => 'Calories';
+
+  @override
+  String get sessionRatingLabel => 'Session difficulty';
 
   @override
   String get weekTag => 'Week tag';
@@ -1213,7 +1373,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bestReps => 'Best reps';
 
   @override
-  String get bestVolume => 'Best set volume';
+  String get bestSeries => 'Best series';
+
+  @override
+  String get bestVolume => 'Best volume';
 
   @override
   String get noProgressYet =>

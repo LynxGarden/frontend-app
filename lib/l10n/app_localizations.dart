@@ -800,6 +800,12 @@ abstract class AppLocalizations {
   /// **'Edit program'**
   String get editProgram;
 
+  /// No description provided for @programSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Program saved'**
+  String get programSaved;
+
   /// No description provided for @programName.
   ///
   /// In en, this message translates to:
@@ -877,6 +883,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Prescription'**
   String get prescription;
+
+  /// No description provided for @noMetricFields.
+  ///
+  /// In en, this message translates to:
+  /// **'This exercise has no custom fields. Add some in the exercise, or pick a method above.'**
+  String get noMetricFields;
 
   /// No description provided for @presSets.
   ///
@@ -1015,6 +1027,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No programs assigned yet.'**
   String get noAssignments;
+
+  /// No description provided for @pushLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Push latest'**
+  String get pushLatest;
+
+  /// No description provided for @assignmentSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Added 1 session} other{Added {count} sessions}}'**
+  String assignmentSynced(int count);
+
+  /// No description provided for @assignmentUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Already up to date'**
+  String get assignmentUpToDate;
 
   /// No description provided for @inviteToApp.
   ///
@@ -2102,6 +2132,12 @@ abstract class AppLocalizations {
   /// **'Add exercise to group'**
   String get addToGroup;
 
+  /// No description provided for @methodNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No method'**
+  String get methodNone;
+
   /// No description provided for @methodStraight.
   ///
   /// In en, this message translates to:
@@ -2191,6 +2227,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tempo'**
   String get methodTempo;
+
+  /// No description provided for @methodDescNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Free logging using the exercise\'s own fields'**
+  String get methodDescNone;
+
+  /// No description provided for @methodDescStraight.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic sets with full rest between them'**
+  String get methodDescStraight;
+
+  /// No description provided for @methodDescSuperset.
+  ///
+  /// In en, this message translates to:
+  /// **'2+ exercises back to back, no rest between them'**
+  String get methodDescSuperset;
+
+  /// No description provided for @methodDescDropset.
+  ///
+  /// In en, this message translates to:
+  /// **'3–4 sets of the same exercise, lowering the weight, no rest (10RM → AMRAP @ 90% → AMRAP @ 75%)'**
+  String get methodDescDropset;
+
+  /// No description provided for @methodDescMechanicalDropset.
+  ///
+  /// In en, this message translates to:
+  /// **'3–4 different exercises for the same muscle, hardest to easiest, no rest'**
+  String get methodDescMechanicalDropset;
+
+  /// No description provided for @methodDescMyo.
+  ///
+  /// In en, this message translates to:
+  /// **'1 pre-fatigue set of 10–15 reps, then 4 × 3–5 reps with 15 s rests — all at the same weight'**
+  String get methodDescMyo;
+
+  /// No description provided for @methodDescMyoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'3 sets matching the same rep count, with short 10 s intra-set pauses; 120 s between sets'**
+  String get methodDescMyoMatch;
+
+  /// No description provided for @methodDescEmom.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a set every full minute — the reps dictate the rest'**
+  String get methodDescEmom;
+
+  /// No description provided for @methodDescE2mom.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a set every 2 minutes'**
+  String get methodDescE2mom;
+
+  /// No description provided for @methodDescE3mom.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a set every 3 minutes'**
+  String get methodDescE3mom;
+
+  /// No description provided for @methodDescRestPause.
+  ///
+  /// In en, this message translates to:
+  /// **'1 × 3–10RM, 2–3 min rest, then 4 × AMRAP @ 80% with 20 s rests'**
+  String get methodDescRestPause;
+
+  /// No description provided for @methodDescRamp.
+  ///
+  /// In en, this message translates to:
+  /// **'2 exercises for the same muscle group, ramping RPE 4 → 6-7 → 8+'**
+  String get methodDescRamp;
+
+  /// No description provided for @methodDescBackOff.
+  ///
+  /// In en, this message translates to:
+  /// **'1 heavy set (3–5 reps), then 3–4 sets @ 80–85% (5–8 reps), 2–3 min rest'**
+  String get methodDescBackOff;
+
+  /// No description provided for @methodDescCluster.
+  ///
+  /// In en, this message translates to:
+  /// **'One set broken into mini-clusters, e.g. 3 reps, 20 s pause, then 2 reps'**
+  String get methodDescCluster;
+
+  /// No description provided for @methodDescContrast.
+  ///
+  /// In en, this message translates to:
+  /// **'Heavy strength set straight into an explosive exercise, no rest'**
+  String get methodDescContrast;
+
+  /// No description provided for @methodDescTempo.
+  ///
+  /// In en, this message translates to:
+  /// **'Controlled tempo work — set the tempo (e.g. 3-1-0-1)'**
+  String get methodDescTempo;
+
+  /// No description provided for @chooseMethodFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the training method, then choose the exercise.'**
+  String get chooseMethodFirst;
+
+  /// No description provided for @restNSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest: {n} s'**
+  String restNSeconds(int n);
+
+  /// No description provided for @startTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Start timer'**
+  String get startTimer;
+
+  /// No description provided for @sessionDifficultyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How hard was this session?'**
+  String get sessionDifficultyTitle;
+
+  /// No description provided for @sessionDifficultyEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get sessionDifficultyEasy;
+
+  /// No description provided for @sessionDifficultyHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Max effort'**
+  String get sessionDifficultyHard;
+
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @homeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeTitle;
+
+  /// No description provided for @nextSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Next session'**
+  String get nextSession;
+
+  /// No description provided for @startSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start session'**
+  String get startSession;
+
+  /// No description provided for @homeSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get homeSessions;
+
+  /// No description provided for @healthSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Health & activity'**
+  String get healthSection;
+
+  /// No description provided for @seeMore.
+  ///
+  /// In en, this message translates to:
+  /// **'See more'**
+  String get seeMore;
+
+  /// No description provided for @stepsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps today'**
+  String get stepsToday;
+
+  /// No description provided for @caloriesToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Active kcal'**
+  String get caloriesToday;
+
+  /// No description provided for @stepsLast7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps — last 7 days'**
+  String get stepsLast7Days;
+
+  /// No description provided for @heartRateToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart rate — today'**
+  String get heartRateToday;
+
+  /// No description provided for @noHealthData.
+  ///
+  /// In en, this message translates to:
+  /// **'No health data yet. Sync Apple Health or Strava to see your steps, heart rate and calories.'**
+  String get noHealthData;
+
+  /// No description provided for @noHeartRateData.
+  ///
+  /// In en, this message translates to:
+  /// **'No heart-rate data today.'**
+  String get noHeartRateData;
+
+  /// No description provided for @allSessionsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All sessions done — train any of them again!'**
+  String get allSessionsDone;
+
+  /// No description provided for @stepsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get stepsLabel;
+
+  /// No description provided for @caloriesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories'**
+  String get caloriesLabel;
+
+  /// No description provided for @sessionRatingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Session difficulty'**
+  String get sessionRatingLabel;
 
   /// No description provided for @weekTag.
   ///
@@ -2342,10 +2612,16 @@ abstract class AppLocalizations {
   /// **'Best reps'**
   String get bestReps;
 
+  /// No description provided for @bestSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'Best series'**
+  String get bestSeries;
+
   /// No description provided for @bestVolume.
   ///
   /// In en, this message translates to:
-  /// **'Best set volume'**
+  /// **'Best volume'**
   String get bestVolume;
 
   /// No description provided for @noProgressYet.

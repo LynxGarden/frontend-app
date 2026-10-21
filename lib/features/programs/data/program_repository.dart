@@ -25,6 +25,7 @@ class PrescriptionInput {
     this.groupOrder = 0,
     this.methodConfig = const {},
     this.weekLabel,
+    this.targetMetrics = const {},
   });
 
   final int? sets;
@@ -44,6 +45,10 @@ class PrescriptionInput {
   final Map<String, dynamic> methodConfig;
   final String? weekLabel;
 
+  /// Per-metric prescribed targets keyed by metric-field key. Only meaningful
+  /// for method = none (schema-driven exercises); empty otherwise.
+  final Map<String, String> targetMetrics;
+
   Map<String, dynamic> toColumns() => {
         'sets': sets,
         'reps': _blankNull(reps),
@@ -61,6 +66,7 @@ class PrescriptionInput {
         'group_order': groupOrder,
         'method_config': methodConfig,
         'week_label': _blankNull(weekLabel),
+        'target_metrics': targetMetrics,
       };
 
   static String? _blankNull(String? v) {
@@ -79,7 +85,8 @@ class ProgramRepository {
       'id, exercise_id, order_index, sets, reps, weight, load_intensity, rpe, '
       'rir, time_seconds, tempo, rest_seconds, set_type_note, coach_note, '
       'method, method_group_id, group_order, method_config, week_label, '
-      'exercises(name, video_url, thumbnail_storage_path)';
+      'target_metrics, '
+      'exercises(name, video_url, thumbnail_storage_path, metric_schema)';
 
   static const _fullSelect = 'id, owner_id, name, description, is_template, '
       'phases(id, name, order_index, '
@@ -96,7 +103,7 @@ class ProgramRepository {
     try {
       final rows = await _t('programs')
           .select(
-              'id, owner_id, name, description, is_template, phases(sessions(id))')
+              'id, owner_id, name, description, is_template, phases(id, order_index, sessions(id))')
           .eq('tenant_id', tenantId)
           .eq('owner_id', ownerId)
           .eq('is_template', true)

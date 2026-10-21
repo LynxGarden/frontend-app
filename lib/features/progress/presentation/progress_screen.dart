@@ -217,25 +217,13 @@ class _ExerciseSection extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.sm),
                 _PbRow(progress: p),
                 const SizedBox(height: AppSpacing.lg),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(l.progressVolume,
-                          style: AppTextStyles.label
-                              .copyWith(color: AppColors.textTertiary)),
-                    ),
-                    SizedBox(
-                      width: 190,
-                      child: AppSegmentedControl<_Metric>(
-                        segments: [
-                          AppSegment(value: _Metric.volume, label: l.progressVolume),
-                          AppSegment(value: _Metric.weight, label: l.bestWeight),
-                        ],
-                        selected: metric,
-                        onChanged: onMetric,
-                      ),
-                    ),
+                AppSegmentedControl<_Metric>(
+                  segments: [
+                    AppSegment(value: _Metric.volume, label: l.progressVolume),
+                    AppSegment(value: _Metric.weight, label: l.bestWeight),
                   ],
+                  selected: metric,
+                  onChanged: onMetric,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppCard(
@@ -269,22 +257,31 @@ class _PbRow extends StatelessWidget {
     final l = AppLocalizations.of(context);
     String fmt(double? v) =>
         v == null ? '—' : (v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(1));
-    return Row(
+    // 2×2 grid of stat tiles. IntrinsicHeight + stretch keeps the two cards in
+    // each row the same height even when a label wraps to two lines.
+    Widget row(List<Widget> tiles) => IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: tiles[0]),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(child: tiles[1]),
+            ],
+          ),
+        );
+    return Column(
       children: [
-        Expanded(
-          child: _PbTile(label: l.bestWeight, value: fmt(progress.bestWeight)),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _PbTile(
-              label: l.bestReps,
-              value: progress.bestReps?.toString() ?? '—'),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child:
-              _PbTile(label: l.bestVolume, value: fmt(progress.bestSetVolume)),
-        ),
+        row([
+          _PbTile(label: l.bestWeight, value: fmt(progress.bestWeight)),
+          _PbTile(
+              label: l.bestReps, value: progress.bestReps?.toString() ?? '—'),
+        ]),
+        const SizedBox(height: AppSpacing.sm),
+        row([
+          _PbTile(
+              label: l.bestSeries, value: progress.bestSeries?.toString() ?? '—'),
+          _PbTile(label: l.bestVolume, value: fmt(progress.bestVolume)),
+        ]),
       ],
     );
   }
@@ -311,7 +308,7 @@ class _PbTile extends StatelessWidget {
                   .copyWith(color: AppColors.textPrimary)),
           const SizedBox(height: 2),
           Text(label,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.label.copyWith(color: AppColors.textTertiary)),
         ],
@@ -396,15 +393,6 @@ class _PickerSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceBorder,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-              ),
-            ),
             const SizedBox(height: AppSpacing.sm),
             Flexible(
               child: ListView.builder(

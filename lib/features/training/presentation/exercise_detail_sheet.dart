@@ -31,6 +31,9 @@ Future<void> showExerciseDetailSheet(
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    // Draggable sheet provides its own grabber below — opt out of the themed
+    // handle so there aren't two.
+    showDragHandle: false,
     backgroundColor: AppColors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),

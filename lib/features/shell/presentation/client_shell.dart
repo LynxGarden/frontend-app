@@ -5,15 +5,16 @@ import 'package:lynx_app/features/calendar/presentation/calendar_screen.dart';
 import 'package:lynx_app/features/calendar/providers/calendar_providers.dart';
 import 'package:lynx_app/features/chat/presentation/chat_list_screen.dart';
 import 'package:lynx_app/features/chat/providers/chat_providers.dart';
+import 'package:lynx_app/features/home/presentation/client_home_screen.dart';
+import 'package:lynx_app/features/home/providers/home_providers.dart';
 import 'package:lynx_app/features/progress/presentation/progress_screen.dart';
 import 'package:lynx_app/features/progress/providers/progress_provider.dart';
 import 'package:lynx_app/features/settings/presentation/settings_screen.dart';
-import 'package:lynx_app/features/training/presentation/train_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/main_shell.dart';
 
-/// Tabs a client sees: Train · Progress · Chat · Settings. The Chat tab carries
-/// a red badge when there are unread messages from their coach.
+/// Tabs a client sees: Home · Progress · Calendar · Chat · Settings. The Chat
+/// tab carries a red badge when there are unread messages from their coach.
 class ClientShell extends ConsumerWidget {
   const ClientShell({super.key});
 
@@ -25,10 +26,16 @@ class ClientShell extends ConsumerWidget {
     return MainShell(
       tabs: [
         ShellTab(
-          label: l.navTrain,
-          sfSymbol: 'figure.run',
-          materialIcon: Icons.fitness_center,
-          screen: const TrainScreen(),
+          label: l.navHome,
+          sfSymbol: 'house',
+          materialIcon: Icons.home_outlined,
+          screen: const ClientHomeScreen(),
+          refreshProviders: [
+            progressSummaryProvider,
+            stepsWeekProvider,
+            caloriesTodayProvider,
+            heartRateTodayProvider,
+          ],
         ),
         ShellTab(
           label: l.navProgress,

@@ -28,6 +28,20 @@ class AssignmentRepository {
     }
   }
 
+  /// Pushes new template phases/sessions into an existing assignment instance
+  /// (additive — existing sessions, logs and swaps are untouched). Returns the
+  /// number of sessions added. See the `resync_assignment` RPC.
+  static Future<int> resyncAssignment(String assignmentId) async {
+    try {
+      return await SupabaseClientWrapper.rpc<int>(
+        'resync_assignment',
+        params: {'p_assignment': assignmentId},
+      );
+    } catch (e) {
+      throw AppException('Could not push the latest changes.', cause: e);
+    }
+  }
+
   /// A client's assignments (with a session count).
   static Future<List<ClientAssignment>> listForClient({
     required String tenantId,
