@@ -30,6 +30,19 @@ final myBookingsProvider = Provider<List<Booking>>((ref) {
   return mine;
 });
 
+/// Booked sessions assigned to the current coach (coach_id = me), earliest
+/// first. Drives the staff Schedule tab.
+final coachSessionsProvider = Provider<List<Booking>>((ref) {
+  final user = ref.watch(currentUserProvider).valueOrNull;
+  final all = ref.watch(tenantBookingsProvider).valueOrNull ?? const [];
+  if (user == null) return const [];
+  final mine = all
+      .where((b) => b.isBooked && b.coachId == user.personId)
+      .toList()
+    ..sort((a, b) => a.slotStart.compareTo(b.slotStart));
+  return mine;
+});
+
 /// The client's health logs (optionally filtered by type). Invalidate after add.
 final healthLogsProvider =
     FutureProvider.family<List<HealthLog>, HealthLogType?>((ref, type) async {

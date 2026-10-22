@@ -63,7 +63,7 @@ class _AppChipState extends State<AppChip> with SingleTickerProviderStateMixin {
           child: Text(
             widget.label,
             style: AppTextStyles.bodySmall.copyWith(
-              color: widget.selected ? Colors.white : AppColors.textSecondary,
+              color: widget.selected ? AppColors.onPrimary : AppColors.textSecondary,
               fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
             ),
           ),

@@ -20,6 +20,9 @@ class AppButton extends StatelessWidget {
     this.variant = AppButtonVariant.primary,
     this.isLoading = false,
     this.isExpanded = false,
+    this.icon,
+    this.leading,
+    this.maxLines = 1,
   });
 
   final VoidCallback? onPressed;
@@ -28,6 +31,17 @@ class AppButton extends StatelessWidget {
   final AppButtonVariant variant;
   final bool isLoading;
   final bool isExpanded;
+
+  /// Optional leading icon, shown before the label (hidden while loading).
+  /// Ignored when [leading] is set.
+  final IconData? icon;
+
+  /// Optional leading widget (e.g. an SVG brand mark), shown before the label.
+  /// Takes precedence over [icon]. Hidden while loading.
+  final Widget? leading;
+
+  /// Max lines for the label — set to 2 to allow a long label to wrap.
+  final int maxLines;
 
   /// Shared height for every variant — the fix for mis-aligned stacked buttons.
   static const double height = 52;
@@ -97,10 +111,28 @@ class AppButton extends StatelessWidget {
                 ],
               ],
             )
-          : Text(
-              displayLabel,
+          : Row(
               key: ValueKey(displayLabel),
-              style: AppTextStyles.button.copyWith(color: _foregroundColor),
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (leading != null) ...[
+                  leading!,
+                  const SizedBox(width: AppSpacing.sm),
+                ] else if (icon != null) ...[
+                  Icon(icon, size: 18, color: _foregroundColor),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                Flexible(
+                  child: Text(
+                    displayLabel,
+                    maxLines: maxLines,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.start,
+                    style:
+                        AppTextStyles.button.copyWith(color: _foregroundColor),
+                  ),
+                ),
+              ],
             ),
     );
 

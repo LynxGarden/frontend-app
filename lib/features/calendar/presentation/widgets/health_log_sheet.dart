@@ -12,30 +12,39 @@ import 'package:lynx_app/shared/widgets/app_chip.dart';
 import 'package:lynx_app/shared/widgets/app_text_field.dart';
 
 /// Bottom sheet to log a health datum manually. Returns a [HealthLogInput] or
-/// null if dismissed.
-Future<HealthLogInput?> showHealthLogSheet(BuildContext context) {
+/// null if dismissed. [initialType] pre-selects the metric (e.g. opened from a
+/// "Log water" quick action); [loggedAt] stamps the entry on a chosen day.
+Future<HealthLogInput?> showHealthLogSheet(
+  BuildContext context, {
+  HealthLogType? initialType,
+  DateTime? loggedAt,
+}) {
   return showModalBottomSheet<HealthLogInput>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     backgroundColor: AppColors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
     ),
-    builder: (_) => const _HealthLogSheet(),
+    builder: (_) => _HealthLogSheet(initialType: initialType, loggedAt: loggedAt),
   );
 }
 
 class _HealthLogSheet extends StatefulWidget {
-  const _HealthLogSheet();
+  const _HealthLogSheet({this.initialType, this.loggedAt});
+
+  final HealthLogType? initialType;
+  final DateTime? loggedAt;
 
   @override
   State<_HealthLogSheet> createState() => _HealthLogSheetState();
 }
 
 class _HealthLogSheetState extends State<_HealthLogSheet> {
-  HealthLogType _type = HealthLogType.weight;
+  late HealthLogType _type;
   final _value = TextEditingController();
-  final _unit = TextEditingController(text: 'kg');
+  late final TextEditingController _unit;
   final _notes = TextEditingController();
 
   static const _units = {
@@ -46,6 +55,13 @@ class _HealthLogSheetState extends State<_HealthLogSheet> {
     HealthLogType.meal: 'kcal',
     HealthLogType.other: '',
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _type = widget.initialType ?? HealthLogType.weight;
+    _unit = TextEditingController(text: _units[_type] ?? '');
+  }
 
   @override
   void dispose() {
@@ -132,6 +148,7 @@ class _HealthLogSheetState extends State<_HealthLogSheet> {
                   value: v,
                   unit: _unit.text.trim().isEmpty ? null : _unit.text.trim(),
                   notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+                  loggedAt: widget.loggedAt,
                 ),
               );
             },

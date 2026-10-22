@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
 import 'package:lynx_app/core/integrations/health_sync_service.dart';
@@ -102,6 +103,9 @@ class _HealthActivityScreenState extends ConsumerState<HealthActivityScreen> {
               Expanded(
                 child: AppButton(
                   label: l.importFromHealth,
+                  leading: SvgPicture.asset('assets/images/apple-health.svg',
+                      width: 22, height: 22),
+                  maxLines: 2,
                   variant: AppButtonVariant.secondary,
                   isLoading: _syncingHealth,
                   onPressed: _syncingHealth ? null : _syncHealth,
@@ -111,6 +115,9 @@ class _HealthActivityScreenState extends ConsumerState<HealthActivityScreen> {
               Expanded(
                 child: AppButton(
                   label: l.importFromStrava,
+                  leading: SvgPicture.asset('assets/images/strava.svg',
+                      width: 22, height: 22),
+                  maxLines: 2,
                   variant: AppButtonVariant.secondary,
                   isLoading: _syncingStrava,
                   onPressed: _syncingStrava ? null : _syncStrava,

@@ -26,6 +26,8 @@ dependencies:
   # Fonts & UI
   google_fonts: ^6.2.1
   cached_network_image: ^3.3.1
+  # SVG assets (brand marks for Apple Health / Strava import).
+  flutter_svg: ^2.0.10+1
   # Charts — progress graphs (volume / PB trends).
   fl_chart: ^0.69.2
   # Calendar UI (month/week booking grid).

@@ -31,6 +31,7 @@ Future<void> showExerciseDetailSheet(
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     // Draggable sheet provides its own grabber below — opt out of the themed
     // handle so there aren't two.
     showDragHandle: false,

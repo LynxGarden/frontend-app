@@ -1301,6 +1301,18 @@ class AppLocalizationsSl extends AppLocalizations {
   String get sessionRatingLabel => 'Napornost treninga';
 
   @override
+  String exercisesInGroup(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vaj',
+      two: '2 vaji',
+      one: '1 vaja',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get weekTag => 'Oznaka tedna';
 
   @override
@@ -1392,6 +1404,13 @@ class AppLocalizationsSl extends AppLocalizations {
   String get bestVolume => 'Najboljši volumen';
 
   @override
+  String get bestVolumeInfoTitle => 'Kaj je volumen?';
+
+  @override
+  String get bestVolumeInfoBody =>
+      'Volumen je skupno delo v enem treningu: teža × ponovitve, sešteto čez vse serije (npr. 60×8 + 60×5 = 780). Ta ploščica prikazuje tvoj najboljši seštevek v enem treningu. Ni enak najboljša teža × največ ponovitev × največ serij — vsak od teh je svoj rekord, pogosto z različnih dni.';
+
+  @override
   String get noProgressYet =>
       'Še ni podatkov — zabeleži nekaj treningov in viden bo napredek.';
 
@@ -1416,6 +1435,27 @@ class AppLocalizationsSl extends AppLocalizations {
 
   @override
   String get calendarHistory => 'Zgodovina';
+
+  @override
+  String get calendarWeek => 'Teden';
+
+  @override
+  String get calendarMonth => 'Mesec';
+
+  @override
+  String get coachCalendarTitle => 'Urnik';
+
+  @override
+  String get mySessions => 'Moji treningi';
+
+  @override
+  String get noSessionsThisDay => 'Ta dan ni treningov.';
+
+  @override
+  String get noSessionsScheduled => 'Ni načrtovanih treningov.';
+
+  @override
+  String get sessionWithClient => 'Trening';
 
   @override
   String get bookTraining => 'Rezerviraj trening';

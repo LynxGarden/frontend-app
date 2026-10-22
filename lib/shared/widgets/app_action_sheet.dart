@@ -32,6 +32,7 @@ Future<T?> showActionSheet<T>(
     context: context,
     backgroundColor: AppColors.surface,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
     ),

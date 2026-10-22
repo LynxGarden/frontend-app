@@ -31,6 +31,7 @@ Future<PrescriptionInput?> showPrescriptionEditor(
   return showModalBottomSheet<PrescriptionInput>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     backgroundColor: AppColors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
@@ -202,6 +203,7 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
       context: context,
       backgroundColor: AppColors.surface,
       isScrollControlled: true,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
@@ -281,64 +283,81 @@ class _PrescriptionEditorState extends State<_PrescriptionEditor> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final bottom = MediaQuery.of(context).viewInsets.bottom;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-          AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, bottom + AppSpacing.lg),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(widget.exerciseName, style: AppTextStyles.heading3),
-            Text(l.prescription, style: AppTextStyles.label),
-            const SizedBox(height: AppSpacing.md),
-            // Method picker (static header when the method was chosen upfront
-            // or comes from the group being extended).
-            if (widget.lockMethod == null) ...[
-              _MethodField(
-                label: l.trainingMethod,
-                value: methodLabel(l, _method),
-                onTap: _pickMethod,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-            ] else ...[
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(methodLabel(l, _method),
-                        style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 2),
-                    Text(methodDescription(l, _method),
-                        style: AppTextStyles.bodySmall
-                            .copyWith(color: AppColors.textSecondary)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-            ],
-            if (_method == TrainingMethod.none)
-              ..._schemaFields(l)
-            else
-              ..._strengthGrid(l),
-            const SizedBox(height: AppSpacing.sm),
-            _text(_coachNote, l.presCoachNote),
-            const SizedBox(height: AppSpacing.lg),
-            AppButton(
-              label: l.done,
-              isExpanded: true,
-              onPressed: () => Navigator.of(context).pop(_build()),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Scrolling form — shrinks so the Done footer stays pinned/visible.
+        Flexible(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.md),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(widget.exerciseName, style: AppTextStyles.heading3),
+                Text(l.prescription, style: AppTextStyles.label),
+                const SizedBox(height: AppSpacing.md),
+                // Method picker (static header when the method was chosen
+                // upfront or comes from the group being extended).
+                if (widget.lockMethod == null) ...[
+                  _MethodField(
+                    label: l.trainingMethod,
+                    value: methodLabel(l, _method),
+                    onTap: _pickMethod,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ] else ...[
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(methodLabel(l, _method),
+                            style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 2),
+                        Text(methodDescription(l, _method),
+                            style: AppTextStyles.bodySmall
+                                .copyWith(color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                if (_method == TrainingMethod.none)
+                  ..._schemaFields(l)
+                else
+                  ..._strengthGrid(l),
+                const SizedBox(height: AppSpacing.sm),
+                _text(_coachNote, l.presCoachNote),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        // Pinned footer — always visible, lifts above the keyboard.
+        Container(
+          padding: EdgeInsets.fromLTRB(
+              AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, bottom + AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border(
+              top: BorderSide(color: AppColors.surfaceBorder),
+            ),
+          ),
+          child: AppButton(
+            label: l.done,
+            isExpanded: true,
+            onPressed: () => Navigator.of(context).pop(_build()),
+          ),
+        ),
+      ],
     );
   }
 

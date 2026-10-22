@@ -32,6 +32,7 @@ Future<bool> showAvatarPicker(
 }) async {
   final changed = await showModalBottomSheet<bool>(
     context: context,
+    useSafeArea: true,
     backgroundColor: AppColors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),

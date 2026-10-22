@@ -165,17 +165,24 @@ class AppNavBarAction extends StatelessWidget {
   });
 
   final IconData icon;
-  final VoidCallback onTap;
+
+  /// Null disables the action — it dims and stops responding to taps.
+  final VoidCallback? onTap;
   final Color? tint;
   final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    final iconColor =
+        (tint ?? AppColors.primary).withValues(alpha: enabled ? 1.0 : 0.35);
     final button = GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
+      onTap: enabled
+          ? () {
+              HapticFeedback.lightImpact();
+              onTap!();
+            }
+          : null,
       child: Container(
         width: 40,
         height: 40,
@@ -184,7 +191,7 @@ class AppNavBarAction extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(color: AppColors.surfaceBorder),
         ),
-        child: Icon(icon, size: 20, color: tint ?? AppColors.primary),
+        child: Icon(icon, size: 20, color: iconColor),
       ),
     );
     return tooltip == null ? button : Tooltip(message: tooltip!, child: button);

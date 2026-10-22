@@ -43,6 +43,7 @@ class GroupDetailScreen extends ConsumerWidget {
     }
     final chosenId = await showModalBottomSheet<String>(
       context: context,
+      useSafeArea: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
@@ -102,6 +103,7 @@ class GroupDetailScreen extends ConsumerWidget {
     }
     final chosen = await showModalBottomSheet<Program>(
       context: context,
+      useSafeArea: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),

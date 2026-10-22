@@ -2462,6 +2462,12 @@ abstract class AppLocalizations {
   /// **'Session difficulty'**
   String get sessionRatingLabel;
 
+  /// No description provided for @exercisesInGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 exercise} other{{count} exercises}}'**
+  String exercisesInGroup(int count);
+
   /// No description provided for @weekTag.
   ///
   /// In en, this message translates to:
@@ -2624,6 +2630,18 @@ abstract class AppLocalizations {
   /// **'Best volume'**
   String get bestVolume;
 
+  /// No description provided for @bestVolumeInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is volume?'**
+  String get bestVolumeInfoTitle;
+
+  /// No description provided for @bestVolumeInfoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume is your total work in one session: weight × reps added up across every set (e.g. 60×8 + 60×5 = 780). This tile shows your best single-session total. It won\'t equal best weight × best reps × best series — those are each a separate all-time record, often from different days.'**
+  String get bestVolumeInfoBody;
+
   /// No description provided for @noProgressYet.
   ///
   /// In en, this message translates to:
@@ -2671,6 +2689,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'History'**
   String get calendarHistory;
+
+  /// No description provided for @calendarWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get calendarWeek;
+
+  /// No description provided for @calendarMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get calendarMonth;
+
+  /// No description provided for @coachCalendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get coachCalendarTitle;
+
+  /// No description provided for @mySessions.
+  ///
+  /// In en, this message translates to:
+  /// **'My sessions'**
+  String get mySessions;
+
+  /// No description provided for @noSessionsThisDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions this day.'**
+  String get noSessionsThisDay;
+
+  /// No description provided for @noSessionsScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions scheduled yet.'**
+  String get noSessionsScheduled;
+
+  /// No description provided for @sessionWithClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get sessionWithClient;
 
   /// No description provided for @bookTraining.
   ///

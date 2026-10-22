@@ -1288,6 +1288,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sessionRatingLabel => 'Session difficulty';
 
   @override
+  String exercisesInGroup(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count exercises',
+      one: '1 exercise',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get weekTag => 'Week tag';
 
   @override
@@ -1379,6 +1390,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bestVolume => 'Best volume';
 
   @override
+  String get bestVolumeInfoTitle => 'What is volume?';
+
+  @override
+  String get bestVolumeInfoBody =>
+      'Volume is your total work in one session: weight × reps added up across every set (e.g. 60×8 + 60×5 = 780). This tile shows your best single-session total. It won\'t equal best weight × best reps × best series — those are each a separate all-time record, often from different days.';
+
+  @override
   String get noProgressYet =>
       'No data yet — log a few sessions to see your progress.';
 
@@ -1403,6 +1421,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendarHistory => 'History';
+
+  @override
+  String get calendarWeek => 'Week';
+
+  @override
+  String get calendarMonth => 'Month';
+
+  @override
+  String get coachCalendarTitle => 'Schedule';
+
+  @override
+  String get mySessions => 'My sessions';
+
+  @override
+  String get noSessionsThisDay => 'No sessions this day.';
+
+  @override
+  String get noSessionsScheduled => 'No sessions scheduled yet.';
+
+  @override
+  String get sessionWithClient => 'Session';
 
   @override
   String get bookTraining => 'Book training';

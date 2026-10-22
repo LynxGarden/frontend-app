@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
+import 'package:lynx_app/features/calendar/presentation/coach_calendar_screen.dart';
 import 'package:lynx_app/features/clients/presentation/clients_list_screen.dart';
 import 'package:lynx_app/features/clients/providers/clients_provider.dart';
 import 'package:lynx_app/features/groups/presentation/groups_list_screen.dart';
 import 'package:lynx_app/features/groups/providers/groups_provider.dart';
 import 'package:lynx_app/features/programs/presentation/program_list_screen.dart';
 import 'package:lynx_app/features/programs/providers/programs_provider.dart';
-import 'package:lynx_app/features/review/presentation/review_screen.dart';
-import 'package:lynx_app/features/review/providers/review_provider.dart';
 import 'package:lynx_app/features/settings/presentation/settings_screen.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/widgets/main_shell.dart';
 
-/// Tabs staff (owner/coach/physio) see: Clients · Programs · Groups · Review · Settings.
+/// Tabs staff (owner/coach/physio) see: Clients · Programs · Groups · Schedule ·
+/// Settings. Review lives behind the Schedule header's Review action.
 class StaffShell extends StatelessWidget {
   const StaffShell({super.key});
 
@@ -43,11 +43,10 @@ class StaffShell extends StatelessWidget {
           refreshProviders: [groupsProvider],
         ),
         ShellTab(
-          label: l.navReview,
-          sfSymbol: 'checkmark.circle',
-          materialIcon: Icons.check_circle_outline,
-          screen: const ReviewScreen(),
-          refreshProviders: [reviewFeedProvider],
+          label: l.navCalendar,
+          sfSymbol: 'calendar',
+          materialIcon: Icons.calendar_today_outlined,
+          screen: const CoachCalendarScreen(),
         ),
         ShellTab(
           label: l.navSettings,

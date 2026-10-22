@@ -44,7 +44,17 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
           controller: _scroll,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            SliverCollapsingHeader(title: l.reviewTitle, controller: _scroll),
+            SliverCollapsingHeader(
+              title: l.reviewTitle,
+              controller: _scroll,
+              action: Navigator.of(context).canPop()
+                  ? IconButton(
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      icon: Icon(Icons.close_rounded,
+                          color: AppColors.textPrimary),
+                    )
+                  : null,
+            ),
             async.when(
               loading: () => const SliverSkeletonList(),
               error: (_, _) => SliverFillRemaining(

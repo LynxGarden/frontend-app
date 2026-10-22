@@ -216,6 +216,7 @@ Future<MetricField?> _showFieldEditor(
   return showModalBottomSheet<MetricField>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     backgroundColor: AppColors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),

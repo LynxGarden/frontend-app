@@ -36,12 +36,20 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
   Program? _program;
   bool _loading = true;
 
+  // Baseline (last saved) values, so the Save action only lights up when the
+  // name/description actually differ from what's stored.
+  String _savedName = '';
+  String _savedDescription = '';
+  bool _dirty = false;
+
   String get _tenantId =>
       ref.read(currentUserProvider).valueOrNull?.tenantId ?? '';
 
   @override
   void initState() {
     super.initState();
+    _name.addListener(_recomputeDirty);
+    _description.addListener(_recomputeDirty);
     _reload(initial: true);
   }
 
@@ -50,6 +58,12 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
     _name.dispose();
     _description.dispose();
     super.dispose();
+  }
+
+  void _recomputeDirty() {
+    final dirty =
+        _name.text != _savedName || _description.text != _savedDescription;
+    if (dirty != _dirty) setState(() => _dirty = dirty);
   }
 
   Future<void> _reload({bool initial = false}) async {
@@ -65,6 +79,9 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
         if (initial) {
           _name.text = program.name;
           _description.text = program.description ?? '';
+          _savedName = program.name;
+          _savedDescription = program.description ?? '';
+          _dirty = false;
         }
       });
     } on AppException catch (e) {
@@ -95,6 +112,11 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
       );
       await _reload();
       if (mounted) {
+        setState(() {
+          _savedName = _name.text;
+          _savedDescription = _description.text;
+          _dirty = false;
+        });
         HapticFeedback.lightImpact();
         AppToast.show(context, title: l.programSaved);
       }
@@ -436,7 +458,9 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  AppNavBarAction(icon: Icons.check, onTap: _saveDetails),
+                  AppNavBarAction(
+                      icon: Icons.check,
+                      onTap: _dirty ? _saveDetails : null),
                   const SizedBox(width: AppSpacing.sm),
                   AppNavBarAction(
                     icon: Icons.delete_outline,

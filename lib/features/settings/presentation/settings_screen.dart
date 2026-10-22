@@ -63,6 +63,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final selected = await showModalBottomSheet<String>(
       context: context,
+      useSafeArea: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius:
@@ -112,6 +113,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final selected = await showModalBottomSheet<ThemeMode>(
       context: context,
+      useSafeArea: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius:

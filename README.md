@@ -14,14 +14,14 @@ This repo is the **Flutter client** for iOS + Android.
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Flutter (SDK `^3.10.8`) |
-| State | Riverpod (code generation) |
-| Backend | Supabase (auth, database, storage, edge functions) |
-| Navigation | GoRouter |
-| Fonts | Google Fonts — Bricolage Grotesque (headings) + Inter (body) |
-| Env | flutter_dotenv (`.env` files) |
+| Layer      | Technology                                                   |
+| ---------- | ------------------------------------------------------------ |
+| Framework  | Flutter (SDK `^3.10.8`)                                      |
+| State      | Riverpod (code generation)                                   |
+| Backend    | Supabase (auth, database, storage, edge functions)           |
+| Navigation | GoRouter                                                     |
+| Fonts      | Google Fonts — Bricolage Grotesque (headings) + Inter (body) |
+| Env        | flutter_dotenv (`.env` files)                                |
 
 The full architecture, design system, and business rules live in
 [`CLAUDE.md`](./CLAUDE.md).
@@ -62,10 +62,10 @@ dart run build_runner build --delete-conflicting-outputs
 
 The app ships two flavors, each with its own entrypoint and env file:
 
-| Flavor | Entrypoint | Env file | App name |
-|---|---|---|---|
-| **dev** | `lib/main_dev.dart` | `.env` | Lynx Dev |
-| **prod** | `lib/main_prod.dart` | `.env.prod` | Lynx |
+| Flavor   | Entrypoint           | Env file    | App name |
+| -------- | -------------------- | ----------- | -------- |
+| **dev**  | `lib/main_dev.dart`  | `.env`      | Lynx Dev |
+| **prod** | `lib/main_prod.dart` | `.env.prod` | Lynx     |
 
 The flavor is selected by the **entrypoint** (`bootstrap(Flavor.dev/prod)`), which
 also picks the env file. On **Android** you must also pass `--flavor` (product
@@ -76,11 +76,11 @@ _"The Xcode project does not define custom schemes"_).
 ```bash
 # iOS — no --flavor
 flutter run -t lib/main_dev.dart                    # dev
-flutter run -t lib/main_prod.dart --release         # prod
+flutter run -t lib/main_prod.dart        # prod
 
 # Android — --flavor required
 flutter run --flavor dev  -t lib/main_dev.dart      # dev
-flutter run --flavor prod -t lib/main_prod.dart --release  # prod
+flutter run --flavor prod -t lib/main_prod.dart  # prod
 ```
 
 Pick a target device with `-d <device-id>` (list them via `flutter devices`).

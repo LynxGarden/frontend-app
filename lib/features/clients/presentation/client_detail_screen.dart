@@ -83,28 +83,42 @@ class ClientDetailScreen extends ConsumerWidget {
     }
     final chosen = await showModalBottomSheet<Program>(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              // Tight top: the theme drag handle already reserves space above.
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.lg),
-              child: Text(l.assignProgram, style: AppTextStyles.heading3),
-            ),
-            for (final p in templates)
-              ListTile(
-                title: Text(p.name, style: AppTextStyles.body),
-                trailing: Icon(Icons.add, color: AppColors.primary),
-                onTap: () => Navigator.of(context).pop(p),
+      builder: (sheetCtx) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(sheetCtx).size.height * 0.8,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                // Tight top: the theme drag handle already reserves space above.
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.md),
+                child: Text(l.assignProgram, style: AppTextStyles.heading3),
               ),
-            const SizedBox(height: AppSpacing.md),
-          ],
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  children: [
+                    for (final p in templates)
+                      ListTile(
+                        title: Text(p.name, style: AppTextStyles.body),
+                        trailing: Icon(Icons.add, color: AppColors.primary),
+                        onTap: () => Navigator.of(sheetCtx).pop(p),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -200,6 +214,7 @@ class ClientDetailScreen extends ConsumerWidget {
       if (!context.mounted) return;
       await showModalBottomSheet<void>(
         context: context,
+        useSafeArea: true,
         backgroundColor: AppColors.surface,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),

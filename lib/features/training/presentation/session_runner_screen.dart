@@ -267,11 +267,62 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
 
     final labels = [for (final e in exercises) e.exerciseName, l.finish];
 
+    // One rail segment per structured method, each positioned over its own
+    // selector cells and scrolling with them — so EVERY group's indicator is
+    // visible at once, not just the current one. Grouped methods bracket their
+    // members with a line; single-exercise methods (drop set…) show just a
+    // centred name.
+    bool isMethod(TrainingMethod m) =>
+        m != TrainingMethod.straight && m != TrainingMethod.none;
+    final segments = <_RailSegmentData>[];
+    var si = 0;
+    while (si < exercises.length) {
+      final e = exercises[si];
+      final gid = e.methodGroupId;
+      if (gid != null && gid.isNotEmpty) {
+        var last = si;
+        while (last + 1 < exercises.length &&
+            exercises[last + 1].methodGroupId == gid) {
+          last++;
+        }
+        final count = last - si + 1;
+        var m = e.method;
+        if (!isMethod(m)) {
+          for (var k = si; k <= last; k++) {
+            if (isMethod(exercises[k].method)) {
+              m = exercises[k].method;
+              break;
+            }
+          }
+        }
+        if (isMethod(m) || count > 1) {
+          segments.add(_RailSegmentData(
+            startIndex: si,
+            count: count,
+            label: methodLabel(l, m),
+            bracket: count > 1,
+          ));
+        }
+        si = last + 1;
+      } else {
+        if (isMethod(e.method)) {
+          segments.add(_RailSegmentData(
+            startIndex: si,
+            count: 1,
+            label: methodLabel(l, e.method),
+            bracket: false,
+          ));
+        }
+        si++;
+      }
+    }
+
     return Column(
       children: [
         SizedBox(height: topInset),
         _ExerciseSelector(
           labels: labels,
+          segments: segments,
           selectedIndex: currentEx,
           finishIndex: exercises.length,
           onSelected: (i) {
@@ -503,15 +554,39 @@ class _RunnerSkeleton extends StatelessWidget {
 // Top selector — one cell per exercise (+ Finish), synced with the PageView.
 // ─────────────────────────────────────────────────────────────────────────
 
+/// Fixed cell width of the top exercise selector — shared so the method rail
+/// can align its brackets to the cells.
+const double _kSelectorItemWidth = 92.0;
+const double _kRailHeight = 18.0;
+
+/// One method indicator in the rail above the selector: either a bracketed
+/// group ("——— Superset ———" spanning [count] cells) or a single-exercise
+/// method shown as a plain centred name ([bracket] = false).
+class _RailSegmentData {
+  const _RailSegmentData({
+    required this.startIndex,
+    required this.count,
+    required this.label,
+    required this.bracket,
+  });
+
+  final int startIndex;
+  final int count;
+  final String label;
+  final bool bracket;
+}
+
 class _ExerciseSelector extends StatefulWidget {
   const _ExerciseSelector({
     required this.labels,
+    required this.segments,
     required this.selectedIndex,
     required this.finishIndex,
     required this.onSelected,
   });
 
   final List<String> labels;
+  final List<_RailSegmentData> segments;
   final int selectedIndex;
   final int finishIndex; // last index = the "Finish" cell
   final ValueChanged<int> onSelected;
@@ -521,7 +596,7 @@ class _ExerciseSelector extends StatefulWidget {
 }
 
 class _ExerciseSelectorState extends State<_ExerciseSelector> {
-  static const double _itemWidth = 92.0;
+  static const double _itemWidth = _kSelectorItemWidth;
   final _scroll = ScrollController();
   bool _ready = false;
 
@@ -565,57 +640,145 @@ class _ExerciseSelectorState extends State<_ExerciseSelector> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final sidePadding = (screenWidth - _itemWidth) / 2;
+    final count = widget.labels.length;
+    final contentWidth = _itemWidth * count;
+    final hasRail = widget.segments.isNotEmpty;
 
-    return SizedBox(
+    final namesRow = SizedBox(
       height: 40,
-      child: ListView.builder(
-        controller: _scroll,
-        scrollDirection: Axis.horizontal,
-        physics: const ClampingScrollPhysics(),
-        padding: EdgeInsets.symmetric(horizontal: sidePadding),
-        itemExtent: _itemWidth,
-        itemCount: widget.labels.length,
-        itemBuilder: (context, index) {
-          final active = index == widget.selectedIndex;
-          final isFinish = index == widget.finishIndex;
-          return GestureDetector(
-            onTap: () => widget.onSelected(index),
-            behavior: HitTestBehavior.opaque,
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isFinish) ...[
-                    Icon(Icons.flag_rounded,
-                        size: 15,
-                        color: active
-                            ? AppColors.primary
-                            : AppColors.textTertiary),
-                    const SizedBox(width: 4),
-                  ],
-                  Flexible(
-                    child: AnimatedDefaultTextStyle(
-                      duration: const Duration(milliseconds: 180),
-                      style: active
-                          ? AppTextStyles.body.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary)
-                          : AppTextStyles.bodySmall
-                              .copyWith(color: AppColors.textTertiary),
-                      child: Text(
-                        widget.labels[index],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
+      child: Row(
+        children: [
+          for (var index = 0; index < count; index++)
+            SizedBox(
+              width: _itemWidth,
+              child: _cell(index),
+            ),
+        ],
+      ),
+    );
+
+    return SingleChildScrollView(
+      controller: _scroll,
+      scrollDirection: Axis.horizontal,
+      physics: const ClampingScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: sidePadding),
+      child: SizedBox(
+        width: contentWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Rail — all method indicators at once, each over its own cells and
+            // scrolling with them.
+            if (hasRail)
+              SizedBox(
+                height: _kRailHeight,
+                child: Stack(
+                  children: [
+                    for (final seg in widget.segments)
+                      Positioned(
+                        left: seg.startIndex * _itemWidth,
+                        width: seg.count * _itemWidth,
+                        top: 0,
+                        bottom: 0,
+                        child: _RailSegment(data: seg),
                       ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+            namesRow,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _cell(int index) {
+    final active = index == widget.selectedIndex;
+    final isFinish = index == widget.finishIndex;
+    return GestureDetector(
+      onTap: () => widget.onSelected(index),
+      behavior: HitTestBehavior.opaque,
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isFinish) ...[
+              Icon(Icons.flag_rounded,
+                  size: 15,
+                  color: active ? AppColors.primary : AppColors.textTertiary),
+              const SizedBox(width: 4),
+            ],
+            Flexible(
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 180),
+                style: active
+                    ? AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w700, color: AppColors.primary)
+                    : AppTextStyles.bodySmall
+                        .copyWith(color: AppColors.textTertiary),
+                child: Text(
+                  widget.labels[index],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// One method indicator in the rail. A grouped method ([data.bracket]) draws a
+/// thin line spanning its cells with the name in the middle; a single-exercise
+/// method shows just its centred name (no lines, which would over-stretch).
+class _RailSegment extends StatelessWidget {
+  const _RailSegment({required this.data});
+
+  final _RailSegmentData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelWidget = Text(
+      data.label.toUpperCase(),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: AppTextStyles.label.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5),
+    );
+
+    if (!data.bracket) {
+      // Single-exercise method — centred name, allowed to overflow its one cell
+      // a little rather than stretch lines across the width.
+      return Center(
+        child: OverflowBox(
+          minWidth: 0,
+          maxWidth: _kSelectorItemWidth * 2.2,
+          alignment: Alignment.center,
+          child: labelWidget,
+        ),
+      );
+    }
+
+    final lineColor = AppColors.primary.withValues(alpha: 0.35);
+    Widget line() => Container(height: 1.5, color: lineColor);
+    // Vertical end cap so the bracket reads as a closed span: |——— LABEL ———|
+    Widget cap() => Container(width: 1.5, height: 9, color: lineColor);
+    return Row(
+      children: [
+        cap(),
+        Expanded(child: line()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          child: labelWidget,
+        ),
+        Expanded(child: line()),
+        cap(),
+      ],
     );
   }
 }
@@ -1136,31 +1299,41 @@ class _SetBottomState extends ConsumerState<_SetBottom>
             : lastAsync.value!.last)
         : null;
 
-    return SingleChildScrollView(
+    // Form scrolls; the Log Set button is pinned to the bottom of the card.
+    return Padding(
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.md),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('${l.setN(widget.setIndex + 1)} / ${widget.setCount}',
-              style: AppTextStyles.label
-                  .copyWith(color: AppColors.textTertiary)),
-          const SizedBox(height: AppSpacing.sm),
-          MetricFormRenderer(
-            key: ValueKey('${widget.exercise.id}#${widget.setIndex}'),
-            schema: _schema,
-            values: _values,
-            lastValues: lastValues,
-            onChanged: (key, value) => _values[key] = value,
-          ),
-          if (ex.restSeconds != null && ex.restSeconds! > 0) ...[
-            const SizedBox(height: AppSpacing.md),
-            _RestRow(
-              seconds: ex.restSeconds!,
-              onStart: () => widget.onStartRest(ex.restSeconds!),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${l.setN(widget.setIndex + 1)} / ${widget.setCount}',
+                      style: AppTextStyles.label
+                          .copyWith(color: AppColors.textTertiary)),
+                  const SizedBox(height: AppSpacing.sm),
+                  MetricFormRenderer(
+                    key: ValueKey('${widget.exercise.id}#${widget.setIndex}'),
+                    schema: _schema,
+                    values: _values,
+                    lastValues: lastValues,
+                    onChanged: (key, value) => _values[key] = value,
+                  ),
+                  if (ex.restSeconds != null && ex.restSeconds! > 0) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    _RestRow(
+                      seconds: ex.restSeconds!,
+                      onStart: () => widget.onStartRest(ex.restSeconds!),
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ],
-          const SizedBox(height: AppSpacing.md),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           SizedBox(
             width: double.infinity,
             height: 48,
@@ -1168,6 +1341,10 @@ class _SetBottomState extends ConsumerState<_SetBottom>
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
+                // Keep the forest fill while saving (disabled) so the spinner
+                // stays visible instead of washing out on a grey disabled bg.
+                disabledBackgroundColor: AppColors.primary,
+                disabledForegroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md)),
               ),
@@ -1366,47 +1543,141 @@ class _LastTimeBlock extends StatelessWidget {
   const _LastTimeBlock({required this.async});
   final AsyncValue<List<LoggedEntry>> async;
 
+  /// A short "when" for the header, e.g. "Today", "Yesterday", "3d ago".
+  static String? _relative(DateTime when) {
+    final now = DateTime.now();
+    final days =
+        DateTime(now.year, now.month, now.day).difference(
+            DateTime(when.year, when.month, when.day)).inDays;
+    if (days <= 0) return 'Today';
+    if (days == 1) return 'Yesterday';
+    if (days < 7) return '${days}d ago';
+    if (days < 30) return '${(days / 7).floor()}w ago';
+    return '${(days / 30).floor()}mo ago';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final entries = async.asData?.value ?? const <LoggedEntry>[];
+    final when = entries.isEmpty ? null : entries.first.loggedAt;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: AppColors.surfaceBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.lastTime.toUpperCase(),
-              style: AppTextStyles.label.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.4)),
-          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.history_rounded,
+                  size: 14, color: AppColors.primary),
+              const SizedBox(width: 6),
+              Text(l.lastTime.toUpperCase(),
+                  style: AppTextStyles.label.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.4)),
+              const Spacer(),
+              if (when != null)
+                Text(_relative(when) ?? '',
+                    style: AppTextStyles.label.copyWith(
+                        color: AppColors.textTertiary,
+                        letterSpacing: 0.2)),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
           async.when(
-            loading: () => Text('…', style: AppTextStyles.bodySmall),
-            error: (_, _) =>
-                Text(l.noHistoryYet, style: AppTextStyles.bodySmall),
+            loading: () => const _LastTimeSkeleton(),
+            error: (_, _) => _empty(l),
             data: (entries) {
-              if (entries.isEmpty) {
-                return Text(l.noHistoryYet,
-                    style: AppTextStyles.bodySmall
-                        .copyWith(color: AppColors.textTertiary));
-              }
+              if (entries.isEmpty) return _empty(l);
               return Wrap(
-                spacing: AppSpacing.md,
-                runSpacing: 2,
+                spacing: 6,
+                runSpacing: 6,
                 children: [
                   for (var i = 0; i < entries.length; i++)
-                    Text('${i + 1}. ${entries[i].summary}',
-                        style: AppTextStyles.bodySmall
-                            .copyWith(fontWeight: FontWeight.w600)),
+                    _SetPill(index: i + 1, value: entries[i].summary),
                 ],
               );
             },
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _empty(AppLocalizations l) => Text(l.noHistoryYet,
+      style: AppTextStyles.bodySmall
+          .copyWith(color: AppColors.textTertiary));
+}
+
+/// One logged set from last time, shown as a pill: a muted set-number badge
+/// followed by the bold actuals (e.g. `8 × 60`).
+class _SetPill extends StatelessWidget {
+  const _SetPill({required this.index, required this.value});
+  final int index;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(5, 4, 10, 4),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: Border.all(color: AppColors.surfaceBorder),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 18,
+            height: 18,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Text('$index',
+                style: AppTextStyles.label.copyWith(
+                    fontSize: 10,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0,
+                    height: 1)),
+          ),
+          const SizedBox(width: 6),
+          Text(value,
+              style: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Layout-matching placeholder: a few pill-shaped shimmer boxes.
+class _LastTimeSkeleton extends StatelessWidget {
+  const _LastTimeSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonLoader(
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: const [
+          SkeletonBox(width: 68, height: 26, borderRadius: AppRadius.pill),
+          SkeletonBox(width: 68, height: 26, borderRadius: AppRadius.pill),
+          SkeletonBox(width: 60, height: 26, borderRadius: AppRadius.pill),
         ],
       ),
     );

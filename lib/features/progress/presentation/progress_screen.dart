@@ -280,7 +280,11 @@ class _PbRow extends StatelessWidget {
         row([
           _PbTile(
               label: l.bestSeries, value: progress.bestSeries?.toString() ?? '—'),
-          _PbTile(label: l.bestVolume, value: fmt(progress.bestVolume)),
+          _PbTile(
+            label: l.bestVolume,
+            value: fmt(progress.bestVolume),
+            onInfo: () => _showVolumeInfo(context, l),
+          ),
         ]),
       ],
     );
@@ -288,16 +292,25 @@ class _PbRow extends StatelessWidget {
 }
 
 class _PbTile extends StatelessWidget {
-  const _PbTile({required this.label, required this.value});
+  const _PbTile({required this.label, required this.value, this.onInfo});
 
   final String label;
   final String value;
+
+  /// When set, the tile is tappable and shows an info icon beside its label.
+  final VoidCallback? onInfo;
 
   @override
   Widget build(BuildContext context) {
     return AppCard(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.all(AppSpacing.md),
+      onTap: onInfo == null
+          ? null
+          : () {
+              HapticFeedback.selectionClick();
+              onInfo!();
+            },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -307,14 +320,43 @@ class _PbTile extends StatelessWidget {
               style: AppTextStyles.heading3
                   .copyWith(color: AppColors.textPrimary)),
           const SizedBox(height: 2),
-          Text(label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.label.copyWith(color: AppColors.textTertiary)),
+          Row(
+            children: [
+              Flexible(
+                child: Text(label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.label
+                        .copyWith(color: AppColors.textTertiary)),
+              ),
+              if (onInfo != null) ...[
+                const SizedBox(width: 4),
+                Icon(Icons.info_outline,
+                    size: 13, color: AppColors.textTertiary),
+              ],
+            ],
+          ),
         ],
       ),
     );
   }
+}
+
+void _showVolumeInfo(BuildContext context, AppLocalizations l) {
+  showDialog<void>(
+    context: context,
+    builder: (_) => AlertDialog(
+      backgroundColor: AppColors.surface,
+      title: Text(l.bestVolumeInfoTitle, style: AppTextStyles.heading3),
+      content: Text(l.bestVolumeInfoBody, style: AppTextStyles.bodySmall),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l.done),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ExercisePicker extends StatelessWidget {
@@ -339,6 +381,7 @@ class _ExercisePicker extends StatelessWidget {
           context: context,
           backgroundColor: AppColors.surface,
           isScrollControlled: true,
+          useSafeArea: true,
           shape: const RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),

@@ -22,6 +22,7 @@ void showExerciseComments(
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     // Draggable sheet provides its own grabber — opt out of the themed handle.
     showDragHandle: false,
     backgroundColor: AppColors.surface,

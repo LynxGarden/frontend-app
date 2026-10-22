@@ -53,7 +53,7 @@ class TrainingRepository {
           .eq('person_id', personId)
           .eq('exercise_id', exerciseId)
           .order('logged_at', ascending: false)
-          .limit(20);
+          .limit(10);
       final all = (rows as List)
           .map((r) => LoggedEntry.fromJson(Map<String, dynamic>.from(r as Map)))
           .toList();

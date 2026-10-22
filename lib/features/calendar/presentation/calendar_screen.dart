@@ -15,6 +15,7 @@ import 'package:lynx_app/features/calendar/data/models/booking.dart';
 import 'package:lynx_app/features/calendar/data/models/health_log.dart';
 import 'package:lynx_app/features/calendar/data/models/reminder.dart';
 import 'package:lynx_app/features/calendar/data/reminder_repository.dart';
+import 'package:lynx_app/features/calendar/presentation/widgets/calendar_views.dart';
 import 'package:lynx_app/features/calendar/presentation/widgets/health_log_sheet.dart';
 import 'package:lynx_app/features/calendar/presentation/widgets/reminder_sheet.dart';
 import 'package:lynx_app/features/calendar/providers/calendar_providers.dart';
@@ -22,15 +23,14 @@ import 'package:lynx_app/features/training/providers/training_provider.dart';
 import 'package:lynx_app/l10n/app_localizations.dart';
 import 'package:lynx_app/shared/providers/current_user_provider.dart';
 import 'package:lynx_app/shared/widgets/app_card.dart';
-import 'package:lynx_app/shared/widgets/app_segmented_control.dart';
 import 'package:lynx_app/shared/widgets/app_toast.dart';
 import 'package:lynx_app/shared/widgets/collapsing_header.dart';
 import 'package:lynx_app/shared/widgets/skeleton_loader.dart';
 
-enum _Tab { book, activity, history }
-
-/// The client's Calendar tab: realtime slot booking, health/activity logging +
-/// reminders, and finished-training history.
+/// The client's Calendar tab: one big week/month calendar. Tapping a day opens a
+/// detail with its training slots (bookable only for the current week), that
+/// day's health logs, finished trainings, plus quick-add actions (activity,
+/// meal, water, reminder). Reminders are listed globally at the bottom.
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
@@ -40,13 +40,15 @@ class CalendarScreen extends ConsumerStatefulWidget {
 
 class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   final _scroll = ScrollController();
-  _Tab _tab = _Tab.book;
+  CalView _calView = CalView.week;
   late DateTime _selectedDay;
+  late DateTime _focusDate; // any day in the focused week/month
 
   @override
   void initState() {
     super.initState();
-    _selectedDay = _dateOnly(DateTime.now());
+    _selectedDay = dateOnly(DateTime.now());
+    _focusDate = _selectedDay;
   }
 
   @override
@@ -55,16 +57,69 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     super.dispose();
   }
 
-  static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+  void _pickDay(DateTime d) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _selectedDay = dateOnly(d);
+      _focusDate = _selectedDay;
+    });
+  }
 
-  DateTime get _weekStart {
-    final now = _dateOnly(DateTime.now());
-    return now.subtract(Duration(days: now.weekday - 1)); // Monday
+  void _shiftFocus(int units) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _focusDate = _calView == CalView.week
+          ? _focusDate.add(Duration(days: 7 * units))
+          : DateTime(_focusDate.year, _focusDate.month + units, 1);
+    });
+  }
+
+  /// Booking is offered only for days in the current calendar week.
+  bool _isBookable(DateTime day) {
+    final ws = weekStartOf(DateTime.now());
+    final we = ws.add(const Duration(days: 7));
+    final d = dateOnly(day);
+    return !d.isBefore(ws) && d.isBefore(we);
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final user = ref.watch(currentUserProvider).valueOrNull;
+
+    final bookingsState = ref.watch(tenantBookingsProvider);
+    final bookings = bookingsState.valueOrNull ?? const <Booking>[];
+    final logs = ref.watch(healthLogsProvider(null)).valueOrNull ??
+        const <HealthLog>[];
+    final assignment = ref.watch(activeAssignmentProvider).valueOrNull;
+    final completed = [
+      for (final s in (assignment?.sessions ?? const []))
+        if (s.isCompleted && s.lastCompletedAt != null) s,
+    ];
+    final reminders = ref.watch(remindersProvider);
+
+    // Days that carry something → a dot in the grid.
+    final marked = <DateTime>{
+      for (final b in bookings)
+        if (b.isBooked && b.personId == user?.personId)
+          dateOnly(b.slotStart),
+      for (final log in logs) dateOnly(log.loggedAt),
+      for (final s in completed) dateOnly(s.lastCompletedAt!),
+    };
+
+    final dayLogs = [
+      for (final log in logs)
+        if (dateOnly(log.loggedAt) == _selectedDay) log,
+    ];
+    final dayCompleted = [
+      for (final s in completed)
+        if (dateOnly(s.lastCompletedAt!) == _selectedDay) s,
+    ];
+    final daySlots = _isBookable(_selectedDay)
+        ? _slotsForDay(_selectedDay, bookings, user?.personId)
+        : const <TimeSlot>[];
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
@@ -73,92 +128,146 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         slivers: [
           SliverCollapsingHeader(title: l.calendarTitle, controller: _scroll),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.md),
-            sliver: SliverToBoxAdapter(
-              child: AppSegmentedControl<_Tab>(
-                segments: [
-                  AppSegment(value: _Tab.book, label: l.calendarBook),
-                  AppSegment(value: _Tab.activity, label: l.calendarActivity),
-                  AppSegment(value: _Tab.history, label: l.calendarHistory),
-                ],
-                selected: _tab,
-                onChanged: (t) => setState(() => _tab = t),
-              ),
-            ),
-          ),
-          SliverPadding(
             padding: EdgeInsets.fromLTRB(
               AppSpacing.lg,
-              0,
+              AppSpacing.xs,
               AppSpacing.lg,
               MediaQuery.paddingOf(context).bottom + AppSpacing.xl,
             ),
-            sliver: switch (_tab) {
-              _Tab.book => _BookSliver(
-                  weekStart: _weekStart,
-                  selectedDay: _selectedDay,
-                  onPickDay: (d) {
-                    HapticFeedback.selectionClick();
-                    setState(() => _selectedDay = d);
-                  },
+            sliver: SliverList.list(
+              children: [
+                // ── Calendar ──────────────────────────────────────────────
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: CalendarViewToggle(
+                    view: _calView,
+                    onChanged: (v) => setState(() => _calView = v),
+                    weekLabel: l.calendarWeek,
+                    monthLabel: l.calendarMonth,
+                  ),
                 ),
-              _Tab.activity => const _ActivitySliver(),
-              _Tab.history => const _HistorySliver(),
-            },
+                const SizedBox(height: AppSpacing.md),
+                if (_calView == CalView.week)
+                  WeekStrip(
+                    weekStart: weekStartOf(_focusDate),
+                    selected: _selectedDay,
+                    onPick: _pickDay,
+                    onPrev: () => _shiftFocus(-1),
+                    onNext: () => _shiftFocus(1),
+                    locale: locale,
+                    markedDays: marked,
+                  )
+                else
+                  MonthGrid(
+                    month: _focusDate,
+                    selected: _selectedDay,
+                    onPick: _pickDay,
+                    onPrev: () => _shiftFocus(-1),
+                    onNext: () => _shiftFocus(1),
+                    locale: locale,
+                    markedDays: marked,
+                  ),
+                const SizedBox(height: AppSpacing.lg),
+                Divider(color: AppColors.surfaceBorder, height: 1),
+                const SizedBox(height: AppSpacing.lg),
+
+                // ── Selected day ─────────────────────────────────────────
+                Text(DateFormat.MMMMEEEEd(locale).format(_selectedDay),
+                    style: AppTextStyles.heading3),
+                const SizedBox(height: AppSpacing.md),
+                _QuickActions(
+                  onActivity: () =>
+                      _addLog(context, ref, HealthLogType.activity),
+                  onMeal: () => _addLog(context, ref, HealthLogType.meal),
+                  onWater: () => _addLog(context, ref, HealthLogType.water),
+                  onReminder: () => _addReminder(context, ref),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                if (bookingsState.isLoading)
+                  const _SlotSkeleton()
+                else ...[
+                  // Booking (current week only).
+                  if (_isBookable(_selectedDay)) ...[
+                    _SectionLabel(l.bookTraining),
+                    const SizedBox(height: AppSpacing.sm),
+                    for (final slot in daySlots)
+                      _SlotTile(slot: slot, locale: locale),
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
+
+                  // Finished trainings this day.
+                  if (dayCompleted.isNotEmpty) ...[
+                    _SectionLabel(l.finishedTrainings),
+                    const SizedBox(height: AppSpacing.sm),
+                    for (final s in dayCompleted)
+                      AppCard(
+                        child: Row(
+                          children: [
+                            Icon(Icons.check_circle_rounded,
+                                color: AppColors.success),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Text(s.label,
+                                  style: AppTextStyles.body.copyWith(
+                                      fontWeight: FontWeight.w600)),
+                            ),
+                            Text(DateFormat.Hm(locale).format(s.lastCompletedAt!),
+                                style: AppTextStyles.bodySmall
+                                    .copyWith(color: AppColors.textTertiary)),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
+
+                  // Health logs this day.
+                  _SectionLabel(l.healthLogs),
+                  const SizedBox(height: AppSpacing.sm),
+                  if (dayLogs.isEmpty)
+                    _Empty(
+                        icon: Icons.monitor_heart_outlined, text: l.noLogsYet)
+                  else
+                    for (final log in dayLogs) _LogTile(log: log),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
+
+                // ── Reminders (global) ───────────────────────────────────
+                Divider(color: AppColors.surfaceBorder, height: 1),
+                const SizedBox(height: AppSpacing.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _SectionLabel(l.reminders),
+                    TextButton.icon(
+                      onPressed: () => _addReminder(context, ref),
+                      icon: Icon(Icons.add, size: 18, color: AppColors.primary),
+                      label: Text(l.addReminder,
+                          style: TextStyle(color: AppColors.primary)),
+                    ),
+                  ],
+                ),
+                reminders.when(
+                  loading: () => const _SlotSkeleton(),
+                  error: (_, _) =>
+                      _Empty(icon: Icons.alarm, text: l.noReminders),
+                  data: (items) => items.isEmpty
+                      ? _Empty(icon: Icons.alarm, text: l.noReminders)
+                      : Column(
+                          children: [
+                            for (final r in items) _ReminderTile(reminder: r),
+                          ],
+                        ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
-}
 
-// ─────────────────────────────────────────────────────────── Book ──────────
-
-class _BookSliver extends ConsumerWidget {
-  const _BookSliver({
-    required this.weekStart,
-    required this.selectedDay,
-    required this.onPickDay,
-  });
-
-  final DateTime weekStart;
-  final DateTime selectedDay;
-  final ValueChanged<DateTime> onPickDay;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final bookingsAsync = ref.watch(tenantBookingsProvider);
-    final user = ref.watch(currentUserProvider).valueOrNull;
-    final locale = Localizations.localeOf(context).toString();
-
-    return bookingsAsync.when(
-      loading: () => const SliverToBoxAdapter(child: _SlotSkeleton()),
-      error: (_, _) => SliverToBoxAdapter(
-        child: _Empty(icon: Icons.wifi_off_rounded, text: l.noBookingThisWeek),
-      ),
-      data: (bookings) {
-        final days = List.generate(7, (i) => weekStart.add(Duration(days: i)));
-        final slots = _slotsFor(selectedDay, bookings, user?.personId);
-        return SliverList.list(
-          children: [
-            _DayStrip(
-              days: days,
-              selected: selectedDay,
-              onPick: onPickDay,
-              locale: locale,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            for (final slot in slots)
-              _SlotTile(slot: slot, locale: locale),
-          ],
-        );
-      },
-    );
-  }
-
-  List<TimeSlot> _slotsFor(
+  List<TimeSlot> _slotsForDay(
       DateTime day, List<Booking> all, String? myPersonId) {
     final result = <TimeSlot>[];
     for (var h = BookingRepository.firstHour;
@@ -181,66 +290,136 @@ class _BookSliver extends ConsumerWidget {
     }
     return result;
   }
+
+  Future<void> _addLog(
+      BuildContext context, WidgetRef ref, HealthLogType type) async {
+    final l = AppLocalizations.of(context);
+    final user = ref.read(currentUserProvider).valueOrNull;
+    if (user == null) return;
+    // Stamp the log at noon on the selected day so it lands on that date.
+    final at = DateTime(
+        _selectedDay.year, _selectedDay.month, _selectedDay.day, 12);
+    final input =
+        await showHealthLogSheet(context, initialType: type, loggedAt: at);
+    if (input == null) return;
+    try {
+      await HealthRepository.add(
+          tenantId: user.tenantId, personId: user.personId, input: input);
+      ref.invalidate(healthLogsProvider(null));
+      if (context.mounted) AppToast.show(context, title: l.logSaved);
+    } on AppException catch (e) {
+      if (context.mounted) AppToast.show(context, title: e.message);
+    }
+  }
+
+  Future<void> _addReminder(BuildContext context, WidgetRef ref) async {
+    final l = AppLocalizations.of(context);
+    final user = ref.read(currentUserProvider).valueOrNull;
+    if (user == null) return;
+    final result = await showReminderSheet(context);
+    if (result == null) return;
+    try {
+      await ReminderRepository.create(
+        tenantId: user.tenantId,
+        personId: user.personId,
+        title: result.title,
+        type: result.type,
+        timeOfDay: result.timeOfDay,
+      );
+      ref.invalidate(remindersProvider);
+      if (context.mounted) AppToast.show(context, title: l.logSaved);
+    } on AppException catch (e) {
+      if (context.mounted) AppToast.show(context, title: e.message);
+    }
+  }
 }
 
-class _DayStrip extends StatelessWidget {
-  const _DayStrip({
-    required this.days,
-    required this.selected,
-    required this.onPick,
-    required this.locale,
+// ─────────────────────────────────────────────────── Quick actions ──────────
+
+class _QuickActions extends StatelessWidget {
+  const _QuickActions({
+    required this.onActivity,
+    required this.onMeal,
+    required this.onWater,
+    required this.onReminder,
   });
 
-  final List<DateTime> days;
-  final DateTime selected;
-  final ValueChanged<DateTime> onPick;
-  final String locale;
+  final VoidCallback onActivity;
+  final VoidCallback onMeal;
+  final VoidCallback onWater;
+  final VoidCallback onReminder;
 
   @override
   Widget build(BuildContext context) {
-    final dow = DateFormat.E(locale);
-    final today = DateTime(
-        DateTime.now().year, DateTime.now().month, DateTime.now().day);
-    return SizedBox(
-      height: 64,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: days.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (_, i) {
-          final d = days[i];
-          final isSel = d == selected;
-          final isPast = d.isBefore(today);
-          final fg = isSel
-              ? AppColors.onPrimary
-              : (isPast ? AppColors.textTertiary : AppColors.textPrimary);
-          return GestureDetector(
-            onTap: () => onPick(d),
-            child: Container(
-              width: 52,
-              decoration: BoxDecoration(
-                color: isSel ? AppColors.primary : AppColors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(color: AppColors.surfaceBorder),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(dow.format(d).toUpperCase(),
-                      style: AppTextStyles.bodySmall.copyWith(color: fg)),
-                  const SizedBox(height: 2),
-                  Text('${d.day}',
-                      style: AppTextStyles.body
-                          .copyWith(color: fg, fontWeight: FontWeight.w600)),
-                ],
-              ),
-            ),
-          );
-        },
+    final l = AppLocalizations.of(context);
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        _QuickAction(
+            icon: Icons.directions_run, label: l.logActivity, onTap: onActivity),
+        _QuickAction(
+            icon: Icons.restaurant_outlined, label: l.logMeal, onTap: onMeal),
+        _QuickAction(
+            icon: Icons.water_drop_outlined, label: l.logWater, onTap: onWater),
+        _QuickAction(
+            icon: Icons.alarm_add_outlined,
+            label: l.addReminder,
+            onTap: onReminder),
+      ],
+    );
+  }
+}
+
+class _QuickAction extends StatelessWidget {
+  const _QuickAction(
+      {required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          border: Border.all(color: AppColors.surfaceBorder),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: AppColors.primary),
+            const SizedBox(width: 6),
+            Text(label,
+                style: AppTextStyles.bodySmall
+                    .copyWith(fontWeight: FontWeight.w600)),
+          ],
+        ),
       ),
     );
   }
 }
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text,
+        style: AppTextStyles.label.copyWith(color: AppColors.textTertiary));
+  }
+}
+
+// ───────────────────────────────────────────────────────── Slot tile ────────
 
 class _SlotTile extends ConsumerStatefulWidget {
   const _SlotTile({required this.slot, required this.locale});
@@ -367,6 +546,7 @@ class _SlotTileState extends ConsumerState<_SlotTile> {
     final slot = widget.slot;
     final action = await showModalBottomSheet<String>(
       context: context,
+      useSafeArea: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
@@ -416,104 +596,7 @@ class _SlotTileState extends ConsumerState<_SlotTile> {
   }
 }
 
-// ──────────────────────────────────────────────────────── Activity ─────────
-
-class _ActivitySliver extends ConsumerWidget {
-  const _ActivitySliver();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final logsAsync = ref.watch(healthLogsProvider(null));
-    final reminders = ref.watch(remindersProvider);
-
-    return SliverList.list(
-      children: [
-        // Manual add — Apple Health / Strava syncing lives on the Home screen.
-        _ActionChip(
-          icon: Icons.add,
-          label: l.addLog,
-          onTap: () => _addLog(context, ref),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(l.healthLogs,
-            style: AppTextStyles.label.copyWith(color: AppColors.textTertiary)),
-        const SizedBox(height: AppSpacing.sm),
-        logsAsync.when(
-          loading: () => const _SlotSkeleton(),
-          error: (_, _) => _Empty(icon: Icons.wifi_off_rounded, text: l.noLogsYet),
-          data: (logs) => logs.isEmpty
-              ? _Empty(icon: Icons.monitor_heart_outlined, text: l.noLogsYet)
-              : Column(children: [for (final log in logs) _LogTile(log: log)]),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(l.reminders,
-                style: AppTextStyles.label
-                    .copyWith(color: AppColors.textTertiary)),
-            TextButton.icon(
-              onPressed: () => _addReminder(context, ref),
-              icon: Icon(Icons.add, size: 18, color: AppColors.primary),
-              label: Text(l.addReminder,
-                  style: TextStyle(color: AppColors.primary)),
-            ),
-          ],
-        ),
-        reminders.when(
-          loading: () => const _SlotSkeleton(),
-          error: (_, _) =>
-              _Empty(icon: Icons.wifi_off_rounded, text: l.noReminders),
-          data: (items) => items.isEmpty
-              ? _Empty(icon: Icons.alarm, text: l.noReminders)
-              : Column(
-                  children: [
-                    for (final r in items) _ReminderTile(reminder: r),
-                  ],
-                ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _addLog(BuildContext context, WidgetRef ref) async {
-    final l = AppLocalizations.of(context);
-    final user = ref.read(currentUserProvider).valueOrNull;
-    if (user == null) return;
-    final input = await showHealthLogSheet(context);
-    if (input == null) return;
-    try {
-      await HealthRepository.add(
-          tenantId: user.tenantId, personId: user.personId, input: input);
-      ref.invalidate(healthLogsProvider(null));
-      if (context.mounted) AppToast.show(context, title: l.logSaved);
-    } on AppException catch (e) {
-      if (context.mounted) AppToast.show(context, title: e.message);
-    }
-  }
-
-  Future<void> _addReminder(BuildContext context, WidgetRef ref) async {
-    final l = AppLocalizations.of(context);
-    final user = ref.read(currentUserProvider).valueOrNull;
-    if (user == null) return;
-    final result = await showReminderSheet(context);
-    if (result == null) return;
-    try {
-      await ReminderRepository.create(
-        tenantId: user.tenantId,
-        personId: user.personId,
-        title: result.title,
-        type: result.type,
-        timeOfDay: result.timeOfDay,
-      );
-      ref.invalidate(remindersProvider);
-      if (context.mounted) AppToast.show(context, title: l.logSaved);
-    } on AppException catch (e) {
-      if (context.mounted) AppToast.show(context, title: e.message);
-    }
-  }
-}
+// ───────────────────────────────────────────────────────── Log tile ─────────
 
 class _LogTile extends StatelessWidget {
   const _LogTile({required this.log});
@@ -523,7 +606,7 @@ class _LogTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
-    final when = DateFormat.MMMEd(locale).add_Hm().format(log.loggedAt);
+    final when = DateFormat.Hm(locale).format(log.loggedAt);
     final value =
         log.value == null ? '' : '${_trim(log.value!)} ${log.unit ?? ''}'.trim();
     return AppCard(
@@ -574,6 +657,8 @@ String _typeLabel(AppLocalizations l, HealthLogType t) => switch (t) {
       HealthLogType.water => l.logWater,
       HealthLogType.other => l.logActivity,
     };
+
+// ─────────────────────────────────────────────────────── Reminder tile ──────
 
 class _ReminderTile extends ConsumerWidget {
   const _ReminderTile({required this.reminder});
@@ -643,95 +728,7 @@ class _ReminderTile extends ConsumerWidget {
   }
 }
 
-// ───────────────────────────────────────────────────────── History ─────────
-
-class _HistorySliver extends ConsumerWidget {
-  const _HistorySliver();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final async = ref.watch(activeAssignmentProvider);
-
-    return async.when(
-      loading: () => const SliverToBoxAdapter(child: _SlotSkeleton()),
-      error: (_, _) => SliverToBoxAdapter(
-          child: _Empty(icon: Icons.wifi_off_rounded, text: l.noFinishedTrainings)),
-      data: (assignment) {
-        final done = [
-          for (final s in (assignment?.sessions ?? const []))
-            if (s.isCompleted) s,
-        ]..sort((a, b) => b.lastCompletedAt!.compareTo(a.lastCompletedAt!));
-        if (done.isEmpty) {
-          return SliverToBoxAdapter(
-            child: _Empty(
-                icon: Icons.history, text: l.noFinishedTrainings),
-          );
-        }
-        final fmt = DateFormat.MMMEd(locale).add_Hm();
-        return SliverList.list(
-          children: [
-            for (final s in done)
-              AppCard(
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle_rounded, color: AppColors.success),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(s.label,
-                              style: AppTextStyles.body
-                                  .copyWith(fontWeight: FontWeight.w600)),
-                          Text(fmt.format(s.lastCompletedAt!),
-                              style: AppTextStyles.bodySmall
-                                  .copyWith(color: AppColors.textTertiary)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-// ──────────────────────────────────────────────────────── shared ───────────
-
-class _ActionChip extends StatelessWidget {
-  const _ActionChip(
-      {required this.icon, required this.label, required this.onTap});
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md, vertical: AppSpacing.md),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 18, color: AppColors.primary),
-          const SizedBox(width: AppSpacing.sm),
-          Flexible(
-            child: Text(label,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.bodySmall
-                    .copyWith(color: AppColors.textPrimary)),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// ──────────────────────────────────────────────────────────── shared ────────
 
 class _Empty extends StatelessWidget {
   const _Empty({required this.icon, required this.text});
@@ -741,10 +738,10 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       child: Column(
         children: [
-          Icon(icon, size: 40, color: AppColors.textTertiary),
+          Icon(icon, size: 36, color: AppColors.textTertiary),
           const SizedBox(height: AppSpacing.sm),
           Text(text,
               textAlign: TextAlign.center,
@@ -764,7 +761,7 @@ class _SlotSkeleton extends StatelessWidget {
     return SkeletonLoader(
       child: Column(
         children: [
-          for (var i = 0; i < 6; i++)
+          for (var i = 0; i < 5; i++)
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: SkeletonBox(
